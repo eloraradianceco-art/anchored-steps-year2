@@ -389,9 +389,12 @@ export default function AnchoredStepsY2(){
                 <div>
                   <label style={LBL}>Passage Study Prompt</label>
                   <div style={{background:"rgba(168,154,207,0.06)",border:"1px solid rgba(168,154,207,0.2)",borderRadius:12,padding:"16px 20px",marginBottom:18}}>
-                    <div style={{fontSize:10,color:"rgba(168,154,207,0.8)",fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Read: {week.verseRef}</div>
                     <div style={{fontSize:10,color:"rgba(168,154,207,0.8)",fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyPrompt}</p>
+                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt}</p>
+                    <div style={{borderTop:"1px solid rgba(168,154,207,0.15)",paddingTop:16}}>
+                      <div style={{fontSize:10,color:"rgba(168,154,207,0.8)",fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Read: {week.verseRef}</div>
+                      <p style={{fontSize:17,color:T.cream,lineHeight:1.9,fontStyle:"italic",margin:0}}>&#8220;{week.verseText}&#8221;</p>
+                    </div>
                   </div>
                   <label style={LBL}>Study Notes</label>
                   <div style={{background:G.bgCard,border:"1px solid "+G.border,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
