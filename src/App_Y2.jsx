@@ -29,9 +29,9 @@ const G = {
   cream:"#F0ECE3",text:"#E0D8CA",muted:"#A0AAB2",dim:"#66737E",border:"rgba(255,255,255,0.06)",
 };
 const LIGHT = {
-  bg:"#F2EDE4",bgCard:"rgba(0,0,0,0.03)",bgMid:"#E8E2D8",
-  cream:"#2C1F0E",text:"#3D2E1A",muted:"#6B5A45",dim:"#9A8878",border:"rgba(0,0,0,0.09)",
-  gold:"#7A5A28",
+  bg:"#F0EAE0",bgCard:"rgba(0,0,0,0.04)",bgMid:"#E4DDCF",
+  cream:"#1A1008",text:"#2C1F0E",muted:"#5A4535",dim:"#8A7060",
+  border:"rgba(0,0,0,0.10)",gold:"#7A5A28",
 };
 
 const ALL_WEEKS = window.__APPDATA_Y2__?.ALL_WEEKS || [];
@@ -40,6 +40,17 @@ function SaveBtn({onSave,flash}){
   return (
     <button onClick={onSave} style={{marginTop:12,width:"100%",background:flash?"rgba(124,146,132,0.15)":G.goldF,border:"1px solid "+(flash?G.greenB:G.goldB),color:flash?G.green:G.gold,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",transition:"all .3s"}}>
       {flash ? "✓ Saved" : "Save Entry"}
+    </button>
+  );
+}
+
+function NextSectionBtn({current, sections, onNext}){
+  const idx = sections.findIndex(s=>s.id===current);
+  const next = sections[idx+1];
+  if(!next) return null;
+  return (
+    <button onClick={()=>onNext(next.id)} style={{marginTop:10,width:"100%",background:"transparent",border:"1px solid rgba(160,120,64,0.25)",color:G.gold,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
+      Next: {next.label} &#8594;
     </button>
   );
 }
@@ -122,6 +133,8 @@ export default function AnchoredStepsY2(){
   const shareCardRef=useRef(null);
 
   const T = darkMode ? G : {...G,...LIGHT};
+  const BG_CARD = darkMode ? 'rgba(255,255,255,0.035)' : 'rgba(0,0,0,0.04)';
+  const BG_MID = darkMode ? '#172330' : '#E4DDCF';
   const week = ALL_WEEKS.find(w=>w.week===wk);
   const LBL = {fontSize:10,color:G.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,display:"block"};
   const INP = {width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px 14px",color:T.text,fontSize:15,fontFamily:"EB Garamond,Georgia,serif",resize:"vertical",boxSizing:"border-box",outline:"none",lineHeight:1.7};
@@ -263,18 +276,24 @@ export default function AnchoredStepsY2(){
   return (
     <div style={{minHeight:"100vh",background:darkMode?G.bg:T.bg,color:T.text,fontFamily:"EB Garamond,Georgia,serif"}}>
       {/* Header */}
-      <div style={{position:"sticky",top:0,zIndex:100,background:darkMode?"rgba(13,24,32,0.97)":"rgba(242,237,228,0.97)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+T.border,padding:"10px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <img src="/icon2.png" alt="⚓" style={{width:28,height:28,borderRadius:7}}/>
-          <div>
-            <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",lineHeight:1}}>Anchored Steps</div>
-            <div style={{fontFamily:"Cinzel,serif",fontSize:13,color:T.cream,lineHeight:1.2}}>Year 2</div>
+      <div style={{position:"sticky",top:0,zIndex:100,background:darkMode?"rgba(13,24,32,0.97)":"rgba(242,237,228,0.97)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+T.border}}>
+        <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <img src="/icon2.png" alt="⚓" style={{width:44,height:44,borderRadius:11,boxShadow:"0 2px 10px rgba(0,0,0,0.3)"}}/>
+            <div>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:16,color:T.cream,lineHeight:1.1,letterSpacing:"0.04em"}}>Anchored Steps</div>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",lineHeight:1.2}}>Year 2</div>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
+            <button onClick={()=>supabase.auth.signOut()} style={{background:"transparent",border:"1px solid rgba(255,255,255,0.1)",color:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>Sign Out</button>
           </div>
         </div>
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"flex",gap:0,borderTop:"1px solid "+T.border,overflowX:"auto"}}>
           {['journal','progress','saved','settings'].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{background:view===v?G.goldF:"transparent",border:"1px solid "+(view===v?G.goldB:"transparent"),color:view===v?G.gold:T.muted,padding:"5px 10px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",textTransform:"capitalize"}}>
-              {v==='journal'?'📖':v==='progress'?'📊':v==='saved'?'☆':'⚙'} {v}
+            <button key={v} onClick={()=>setView(v)} style={{flex:1,background:view===v?"rgba(160,120,64,0.1)":"transparent",borderBottom:"2px solid "+(view===v?G.gold:"transparent"),color:view===v?G.gold:T.muted,padding:"10px 4px",cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",textTransform:"capitalize",whiteSpace:"nowrap",border:"none",borderBottom:"2px solid "+(view===v?G.gold:"transparent")}}>
+              {v==='journal'?'📖 Journal':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
         </div>
@@ -289,8 +308,8 @@ export default function AnchoredStepsY2(){
             <div style={{display:"flex",alignItems:"center",gap:10,padding:"18px 18px 0"}}>
               <button onClick={()=>goWk(Math.max(1,wk-1))} disabled={wk===1} style={{background:G.goldF,border:"1px solid "+G.goldB,color:G.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===1?.3:1}}>&#8249;</button>
               <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:10,color:G.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:2}}>Week {wk} of 52</div>
-                <div style={{fontSize:11,color:T.muted,fontStyle:"italic",fontFamily:"EB Garamond,Georgia,serif"}}>{week.theme}</div>
+                <div style={{fontSize:10,color:G.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4}}>Week {wk} of 52</div>
+                <div style={{fontSize:18,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.02em",lineHeight:1.2}}>{week.theme}</div>
               </div>
               <button onClick={()=>goWk(Math.min(52,wk+1))} disabled={wk===52} style={{background:G.goldF,border:"1px solid "+G.goldB,color:G.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===52?.3:1}}>&#8250;</button>
             </div>
@@ -339,6 +358,7 @@ export default function AnchoredStepsY2(){
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.readInContext}</p>
                   </div>
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -349,10 +369,18 @@ export default function AnchoredStepsY2(){
                   <div style={{background:G.bgCard,border:"1px solid "+G.border,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.whereAreWe}</p>
                   </div>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
+                </div>
+              )}
+
+              {/* DON'T MISS THIS — own section */}
+              {sec==="dontmiss" && (
+                <div>
                   <label style={LBL}>⚠️ Don't Miss This</label>
-                  <div style={{background:"linear-gradient(145deg,rgba(160,120,64,0.07),rgba(160,120,64,0.02))",border:"1px solid rgba(160,120,64,0.2)",borderRadius:12,padding:"16px 20px",marginBottom:14}}>
+                  <div style={{background:"linear-gradient(145deg,rgba(160,120,64,0.07),rgba(160,120,64,0.02))",border:"1px solid rgba(160,120,64,0.2)",borderRadius:12,padding:"16px 20px",marginBottom:18}}>
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.dontMissThis}</p>
                   </div>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -361,7 +389,17 @@ export default function AnchoredStepsY2(){
                 <div>
                   <label style={LBL}>Passage Study Prompt</label>
                   <div style={{background:"rgba(168,154,207,0.06)",border:"1px solid rgba(168,154,207,0.2)",borderRadius:12,padding:"16px 20px",marginBottom:18}}>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyPrompt}</p>
+                    <div style={{fontSize:10,color:"rgba(168,154,207,0.8)",fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Read: {week.verseRef}</div>
+                    <div style={{fontSize:10,color:"rgba(168,154,207,0.8)",fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
+                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyPrompt.replace(/^Read [^
+]+
+
+Ask:
+|^Read [^
+]+
+
+Ask
+/,'')}</p>
                   </div>
                   <label style={LBL}>Study Notes</label>
                   <div style={{background:G.bgCard,border:"1px solid "+G.border,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
@@ -370,6 +408,7 @@ export default function AnchoredStepsY2(){
                   <label style={LBL}>Your Notes</label>
                   <textarea rows={6} value={get("study")} onChange={e=>set("study",e.target.value)} placeholder="Write your personal study notes here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -386,6 +425,7 @@ export default function AnchoredStepsY2(){
                     </div>
                   ))}
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -399,6 +439,7 @@ export default function AnchoredStepsY2(){
                   <label style={LBL}>How Will You Live This Out?</label>
                   <textarea rows={5} value={get("apply")} onChange={e=>set("apply",e.target.value)} placeholder="Write your specific plan here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -412,6 +453,7 @@ export default function AnchoredStepsY2(){
                   <label style={LBL}>Your Personal Prayer</label>
                   <textarea rows={6} value={get("prayer")} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -435,6 +477,7 @@ export default function AnchoredStepsY2(){
                   <label style={LBL}>End of Week Reflection</label>
                   <textarea rows={4} value={get("weekreflect")} onChange={e=>set("weekreflect",e.target.value)} placeholder="What changed in you this week?" style={INP}/>
                   <SaveBtn onSave={save} flash={flash}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}}/>
                 </div>
               )}
 
@@ -518,20 +561,49 @@ export default function AnchoredStepsY2(){
         {view==='settings' && (
           <div className="fi" style={{padding:18}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:20}}>Settings</h2>
-            <div style={{background:G.bgCard,border:"1px solid "+G.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
+
+            {/* Appearance */}
+            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
               <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Appearance</div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <span style={{fontSize:15,color:T.text}}>Dark Mode</span>
-                <button onClick={()=>setDarkMode(d=>!d)} style={{background:darkMode?G.goldF:"rgba(255,255,255,0.06)",border:"1px solid "+(darkMode?G.goldB:G.border),color:darkMode?G.gold:T.muted,padding:"6px 16px",borderRadius:20,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>
+                <button onClick={()=>setDarkMode(d=>!d)} style={{background:darkMode?G.goldF:"rgba(0,0,0,0.06)",border:"1px solid "+(darkMode?G.goldB:T.border),color:darkMode?G.gold:T.muted,padding:"6px 16px",borderRadius:20,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>
                   {darkMode?"On":"Off"}
                 </button>
               </div>
             </div>
-            <div style={{background:G.bgCard,border:"1px solid "+G.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Account</div>
-              <p style={{fontSize:14,color:T.muted,marginBottom:14}}>{session.user.email}</p>
-              <button onClick={()=>supabase.auth.signOut()} style={{background:"transparent",border:"1px solid rgba(217,122,122,0.3)",color:G.red,padding:"9px 18px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>Sign Out</button>
+
+            {/* Refer a Friend */}
+            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Refer a Friend</div>
+              <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Share Anchored Steps Year 2 with someone ready to go deeper.</p>
+              <div style={{background:darkMode?"rgba(160,120,64,0.06)":"rgba(160,120,64,0.08)",border:"1px solid rgba(160,120,64,0.2)",borderRadius:10,padding:"12px 14px",marginBottom:12,fontFamily:"Cinzel,serif",fontSize:12,color:G.gold,letterSpacing:"0.04em"}}>
+                anchored-steps-y2.vercel.app
+              </div>
+              <button onClick={()=>{navigator.clipboard.writeText("anchored-steps-y2.vercel.app").then(()=>alert("Link copied!"));}} style={{width:"100%",background:G.goldF,border:"1px solid "+G.goldB,color:G.gold,padding:"10px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
+                Copy Link
+              </button>
             </div>
+
+            {/* Account */}
+            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:G.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Account</div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <span style={{fontSize:13,color:T.muted}}>Email</span>
+                <span style={{fontSize:13,color:T.text}}>{session.user.email}</span>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+                <span style={{fontSize:13,color:T.muted}}>Plan</span>
+                <span style={{fontSize:12,color:G.gold,fontFamily:"Cinzel,serif",background:G.goldF,border:"1px solid "+G.goldB,padding:"3px 10px",borderRadius:12}}>{profile?.plan==='annual'?'Annual Access':'Monthly'}</span>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:14,borderTop:"1px solid "+T.border}}>
+                <span style={{fontSize:13,color:T.muted}}>Progress</span>
+                <span style={{fontSize:13,color:T.text}}>{ALL_WEEKS.filter(w=>entries.some(e=>e.week===w.week&&(e.field_value||'').trim())).length} / 52 weeks</span>
+              </div>
+            </div>
+
+            {/* Sign Out */}
+            <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",background:"transparent",border:"1px solid rgba(217,122,122,0.3)",color:G.red,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>Sign Out</button>
           </div>
         )}
 
