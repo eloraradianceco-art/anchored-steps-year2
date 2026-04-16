@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/icon2.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0D1820"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <title>Anchored Steps: Year 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+    <script src="/data_y2.js"></script>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:'EB Garamond',Georgia,serif;-webkit-font-smoothing:antialiased}
+      .fi{animation:fadeIn .35s ease}
+      .fu{animation:fadeUp .3s ease}
+      @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+      @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+      textarea{font-family:'EB Garamond',Georgia,serif}
+      ::-webkit-scrollbar{width:4px}
+      ::-webkit-scrollbar-track{background:transparent}
+      ::-webkit-scrollbar-thumb{background:rgba(160,120,64,0.3);border-radius:2px}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main_y2.jsx"></script>
+  </body>
+</html>
