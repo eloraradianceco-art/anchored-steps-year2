@@ -292,7 +292,7 @@ export default function AnchoredStepsY2(){
         </div>
         <div style={{display:"flex",gap:0,borderTop:"1px solid "+T.border,overflowX:"auto"}}>
           {['journal','progress','saved','settings'].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{flex:1,background:view===v?"rgba(160,120,64,0.1)":"transparent",borderBottom:"2px solid "+(view===v?G.gold:"transparent"),color:view===v?G.gold:T.muted,padding:"10px 4px",cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",textTransform:"capitalize",whiteSpace:"nowrap",border:"none",borderBottom:"2px solid "+(view===v?G.gold:"transparent")}}>
+            <button key={v} onClick={()=>setView(v)} style={{flex:1,background:view===v?"rgba(160,120,64,0.1)":"transparent",color:view===v?G.gold:T.muted,padding:"10px 4px",cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",textTransform:"capitalize",whiteSpace:"nowrap",border:"none",borderBottom:"2px solid "+(view===v?G.gold:"transparent")}}>
               {v==='journal'?'📖 Journal':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
