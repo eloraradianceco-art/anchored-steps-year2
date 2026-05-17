@@ -220,9 +220,32 @@ function AnchoredStepsY2Inner(){
       if(!cancelled && data) setProfile(data);
     });
 
-    supabase.from('journal_entries').select('*').eq('user_id',session.user.id).then(({data})=>{
-      if(!cancelled && data) setEntries(data);
-    });
+    // Load entries for current week ± 5 weeks (smarter than loading all 1500+)
+    const minWeek = Math.max(1, wk - 5);
+    const maxWeek = Math.min(52, wk + 5);
+    supabase.from('journal_entries')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .gte('week', minWeek)
+      .lte('week', maxWeek)
+      .then(({data})=>{
+        if(!cancelled && data) setEntries(data);
+      });
+
+    // Also load just field_key='tr_*' across all weeks for progress stats
+    supabase.from('journal_entries')
+      .select('id, week, field_key, field_value, user_id')
+      .eq('user_id', session.user.id)
+      .like('field_key', 'tr_%')
+      .then(({data})=>{
+        if(!cancelled && data) {
+          setEntries(prev => {
+            const existing = new Set(prev.map(e => e.id));
+            const newOnes = data.filter(d => !existing.has(d.id));
+            return [...prev, ...newOnes];
+          });
+        }
+      });
 
     // Realtime subscription for entries — sync across devices
     const channel = supabase
@@ -248,7 +271,7 @@ function AnchoredStepsY2Inner(){
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
-  },[session]);
+  },[session, wk]);
 
   // Load community notes for current week
   useEffect(()=>{
@@ -624,7 +647,7 @@ function AnchoredStepsY2Inner(){
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyNotes || 'No study notes for this week.'}</p>
                   </div>
                   <label style={LBL}>Your Notes</label>
-                  <textarea rows={6} defaultValue={get("study")} onChange={e=>set("study",e.target.value)} placeholder="Write your personal study notes here..." style={INP}/>
+                  <textarea rows={6} defaultValue={get("study")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("study",e.target.value)} placeholder="Write your personal study notes here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
                   <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
                 </div>
@@ -639,7 +662,7 @@ function AnchoredStepsY2Inner(){
                       <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:9,padding:"12px 16px",marginBottom:8}}>
                         <p style={{fontSize:16,color:T.cream,fontStyle:"italic",margin:0,lineHeight:1.7}}>{q}</p>
                       </div>
-                      <textarea rows={4} defaultValue={get("rq"+i)} onChange={e=>set("rq"+i,e.target.value)} placeholder="Reflect honestly..." style={INP}/>
+                      <textarea rows={4} defaultValue={get("rq"+i)} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("rq"+i,e.target.value)} placeholder="Reflect honestly..." style={INP}/>
                     </div>
                   ))}
                   {(!week.reflectionQuestions || week.reflectionQuestions.length === 0) && (
@@ -658,7 +681,7 @@ function AnchoredStepsY2Inner(){
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.application || 'No application content this week.'}</p>
                   </div>
                   <label style={LBL}>How Will You Live This Out?</label>
-                  <textarea rows={5} defaultValue={get("apply")} onChange={e=>set("apply",e.target.value)} placeholder="Write your specific plan here..." style={INP}/>
+                  <textarea rows={5} defaultValue={get("apply")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("apply",e.target.value)} placeholder="Write your specific plan here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
                   <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
                 </div>
@@ -672,7 +695,7 @@ function AnchoredStepsY2Inner(){
                     <p style={{fontSize:17,color:T.cream,lineHeight:2,fontStyle:"italic",margin:0,whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
                   </div>
                   <label style={LBL}>Your Personal Prayer</label>
-                  <textarea rows={6} defaultValue={get("prayer")} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
+                  <textarea rows={6} defaultValue={get("prayer")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
                   <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
                 </div>
@@ -689,14 +712,14 @@ function AnchoredStepsY2Inner(){
                           <button onClick={()=>setDay(day===i?-1:i)} style={{background:day===i?T.goldF:"transparent",border:"1px solid "+(day===i?T.goldB:T.border),color:day===i?T.gold:T.muted,padding:"4px 14px",borderRadius:6,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",transition:"all .15s"}}>{d}</button>
                           {(get("tr_"+i)||"").trim()&&<span style={{width:7,height:7,borderRadius:"50%",background:T.green,display:"inline-block"}}/>}
                         </div>
-                        {day===i&&<textarea className="fu" rows={3} defaultValue={get("tr_"+i)} onChange={e=>set("tr_"+i,e.target.value)} placeholder={d+": Where did you see surrender, growth, or God's faithfulness today?"} style={INP}/>}
+                        {day===i&&<textarea className="fu" rows={3} defaultValue={get("tr_"+i)} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("tr_"+i,e.target.value)} placeholder={d+": Where did you see surrender, growth, or God's faithfulness today?"} style={INP}/>}
                       </div>
                     ))}
                   </div>
                   <label style={LBL}>Gratitude (3 things this week)</label>
-                  <textarea rows={3} defaultValue={get("gratitude")} onChange={e=>set("gratitude",e.target.value)} placeholder="What are you grateful for this week?" style={{...INP,marginBottom:14}}/>
+                  <textarea rows={3} defaultValue={get("gratitude")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("gratitude",e.target.value)} placeholder="What are you grateful for this week?" style={{...INP,marginBottom:14}}/>
                   <label style={LBL}>End of Week Reflection</label>
-                  <textarea rows={4} defaultValue={get("weekreflect")} onChange={e=>set("weekreflect",e.target.value)} placeholder="What changed in you this week?" style={INP}/>
+                  <textarea rows={4} defaultValue={get("weekreflect")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("weekreflect",e.target.value)} placeholder="What changed in you this week?" style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
                   <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
                 </div>
