@@ -95,7 +95,7 @@ export default function Onboarding({ onComplete }) {
 
         {/* Icon / Image */}
         {step === 0 && (
-          <img src="/icon.png" alt="Anchored Steps"
+          <img src="/icon2.png" alt="Anchored Steps"
             style={{width:96,height:96,borderRadius:20,marginBottom:28,boxShadow:"0 12px 40px rgba(0,0,0,0.4)"}}
           />
         )}
