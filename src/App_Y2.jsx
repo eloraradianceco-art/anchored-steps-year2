@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"; // v2.2
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"; // v2.3
 import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
@@ -74,7 +74,7 @@ class ErrorBoundary extends React.Component {
 function SaveBtn({onSave,flash,T}){
   return (
     <button onClick={onSave} style={{marginTop:12,width:"100%",background:flash?T.greenF:T.goldF,border:"1px solid "+(flash?T.greenB:T.goldB),color:flash?T.green:T.gold,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",transition:"all .3s"}}>
-      {flash ? "✓ Saved" : "Mark as Saved"}
+      {flash ? "✓ Saved" : "Save Notes"}
     </button>
   );
 }
@@ -86,6 +86,16 @@ function NextSectionBtn({current, sections, onNext, T}){
   return (
     <button onClick={()=>onNext(next.id)} style={{marginTop:10,width:"100%",background:"transparent",border:"1px solid "+T.goldB,color:T.gold,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
       Next: {next.label} &#8594;
+    </button>
+  );
+}
+
+function CopyBtn({text, label="Copy", T, style={}}){
+  const [copied,setCopied]=React.useState(false);
+  const handle=()=>{ navigator.clipboard.writeText(text||'').then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),1800); }); };
+  return (
+    <button onClick={handle} style={{background:copied?T.greenF:"transparent",border:"1px solid "+(copied?T.greenB:T.border),color:copied?T.green:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",transition:"all .2s",...style}}>
+      {copied?"✓ Copied":label}
     </button>
   );
 }
@@ -162,13 +172,14 @@ function AnchoredStepsY2Inner(){
   const [sec,setSec]=useState('passage');
   const [entries,setEntries]=useState([]);
   const [flash,setFlash]=useState(false);
+  const [saveStatus,setSaveStatus]=useState('idle'); // 'idle'|'saving'|'saved'
+  const [showWeekJump,setShowWeekJump]=useState(false);
   const [darkMode,setDarkMode]=useState(()=>{
     try { return localStorage.getItem('y2_dark_mode') !== '0'; } catch { return true; }
   });
   const [view,setView]=useState('journal');
   const [animK,setAnimK]=useState(0);
   const [quizVerse,setQuizVerse]=useState(null);
-  const [openAuthor,setOpenAuthor]=useState(null);
   const [shareVerse,setShareVerse]=useState(null);
   const [bookmarks,setBookmarks]=useState(()=>{try{return JSON.parse(localStorage.getItem('y2_bookmarks')||'[]')}catch{return []}});
   const [showOnboarding,setShowOnboarding]=useState(()=>{
@@ -185,6 +196,7 @@ function AnchoredStepsY2Inner(){
   // Debounce timer ref for saves
   const saveTimerRef = useRef({});
   const pendingSavesRef = useRef({});
+  const saveStatusTimerRef = useRef(null);
 
   // Active theme
   const T = darkMode ? DARK_THEME : LIGHT_THEME;
@@ -307,6 +319,10 @@ function AnchoredStepsY2Inner(){
       }
     });
 
+    // Show saving indicator
+    setSaveStatus('saving');
+    if(saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+
     // Debounce Supabase write
     if(saveTimerRef.current[fullKey]) clearTimeout(saveTimerRef.current[fullKey]);
     saveTimerRef.current[fullKey] = setTimeout(async () => {
@@ -326,6 +342,9 @@ function AnchoredStepsY2Inner(){
           setEntries(prev => prev.map(e => e.id === 'temp_'+fullKey ? data : e));
         }
       }
+      setSaveStatus('saved');
+      if(saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = setTimeout(()=>setSaveStatus('idle'), 2200);
     }, 600);
   },[entries,wk,session]);
 
@@ -353,7 +372,9 @@ function AnchoredStepsY2Inner(){
     }
 
     setFlash(true);
-    setTimeout(()=>setFlash(false),2000);
+    setSaveStatus('saved');
+    if(saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+    saveStatusTimerRef.current = setTimeout(()=>{setFlash(false);setSaveStatus('idle');}, 2200);
   },[entries, session]);
 
   const goWk=useCallback((n)=>{
@@ -361,6 +382,7 @@ function AnchoredStepsY2Inner(){
     setSec('passage');
     setAnimK(a=>a+1);
     setDay(-1);
+    setShowWeekJump(false);
     window.scrollTo(0,0);
   },[]);
 
@@ -534,6 +556,11 @@ function AnchoredStepsY2Inner(){
             </div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {saveStatus!=='idle'&&(
+              <div style={{fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",color:saveStatus==='saved'?T.green:T.muted,transition:"color .3s"}}>
+                {saveStatus==='saving'?"Saving…":"✓ Saved"}
+              </div>
+            )}
             <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
             <button onClick={()=>setShowSignOutConfirm(true)} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>Sign Out</button>
           </div>
@@ -555,11 +582,24 @@ function AnchoredStepsY2Inner(){
             <div style={{display:"flex",alignItems:"center",gap:10,padding:"18px 18px 0"}}>
               <button onClick={()=>goWk(Math.max(1,wk-1))} disabled={wk===1} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===1?.3:1}}>&#8249;</button>
               <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:10,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4}}>Week {wk} of 52</div>
+                <button onClick={()=>setShowWeekJump(v=>!v)} style={{fontSize:10,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4,background:"transparent",border:"none",cursor:"pointer",padding:0}}>
+                  Week {wk} of 52 {showWeekJump?"▲":"▼"}
+                </button>
                 <div style={{fontSize:18,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.02em",lineHeight:1.2}}>{week.theme}</div>
               </div>
               <button onClick={()=>goWk(Math.min(52,wk+1))} disabled={wk===52} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===52?.3:1}}>&#8250;</button>
             </div>
+
+            {/* Week Jump */}
+            {showWeekJump&&(
+              <div style={{margin:"8px 18px 0",background:darkMode?"rgba(13,24,32,0.98)":"rgba(240,234,224,0.98)",border:"1px solid "+T.goldB,borderRadius:12,padding:10,maxHeight:190,overflowY:"auto",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:3,boxShadow:"0 8px 24px rgba(0,0,0,0.3)"}}>
+                {ALL_WEEKS.map(w=>(
+                  <button key={w.week} onClick={()=>goWk(w.week)} style={{background:w.week===wk?T.goldF:"transparent",border:"1px solid "+(w.week===wk?T.goldB:T.border),borderRadius:6,padding:"6px 2px",cursor:"pointer",textAlign:"center",color:w.week===wk?T.gold:T.muted,fontSize:11,fontFamily:"Cinzel,serif"}}>
+                    {w.week}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Progress bar */}
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:3,height:3,margin:"12px 18px 0",overflow:"hidden"}}>
@@ -568,9 +608,20 @@ function AnchoredStepsY2Inner(){
 
             {/* Section tabs */}
             <div style={{display:"flex",gap:3,flexWrap:"wrap",padding:"14px 18px 0"}}>
-              {SECTIONS.map(s=>(
-                <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:11,transition:"all .18s"}}>{s.label}</button>
-              ))}
+              {SECTIONS.map(s=>{
+                const hasData = (s.id==='study'&&(get('study')||'').trim()) ||
+                  (s.id==='reflect'&&[0,1,2,3,4].some(i=>(get('rq'+i)||'').trim())) ||
+                  (s.id==='apply'&&(get('apply')||'').trim()) ||
+                  (s.id==='prayer'&&(get('prayer')||'').trim()) ||
+                  (s.id==='tracker'&&(DAYS.some((_,i)=>(get('tr_'+i)||'').trim())||(get('gratitude')||'').trim())) ||
+                  (s.id==='community'&&communityDone);
+                return (
+                  <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:11,transition:"all .18s",position:"relative"}}>
+                    {s.label}
+                    {hasData&&<span style={{position:"absolute",top:2,right:2,width:5,height:5,borderRadius:"50%",background:T.green,display:"block"}}/>}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Section content */}
@@ -585,7 +636,7 @@ function AnchoredStepsY2Inner(){
                       <div style={{flex:1}}>
                         <p style={{fontSize:20,lineHeight:1.9,color:T.cream,fontStyle:"italic",marginBottom:14,letterSpacing:"0.01em"}}>{week.verseText || '(Verse text missing)'}</p>
                         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-                          <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",fontWeight:500,letterSpacing:"0.08em",textTransform:"uppercase"}}>{week.verseRef || ''}</span>
+                          <a href={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(week.verseRef||'')}\u0026version=NIV`} target="_blank" rel="noreferrer" style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",fontWeight:500,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid "+T.goldB}}>{week.verseRef || ''} ↗</a>
                           <div style={{display:"flex",gap:6}}>
                             <button onClick={()=>setQuizVerse({text:week.verseText,ref:week.verseRef})} style={{background:get("mem_"+week.verseRef)?T.greenF:T.purpleF,border:"1px solid "+(get("mem_"+week.verseRef)?T.greenB:T.purpleB),color:get("mem_"+week.verseRef)?T.green:T.purple,padding:"3px 11px",borderRadius:12,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif"}}>
                               {get("mem_"+week.verseRef)?"✓ Memorized":"✦ Memorize"}
@@ -638,7 +689,7 @@ function AnchoredStepsY2Inner(){
                     <div style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt || 'Study prompt not available.'}</p>
                     <div style={{borderTop:"1px solid "+T.purpleB,paddingTop:16}}>
-                      <div style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Read: {week.verseRef || ''}</div>
+                      <a href={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(week.verseRef||'')}\u0026version=NIV`} target="_blank" rel="noreferrer" style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read: {week.verseRef || ''} ↗</a>
                       <p style={{fontSize:17,color:T.cream,lineHeight:1.9,fontStyle:"italic",margin:0}}>&#8220;{week.verseText || ''}&#8221;</p>
                     </div>
                   </div>
@@ -663,6 +714,11 @@ function AnchoredStepsY2Inner(){
                         <p style={{fontSize:16,color:T.cream,fontStyle:"italic",margin:0,lineHeight:1.7}}>{q}</p>
                       </div>
                       <textarea rows={4} defaultValue={get("rq"+i)} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("rq"+i,e.target.value)} placeholder="Reflect honestly..." style={INP}/>
+                      {(get("rq"+i)||'').trim()&&(
+                        <div style={{marginTop:6,display:"flex",justifyContent:"flex-end"}}>
+                          <CopyBtn text={q+"\n\n"+get("rq"+i)} label="Copy Reflection" T={T}/>
+                        </div>
+                      )}
                     </div>
                   ))}
                   {(!week.reflectionQuestions || week.reflectionQuestions.length === 0) && (
@@ -691,9 +747,14 @@ function AnchoredStepsY2Inner(){
               {sec==="prayer" && (
                 <div>
                   <label style={LBL}>This Week's Prayer</label>
-                  <div style={{background:T.purpleF,border:"1px solid "+T.purpleB,borderRadius:14,padding:"22px 24px",marginBottom:18}}>
-                    <p style={{fontSize:17,color:T.cream,lineHeight:2,fontStyle:"italic",margin:0,whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
+                  <div style={{background:T.purpleF,border:"1px solid "+T.purpleB,borderRadius:14,padding:"22px 24px",marginBottom:4}}>
+                    <p style={{fontSize:17,color:T.cream,lineHeight:2,fontStyle:"italic",margin:"0 0 14px",whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
+                    <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                      <CopyBtn text={week.prayer||''} label="Copy Prayer" T={T}/>
+                      <button onClick={()=>setShareVerse({verseText:week.prayer,verseRef:"Week "+wk+" — Prayer"})} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>Share ↗</button>
+                    </div>
                   </div>
+                  <div style={{marginBottom:18}}/>
                   <label style={LBL}>Your Personal Prayer</label>
                   <textarea rows={6} defaultValue={get("prayer")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
@@ -749,7 +810,7 @@ function AnchoredStepsY2Inner(){
                       {communityNotes.map((note,i)=>(
                         <div key={note.id || i} style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:10,padding:"12px 16px",marginBottom:8}}>
                           <p style={{fontSize:15,color:T.text,lineHeight:1.7,margin:"0 0 6px",fontStyle:"italic"}}>"{note.text}"</p>
-                          <p style={{fontSize:11,color:T.muted,margin:0}}>{note.date}</p>
+                          <p style={{fontSize:11,color:T.muted,margin:0}}>{note.created_at ? new Date(note.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : note.date}</p>
                         </div>
                       ))}
                     </div>
@@ -905,8 +966,6 @@ function AnchoredStepsY2Inner(){
         <QuizModal verse={quizVerse} onClose={()=>setQuizVerse(null)} onPass={()=>set("mem_"+quizVerse.ref,"1")} T={T}/>
       )}
 
-      {/* Context Modal */}
-      {openAuthor && <ContextModal ae={openAuthor} onClose={()=>setOpenAuthor(null)} T={T}/>}
 
       {/* Share Verse Modal */}
       {shareVerse && (
