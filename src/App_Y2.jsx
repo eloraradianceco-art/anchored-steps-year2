@@ -424,7 +424,7 @@ function AnchoredStepsY2Inner(){
     setAuthErr('');
     if(!email) { setAuthErr('Enter your email first'); return; }
     const {error} = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
+      redirectTo: window.location.origin + '/reset-password',
     });
     if(error) setAuthErr(error.message);
     else setResetSent(true);
