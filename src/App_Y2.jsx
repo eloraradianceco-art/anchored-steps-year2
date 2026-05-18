@@ -430,6 +430,17 @@ function AnchoredStepsY2Inner(){
     else setResetSent(true);
   };
 
+  const enduringWordUrl = (ref) => {
+    if (!ref) return '#';
+    const m = ref.match(/^(.+?)\s+(\d+)/);
+    if (!m) return 'https://enduringword.com/bible-commentary/';
+    let book = m[1].trim().toLowerCase().replace(/\s+/g, '-');
+    const chap = m[2];
+    if (book === 'psalm') book = 'psalms';
+    return 'https://enduringword.com/bible-commentary/' + book + '-' + chap + '/';
+  };
+
+
   if(loading) return (
     <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,opacity:.5,animation:"pulse 2s ease-in-out infinite"}}/>
@@ -636,7 +647,7 @@ function AnchoredStepsY2Inner(){
                       <div style={{flex:1}}>
                         <p style={{fontSize:20,lineHeight:1.9,color:T.cream,fontStyle:"italic",marginBottom:14,letterSpacing:"0.01em"}}>{week.verseText || '(Verse text missing)'}</p>
                         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-                          <a href={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(week.verseRef||'')}\u0026version=NIV`} target="_blank" rel="noreferrer" style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",fontWeight:500,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid "+T.goldB}}>{week.verseRef || ''} ↗</a>
+                          <a href={enduringWordUrl(week.verseRef||'')} target="_blank" rel="noreferrer" style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",fontWeight:500,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid "+T.goldB}}>{week.verseRef || ''} ↗</a>
                           <div style={{display:"flex",gap:6}}>
                             <button onClick={()=>setQuizVerse({text:week.verseText,ref:week.verseRef})} style={{background:get("mem_"+week.verseRef)?T.greenF:T.purpleF,border:"1px solid "+(get("mem_"+week.verseRef)?T.greenB:T.purpleB),color:get("mem_"+week.verseRef)?T.green:T.purple,padding:"3px 11px",borderRadius:12,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif"}}>
                               {get("mem_"+week.verseRef)?"✓ Memorized":"✦ Memorize"}
@@ -689,7 +700,7 @@ function AnchoredStepsY2Inner(){
                     <div style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
                     <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt || 'Study prompt not available.'}</p>
                     <div style={{borderTop:"1px solid "+T.purpleB,paddingTop:16}}>
-                      <a href={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(week.verseRef||'')}\u0026version=NIV`} target="_blank" rel="noreferrer" style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read: {week.verseRef || ''} ↗</a>
+                      <a href={enduringWordUrl(week.verseRef||'')} target="_blank" rel="noreferrer" style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read full commentary: {week.verseRef || ''} ↗</a>
                       <p style={{fontSize:17,color:T.cream,lineHeight:1.9,fontStyle:"italic",margin:0}}>&#8220;{week.verseText || ''}&#8221;</p>
                     </div>
                   </div>
@@ -748,7 +759,7 @@ function AnchoredStepsY2Inner(){
                 <div>
                   <label style={LBL}>This Week's Prayer</label>
                   <div style={{background:T.purpleF,border:"1px solid "+T.purpleB,borderRadius:14,padding:"22px 24px",marginBottom:4}}>
-                    <p style={{fontSize:17,color:T.cream,lineHeight:2,fontStyle:"italic",margin:"0 0 14px",whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
+                    <p style={{fontSize:17,color:T.cream,lineHeight:1.65,fontStyle:"italic",margin:"0 0 14px",whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
                     <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                       <CopyBtn text={week.prayer||''} label="Copy Prayer" T={T}/>
                       <button onClick={()=>setShareVerse({verseText:week.prayer,verseRef:"Week "+wk+" — Prayer"})} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>Share ↗</button>
