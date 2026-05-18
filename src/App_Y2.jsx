@@ -627,7 +627,7 @@ function AnchoredStepsY2Inner(){
                   (s.id==='tracker'&&(DAYS.some((_,i)=>(get('tr_'+i)||'').trim())||(get('gratitude')||'').trim())) ||
                   (s.id==='community'&&communityDone);
                 return (
-                  <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:11,transition:"all .18s",position:"relative"}}>
+                  <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:11,transition:"all .18s",position:"relative"}}>
                     {s.label}
                     {hasData&&<span style={{position:"absolute",top:2,right:2,width:5,height:5,borderRadius:"50%",background:T.green,display:"block"}}/>}
                   </button>
@@ -669,7 +669,7 @@ function AnchoredStepsY2Inner(){
                     </div>
                   </div>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -683,7 +683,7 @@ function AnchoredStepsY2Inner(){
                       <CopyBtn text={week.whereAreWe||''} label="Copy Story Context" T={T}/>
                     </div>
                   </div>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -697,7 +697,7 @@ function AnchoredStepsY2Inner(){
                       <CopyBtn text={"\u26a0\ufe0f Don't Miss This — Week "+wk+"\n\n"+(week.dontMissThis||'')} label="Copy Don't Miss This" T={T}/>
                     </div>
                   </div>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -723,7 +723,7 @@ function AnchoredStepsY2Inner(){
                   <label style={LBL}>Your Notes</label>
                   <textarea rows={6} defaultValue={get("study")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("study",e.target.value)} placeholder="Write your personal study notes here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -748,7 +748,7 @@ function AnchoredStepsY2Inner(){
                     <p style={{color:T.muted,fontStyle:"italic",marginBottom:18}}>No reflection questions for this week.</p>
                   )}
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -765,7 +765,7 @@ function AnchoredStepsY2Inner(){
                   <label style={LBL}>How Will You Live This Out?</label>
                   <textarea rows={5} defaultValue={get("apply")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("apply",e.target.value)} placeholder="Write your specific plan here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -784,7 +784,7 @@ function AnchoredStepsY2Inner(){
                   <label style={LBL}>Your Personal Prayer</label>
                   <textarea rows={6} defaultValue={get("prayer")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -808,7 +808,7 @@ function AnchoredStepsY2Inner(){
                   <label style={LBL}>End of Week Reflection</label>
                   <textarea rows={4} defaultValue={get("weekreflect")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("weekreflect",e.target.value)} placeholder="What changed in you this week?" style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);}} T={T}/>
+                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -894,7 +894,7 @@ function AnchoredStepsY2Inner(){
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",gap:10,alignItems:"center"}}>
                       <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>{bm.ref}</span>
-                      <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:11,textDecoration:"underline"}}>Open</button>
+                      <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:11,textDecoration:"underline"}}>Open</button>
                     </div>
                     <div style={{display:"flex",gap:8,alignItems:"center"}}>
                       <span style={{fontSize:11,color:T.muted}}>Week {bm.week}</span>
