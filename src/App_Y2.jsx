@@ -100,30 +100,106 @@ function CopyBtn({text, label="Copy", T, style={}}){
   );
 }
 
-function QuizModal({verse,onClose,onPass,T}){
-  const [input,setInput]=useState('');
-  const [result,setResult]=useState(null);
-  const check=()=>{
-    const norm=s=>(s||'').toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
-    const aw=norm(input).split(' ').filter(Boolean);
-    const cw=norm(verse.text||verse.verseText||'').split(' ').filter(Boolean);
-    if (cw.length === 0) { setResult('fail'); return; }
-    const matches = aw.filter(w=>cw.includes(w)).length;
-    const r=(matches/cw.length)>=0.75?'pass':'fail';
-    setResult(r);
-    if(r==='pass') onPass();
+function MemorizeModal({verse,onClose,onPass,T}){
+  const [mode,setMode]=useState(null);
+  const [revealed,setRevealed]=useState(false);
+  const [typed,setTyped]=useState('');
+  const [score,setScore]=useState(null);
+  const verseText = verse.text||verse.verseText||'';
+  const verseRef = verse.ref||verse.verseRef||'';
+  const words=verseText.split(' ');
+  const blankedWords=words.map((w,i)=>(i+1)%3===0?'___':w);
+  const markMemo=()=>{onPass();onClose();};
+  const checkScore=()=>{
+    const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+    const tw=norm(typed).split(' ').filter(Boolean);
+    const ow=norm(verseText).split(' ').filter(Boolean);
+    const pct=ow.length?Math.round(tw.filter(w=>ow.includes(w)).length/ow.length*100):0;
+    setScore(pct);
+    if(pct>=70)onPass();
   };
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:24}} onClick={onClose}>
-      <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:28,maxWidth:420,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}} onClick={e=>e.stopPropagation()}>
-        <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:16}}>Memorize This Verse</div>
-        <p style={{fontSize:14,color:T.muted,fontStyle:"italic",lineHeight:1.7,marginBottom:20}}>{verse.ref || verse.verseRef}</p>
-        <textarea rows={4} value={input} onChange={e=>setInput(e.target.value)} placeholder="Type the verse from memory..." style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px 14px",color:T.text,fontSize:15,fontFamily:"EB Garamond,Georgia,serif",resize:"none",boxSizing:"border-box",outline:"none",lineHeight:1.7,marginBottom:12}}/>
-        {result&&<div style={{textAlign:"center",fontSize:15,color:result==='pass'?T.green:T.red,marginBottom:12,fontFamily:"Cinzel,serif"}}>{result==='pass'?"✓ Well done! Marked as memorized.":"Keep practicing — you're getting there."}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          <button onClick={check} style={{background:"linear-gradient(135deg,"+T.goldF+","+T.goldF+")",border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Check</button>
-          <button onClick={onClose} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Close</button>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:16,overflowY:"auto"}} onClick={()=>{if(!mode)onClose();}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:24,maxWidth:420,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.16em",textTransform:"uppercase"}}>{mode?"← ":""}✦ Memorize</div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
         </div>
+        <div style={{fontSize:14,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:16,paddingBottom:14,borderBottom:"1px solid "+T.goldB,textAlign:"center"}}>{verseRef}</div>
+        {!mode?(
+          <div>
+            <p style={{fontSize:14,color:T.muted,textAlign:"center",marginBottom:16,fontStyle:"italic",lineHeight:1.6}}>Choose your memorization method:</p>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {[{id:"recall",icon:"🧠",title:"Read & Recall",desc:"See the reference, recite aloud, then reveal to check"},{id:"blanks",icon:"✏️",title:"Fill the Gaps",desc:"Read the verse with every 3rd word blanked out"},{id:"type",icon:"⌨️",title:"Write it Out",desc:"Type the verse from memory and get a score"}].map(m=>(
+                <button key={m.id} onClick={()=>{setMode(m.id);setRevealed(false);setTyped('');setScore(null);}} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",borderRadius:12,cursor:"pointer",textAlign:"left",background:T.goldF,border:"1px solid "+T.goldB,transition:"all .2s"}}>
+                  <span style={{fontSize:22,flexShrink:0}}>{m.icon}</span>
+                  <span>
+                    <span style={{display:"block",fontSize:13,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",marginBottom:2}}>{m.title}</span>
+                    <span style={{display:"block",fontSize:12,color:T.muted,fontStyle:"italic"}}>{m.desc}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ):mode==='recall'?(
+          <div>
+            {!revealed?(
+              <div style={{textAlign:"center"}}>
+                <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:20,lineHeight:1.7}}>Say the verse aloud from memory, then reveal to check yourself.</p>
+                <button onClick={()=>setRevealed(true)} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px 28px",borderRadius:50,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Reveal Verse</button>
+              </div>
+            ):(
+              <div>
+                <p style={{fontSize:17,color:T.cream,fontStyle:"italic",lineHeight:1.85,marginBottom:20,textAlign:"center"}}>"{verseText}"</p>
+                <button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"13px",borderRadius:12,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>✓ I've Got It — Mark Memorized</button>
+                <button onClick={()=>setRevealed(false)} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
+              </div>
+            )}
+          </div>
+        ):mode==='blanks'?(
+          <div>
+            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:14,lineHeight:1.6,textAlign:"center"}}>Read aloud, filling in the blanked words from memory.</p>
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:12,padding:"16px",marginBottom:16}}>
+              <p style={{fontSize:17,color:T.cream,fontStyle:"italic",lineHeight:2.1,margin:0}}>
+                {blankedWords.map((w,i)=>(
+                  <span key={i} style={{color:w==='___'?T.gold:T.cream,borderBottom:w==='___'?"1px solid "+T.gold:undefined,padding:w==='___'?"0 4px":undefined,letterSpacing:w==='___'?"0.1em":undefined}}>{w}{i<blankedWords.length-1?" ":""}</span>
+                ))}
+              </p>
+            </div>
+            {!revealed?(
+              <button onClick={()=>setRevealed(true)} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>Reveal Missing Words</button>
+            ):(
+              <div style={{background:"rgba(124,146,132,0.08)",border:"1px solid rgba(124,146,132,0.25)",borderRadius:10,padding:"12px 14px",marginBottom:12}}>
+                <p style={{fontSize:14,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>
+                  {words.map((w,i)=>(
+                    <span key={i} style={{color:(i+1)%3===0?T.green:T.text,fontWeight:(i+1)%3===0?600:400}}>{w}{i<words.length-1?" ":""}</span>
+                  ))}
+                </p>
+              </div>
+            )}
+            <button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>✓ Mark as Memorized</button>
+          </div>
+        ):(
+          <div>
+            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:12,lineHeight:1.6,textAlign:"center"}}>Type the verse from memory, then check your score.</p>
+            {score===null?(
+              <div>
+                <textarea rows={5} value={typed} onChange={e=>setTyped(e.target.value)} placeholder="Type the verse here from memory..." style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,color:T.cream,fontSize:15,padding:"12px",fontFamily:"EB Garamond,Georgia,serif",outline:"none",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.7}}/>
+                <button onClick={checkScore} disabled={!typed.trim()} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",opacity:typed.trim()?1:0.4}}>Check My Score</button>
+              </div>
+            ):(
+              <div style={{textAlign:"center"}}>
+                <div style={{fontSize:48,fontWeight:700,color:score>=80?T.green:score>=50?T.gold:T.red,fontFamily:"Cinzel,serif",marginBottom:4}}>{score}%</div>
+                <div style={{fontSize:13,color:T.muted,marginBottom:16}}>{score>=90?"Nearly perfect!":score>=70?"Great progress!":score>=50?"Good start!":"Keep practicing!"}</div>
+                <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px",marginBottom:14,textAlign:"left"}}>
+                  <p style={{fontSize:14,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>"{verseText}"</p>
+                </div>
+                {score>=70&&<button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>✓ Mark as Memorized</button>}
+                <button onClick={()=>{setTyped('');setScore(null);}} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -900,6 +976,40 @@ function AnchoredStepsY2Inner(){
         )}
 
         {/* SAVED VIEW */}
+        {view==='search' && (
+          <div style={{padding:"0 0 80px"}}>
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Search</h2>
+            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
+            <input
+              autoFocus
+              value={searchQuery}
+              onChange={e=>doSearch(e.target.value)}
+              placeholder="Search verses, themes, prayers, insights..."
+              style={{width:"100%",background:T.inputBg,border:"1px solid "+T.goldB,borderRadius:12,color:T.text,fontSize:16,padding:"13px 16px",fontFamily:"EB Garamond,Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:16}}
+            />
+            {searchQuery && (
+              <div>
+                <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>{searchResults.length} weeks found</div>
+                {searchResults.length===0&&<p style={{fontSize:15,color:T.muted,fontStyle:"italic"}}>No results. Try a different word.</p>}
+                {searchResults.map(({week:w,hits})=>(
+                  <button key={w.week} onClick={()=>{setWk(w.week);setView('journal');setSec('passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,marginBottom:8,cursor:"pointer",textAlign:"left",background:T.cardBg,border:"1px solid "+T.border,transition:"all .2s"}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:10,color:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:2}}>WEEK {w.week}</div>
+                      <div style={{fontSize:13,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.theme}</div>
+                      <div style={{fontSize:12,color:T.muted,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.verseRef}</div>
+                      <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
+                        {hits.map(h=>(<span key={h} style={{fontSize:9,color:T.gold,background:T.goldF,border:"1px solid "+T.goldB,borderRadius:6,padding:"1px 6px",fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}>{h}</span>))}
+                      </div>
+                    </div>
+                    <span style={{color:T.gold,fontSize:14}}>›</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {!searchQuery&&<div style={{textAlign:"center",padding:"32px 0"}}><div style={{fontSize:32,marginBottom:10}}>⚓</div><p style={{fontSize:14,color:T.muted,fontStyle:"italic"}}>Search all 52 weeks of Year 2.</p></div>}
+          </div>
+        )}
+
         {view==='saved' && (
           <div className="fi" style={{padding:18}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Saved Verses</h2>
@@ -1006,7 +1116,7 @@ function AnchoredStepsY2Inner(){
 
       {/* Quiz Modal */}
       {quizVerse && (
-        <QuizModal verse={quizVerse} onClose={()=>setQuizVerse(null)} onPass={()=>set("mem_"+quizVerse.ref,"1")} T={T}/>
+        <MemorizeModal verse={quizVerse} onClose={()=>setQuizVerse(null)} onPass={()=>set("mem_"+quizVerse.ref,"1")} T={T}/>
       )}
 
 
