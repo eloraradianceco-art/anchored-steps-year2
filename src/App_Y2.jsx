@@ -181,6 +181,9 @@ function AnchoredStepsY2Inner(){
   const [animK,setAnimK]=useState(0);
   const [quizVerse,setQuizVerse]=useState(null);
   const [shareVerse,setShareVerse]=useState(null);
+  const [shareCardType,setShareCardType]=useState('passage')
+  const [shareCardLight,setShareCardLight]=useState(false)
+  const [sharingCard,setSharingCard]=useState(false)
   const [bookmarks,setBookmarks]=useState(()=>{try{return JSON.parse(localStorage.getItem('y2_bookmarks')||'[]')}catch{return []}});
   const [showOnboarding,setShowOnboarding]=useState(()=>{
     try { return !localStorage.getItem('y2_onboarding_complete'); } catch { return false; }
@@ -402,22 +405,36 @@ function AnchoredStepsY2Inner(){
   const daysComplete=n=>entries.filter(e=>e.week===n&&e.field_key.startsWith('tr_')&&(e.field_value||'').trim()).length;
 
   const handleShareImage=async()=>{
-    if(!shareCardRef.current||!shareVerse) return;
-    try{
-      const dataUrl=await toPng(shareCardRef.current,{cacheBust:true,pixelRatio:2,backgroundColor:"#0D1820"});
-      const res=await fetch(dataUrl);
-      const blob=await res.blob();
-      const file=new File([blob],"anchored-steps-year2-verse.png",{type:"image/png"});
-      const cap="\u201c"+shareVerse.verseText+"\u201d \u2014 "+shareVerse.verseRef+(week?"\n\nThis week: "+week.theme+".":"")+"\n\nAnchored Steps: Year 2 \u2014 Deeper faith. Harder truth. Real growth.\n\nanchored-steps-y2.vercel.app";
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"Anchored Steps Year 2",text:cap});
+    if(!shareCardRef.current||!shareVerse) return
+    setSharingCard(true)
+    try {
+      const bg=shareCardLight?'#F2EDE3':'#0D1820'
+      const dataUrl=await toPng(shareCardRef.current,{cacheBust:true,pixelRatio:2,backgroundColor:bg})
+      const res=await fetch(dataUrl)
+      const blob=await res.blob()
+      const file=new File([blob],'anchored-steps-y2-card.png',{type:'image/png'})
+      const body=shareCardType==='prayer'?(week?.prayer||'')
+               :shareCardType==='dontmiss'?(week?.dontMissThis||'')
+               :shareCardType==='apply'?(week?.application||'')
+               :(shareVerse.verseText||'')
+      const ref=shareCardType==='passage'?(shareVerse.verseRef||null):null
+      const caption=[
+        '“'+body+'”',
+        ref?'— '+ref:'',
+        '',
+        week?'Week '+wk+': '+week.theme:'',
+        '',
+        'Anchored Steps: Year 2 — Deeper faith. Harder truth. Real growth.',
+        '',
+        'anchored-steps-y2.vercel.app',
+      ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n').trim()
+      if(navigator.canShare?.({files:[file]})){
+        await navigator.share({files:[file],title:'Anchored Steps Year 2',text:caption})
       } else {
-        const a=document.createElement("a");a.href=dataUrl;a.download="anchored-steps-year2-verse.png";a.click();
+        const a=document.createElement('a');a.href=dataUrl;a.download='anchored-steps-y2-card.png';a.click()
       }
-    } catch(err){
-      const text=(shareVerse.verseText||'')+' \u2014 '+(shareVerse.verseRef||'');
-      navigator.clipboard.writeText(text).then(()=>alert("Copied!"));
-    }
+    } catch(err){console.error('Share failed:',err)}
+    setSharingCard(false)
   };
 
   const handlePasswordReset = async () => {
@@ -994,33 +1011,84 @@ function AnchoredStepsY2Inner(){
 
 
       {/* Share Verse Modal */}
-      {shareVerse && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:24}} onClick={()=>setShareVerse(null)}>
-          <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:28,maxWidth:380,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}} onClick={e=>e.stopPropagation()}>
-            <div style={{textAlign:"center",marginBottom:16}}>
-              <img src="/icon2.png" alt="" style={{width:36,height:36,borderRadius:8,marginBottom:8}}/>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.14em",textTransform:"uppercase"}}>Share This Verse</div>
+      {shareVerse && (()=>{
+        const Y2_TYPES=[
+          {id:'passage', icon:'Passage',  label:'Passage',    show:!!(week?.verseText)},
+          {id:'prayer',  icon:'Prayer',   label:'Prayer',     show:!!(week?.prayer)},
+          {id:'dontmiss',icon:'DontMiss', label:"Don't Miss", show:!!(week?.dontMissThis)},
+          {id:'apply',   icon:'Apply',    label:'Apply',      show:!!(week?.application)},
+        ].filter(t=>t.show)
+        const cardContent=shareCardType==='prayer'
+          ?{label:'Prayer',body:week?.prayer||'',ref:null}
+          :shareCardType==='dontmiss'
+          ?{label:"Don't Miss",body:week?.dontMissThis||'',ref:null}
+          :shareCardType==='apply'
+          ?{label:'Application',body:week?.application||'',ref:null}
+          :{label:'This Week',body:shareVerse.verseText||'',ref:shareVerse.verseRef||null}
+        const caption2=[
+          '“'+cardContent.body+'”',
+          cardContent.ref?'— '+cardContent.ref:'',
+          '',
+          week?'Week '+wk+': '+week.theme:'',
+          '',
+          'Anchored Steps: Year 2 — Deeper faith. Harder truth. Real growth.',
+          '',
+          'anchored-steps-y2.vercel.app',
+        ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n').trim()
+        const cBg=shareCardLight?'linear-gradient(155deg,#F2EDE3 0%,#E8E1D4 100%)':'linear-gradient(155deg,#0D1820 0%,#172330 100%)'
+        const cBorder=shareCardLight?'rgba(0,0,0,0.1)':'rgba(160,120,64,0.25)'
+        const cText=shareCardLight?'#1A1209':'#F0ECE3'
+        const cGold=shareCardLight?'#7A5C28':'#A07840'
+        const cMuted=shareCardLight?'#7A6248':'#7a8a96'
+        const cLabel=shareCardLight?'rgba(0,0,0,0.4)':'rgba(160,120,64,0.6)'
+        return (
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.82)',zIndex:500,display:'flex',alignItems:'flex-start',justifyContent:'center',overflowY:'auto',padding:'16px 16px 48px'}} onClick={()=>setShareVerse(null)}>
+            <div style={{background:'linear-gradient(145deg,'+T.bg+','+T.bgMid+')',border:'1px solid '+T.goldB,borderRadius:20,padding:22,width:'100%',maxWidth:420,marginTop:24,boxShadow:'0 20px 60px rgba(0,0,0,0.65)'}} onClick={e=>e.stopPropagation()}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <div style={{fontSize:10,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.18em',textTransform:'uppercase'}}>Share Card</div>
+                <button onClick={()=>setShareVerse(null)} style={{background:'transparent',border:'none',color:T.muted,cursor:'pointer',fontSize:20,lineHeight:1,padding:0}}>x</button>
+              </div>
+              <div style={{display:'flex',gap:5,marginBottom:14,flexWrap:'wrap'}}>
+                {Y2_TYPES.map(t=>(
+                  <button key={t.id} onClick={()=>setShareCardType(t.id)} style={{flex:'1 1 auto',padding:'7px 5px',borderRadius:9,cursor:'pointer',fontSize:11,fontFamily:'Cinzel,serif',letterSpacing:'0.04em',background:shareCardType===t.id?T.goldF:'rgba(255,255,255,0.04)',border:'1px solid '+(shareCardType===t.id?T.goldB:'rgba(255,255,255,0.07)'),color:shareCardType===t.id?T.gold:T.muted,transition:'all .2s'}}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
+                <button onClick={()=>setShareCardLight(!shareCardLight)} style={{background:shareCardLight?'rgba(255,255,255,0.1)':T.goldF,border:'1px solid '+(shareCardLight?'rgba(255,255,255,0.2)':T.goldB),color:shareCardLight?'#F0ECE3':T.gold,padding:'5px 13px',borderRadius:20,cursor:'pointer',fontSize:11,fontFamily:'Cinzel,serif',letterSpacing:'0.06em'}}>
+                  {shareCardLight?'Light':'Dark'}
+                </button>
+              </div>
+              <div ref={shareCardRef} style={{background:cBg,border:'1px solid '+cBorder,borderRadius:18,padding:'26px 24px',marginBottom:18,textAlign:'center',fontFamily:'EB Garamond,Georgia,serif'}}>
+                <img src="/icon2.png" alt="" style={{width:36,height:36,borderRadius:8,marginBottom:9}}/>
+                <div style={{fontSize:9,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.2em',textTransform:'uppercase',marginBottom:4}}>Anchored Steps - Year 2</div>
+                <div style={{fontSize:9,color:cLabel,fontFamily:'Cinzel,serif',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:14,paddingBottom:14,borderBottom:'1px solid '+cBorder}}>Week {wk} - {week?.theme}</div>
+                <div style={{fontSize:9,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.16em',textTransform:'uppercase',marginBottom:11}}>{Y2_TYPES.find(t=>t.id===shareCardType)?.label}</div>
+                <p style={{fontSize:17,color:cText,fontStyle:'italic',lineHeight:1.9,margin:'0 0 12px',letterSpacing:'0.01em'}}>
+                  {shareCardType==='passage'?'"'+cardContent.body+'"':cardContent.body}
+                </p>
+                {cardContent.ref&&<p style={{fontSize:10,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.12em',textTransform:'uppercase',margin:'0 0 12px'}}>{cardContent.ref}</p>}
+                <p style={{fontSize:9,color:cMuted,margin:0,letterSpacing:'0.05em'}}>Walk steadily. Stay anchored. - eloraradiance.com</p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+                <button onClick={handleShareImage} disabled={sharingCard} style={{background:'linear-gradient(135deg,'+T.goldF+','+T.goldF+')',border:'1px solid '+T.goldB,color:T.gold,padding:'12px',borderRadius:10,cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',letterSpacing:'0.08em',opacity:sharingCard?0.6:1}}>
+                  {sharingCard?'Saving...':'Share Image'}
+                </button>
+                <button onClick={()=>navigator.clipboard?.writeText(cardContent.body).then(()=>alert('Copied!'))} style={{background:'transparent',border:'1px solid '+T.border,color:T.muted,padding:'12px',borderRadius:10,cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',letterSpacing:'0.08em'}}>
+                  Copy Text
+                </button>
+              </div>
+              <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:10,padding:'12px 14px',marginBottom:10}}>
+                <div style={{fontSize:9,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:8}}>Suggested Caption</div>
+                <p style={{fontSize:12,color:T.muted,lineHeight:1.7,margin:'0 0 8px',whiteSpace:'pre-line'}}>{caption2}</p>
+                <button onClick={()=>navigator.clipboard?.writeText(caption2).then(()=>alert('Caption copied!'))} style={{width:'100%',background:'transparent',border:'1px solid '+T.goldB,color:T.gold,padding:'7px',borderRadius:7,cursor:'pointer',fontSize:10,fontFamily:'Cinzel,serif',letterSpacing:'0.1em'}}>Copy Caption</button>
+              </div>
+              <button onClick={()=>setShareVerse(null)} style={{width:'100%',background:'transparent',border:'none',color:T.muted,cursor:'pointer',fontSize:13,fontFamily:'EB Garamond,Georgia,serif',paddingTop:4}}>Close</button>
             </div>
-            <div ref={shareCardRef} style={{background:"linear-gradient(155deg,#0D1820 0%,#172330 100%)",border:"1px solid rgba(160,120,64,0.25)",borderRadius:18,padding:24,marginBottom:20,textAlign:"center"}}>
-              <img src="/icon2.png" alt="" style={{width:42,height:42,borderRadius:10,marginBottom:10}}/>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:"#A07840",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>Anchored Steps · Year 2</div>
-              <p style={{fontSize:18,color:"#F0ECE3",fontStyle:"italic",lineHeight:1.85,marginBottom:12,fontFamily:"EB Garamond,Georgia,serif"}}>&#8220;{shareVerse.verseText}&#8221;</p>
-              <p style={{fontSize:11,color:"#A07840",fontFamily:"Cinzel,serif",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8}}>{shareVerse.verseRef}</p>
-              <p style={{fontSize:10,color:"#7a8a96",marginBottom:0}}>Walk steadily. Stay anchored. &mdash; eloraradiance.com</p>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-              <button onClick={handleShareImage} style={{background:"linear-gradient(135deg,"+T.goldF+","+T.goldF+")",border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Share Image &#8599;</button>
-              <button onClick={()=>{navigator.clipboard.writeText((shareVerse.verseText||'')+' — '+(shareVerse.verseRef||'')).then(()=>alert("Copied!"));}} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Copy Text</button>
-            </div>
-            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px 14px",marginBottom:12}}>
-              <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}>Suggested Caption</div>
-              <p style={{fontSize:13,color:T.muted,lineHeight:1.7,margin:"0 0 10px",fontStyle:"italic"}}>&#8220;{shareVerse.verseText}&#8221; &mdash; {shareVerse.verseRef}{week?"\n\nThis week: "+week.theme+".":""}{"\n\nAnchored Steps: Year 2\neloraradiance.com"}</p>
-              <button onClick={()=>{const cap="\u201c"+(shareVerse.verseText||"")+"\u201d \u2014 "+(shareVerse.verseRef||"")+(week?"\n\nThis week: "+week.theme+".":"")+"\n\nAnchored Steps: Year 2 \u2014 Deeper faith. Harder truth. Real growth.\n\nanchored-steps-y2.vercel.app";navigator.clipboard.writeText(cap).then(()=>alert("Caption copied!"));}} style={{width:"100%",background:"transparent",border:"1px solid "+T.goldB,color:T.gold,padding:"8px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Copy Caption</button>
-            </div>
-            <button onClick={()=>setShareVerse(null)} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Close</button>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   );
 }
