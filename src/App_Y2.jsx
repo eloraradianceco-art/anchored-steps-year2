@@ -671,7 +671,7 @@ function AnchoredStepsY2Inner(){
         </div>
         <div style={{display:"flex",gap:0,borderTop:"1px solid "+T.border,overflowX:"auto"}}>
           {['journal','progress','saved','settings'].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{flex:1,background:view===v?T.goldF:"transparent",color:view===v?T.gold:T.muted,padding:"10px 4px",cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",textTransform:"capitalize",whiteSpace:"nowrap",border:"none",borderBottom:"2px solid "+(view===v?T.gold:"transparent")}}>
+            <button key={v} onClick={()=>setView(v)} style={{background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 8px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.04em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
               {v==='journal'?'📖 Journal':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
