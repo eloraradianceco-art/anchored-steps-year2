@@ -964,7 +964,7 @@ function AnchoredStepsY2Inner(){
                 const done=daysComplete(w.week);
                 const cur=w.week===wk;
                 return (
-                  <button key={w.week} onClick={()=>{setWk(w.week);setView('journal');setSec('passage');setAnimK(a=>a+1);}} style={{background:cur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":done>0?"linear-gradient(145deg,"+T.greenF+","+T.greenF+")":T.bgCard,border:"1px solid "+(cur?T.goldB:done>0?T.greenB:T.border),borderRadius:10,padding:"10px 12px",cursor:"pointer",textAlign:"left",transition:"all .25s"}}>
+                  <button key={w.week} onClick={()=>{setWk(w.week);setView('journal');setSec('passage');setAnimK(a=>a+1);}} style={{background:cur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":done>0?"linear-gradient(145deg,"+T.greenF+","+T.greenF+")":T.bgCard,border:"1px solid "+(cur?T.goldB:done>0?T.greenB:T.border),borderRadius:12,padding:"13px 16px",cursor:"pointer",textAlign:"left",transition:"all .25s"}}>
                     <div style={{fontSize:9,color:cur?T.gold:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:3}}>WEEK {w.week}</div>
                     <div style={{fontSize:11,color:T.text,lineHeight:1.3}}>{w.theme}</div>
                     {done>0&&<div style={{fontSize:9,color:T.green,marginTop:4}}>{done}/7 days</div>}
