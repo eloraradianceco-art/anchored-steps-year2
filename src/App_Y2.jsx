@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
-import Settings from "./components/Settings_AS2.jsx";
+import Settings from "./components/Settings.jsx";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL_Y2 || "";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
@@ -1136,7 +1136,7 @@ function AnchoredStepsY2Inner(){
       {/* Share Verse Modal */}
        {shareVerse && (()=>{
         const TYPES=[
-          {id:'passage',  icon:'📖', label:'Passage',     body:shareVerse?.verse||shareVerse?.text||'', ref:shareVerse?.verseRef||null, show:true},
+          {id:'passage',  icon:'📖', label:'Passage',     body:shareVerse?.verseText||shareVerse?.verse||shareVerse?.text||'', ref:shareVerse?.verseRef||null, show:true},
           {id:'context',  icon:'🧭', label:'Context',     body:week?.whereAreWe||week?.readInContext||'', ref:null, show:!!(week?.whereAreWe||week?.readInContext)},
           {id:'dontmiss', icon:'⚠️', label:"Don't Miss", body:week?.dontMissThis||'', ref:null, show:!!(week?.dontMissThis)},
           {id:'study',    icon:'🧠', label:'Study',       body:week?.studyNotes||'', ref:null, show:!!(week?.studyNotes)},
