@@ -259,6 +259,7 @@ function AnchoredStepsY2Inner(){
   const [shareVerse,setShareVerse]=useState(null);
   const [shareCardType,setShareCardType]=useState('passage')
   const [shareCardLight,setShareCardLight]=useState(false)
+  const [captionCopied,setCaptionCopied]=useState(false)
   const [sharingCard,setSharingCard]=useState(false)
   const [bookmarks,setBookmarks]=useState(()=>{try{return JSON.parse(localStorage.getItem('y2_bookmarks')||'[]')}catch{return []}});
   const [showOnboarding,setShowOnboarding]=useState(()=>{
@@ -543,92 +544,85 @@ function AnchoredStepsY2Inner(){
   );
 
   if(!session){
+    const INP2={width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.goldB,borderRadius:10,color:T.cream,fontSize:16,padding:"14px 16px",fontFamily:"'EB Garamond',Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:12};
+    const BTN2=(a)=>({width:"100%",padding:"16px",borderRadius:12,cursor:a?"pointer":"default",fontSize:14,fontFamily:"Cinzel,serif",letterSpacing:"0.09em",transition:"all .25s",touchAction:"manipulation",border:"none",background:a?"linear-gradient(135deg,rgba(160,120,64,0.4),rgba(160,120,64,0.2))":"rgba(160,120,64,0.08)",color:a?T.cream:T.muted});
+    const LBL2={fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6,display:"block"};
     return (
-      <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
-        <div style={{maxWidth:380,width:"100%"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <img src="/icon2.png" alt="⚓" style={{width:60,height:60,borderRadius:14,marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}/>
-            <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.18em",textTransform:"uppercase",marginBottom:6}}>Anchored Steps</div>
-            <div style={{fontFamily:"Cinzel,serif",fontSize:22,color:T.cream,marginBottom:4}}>Year 2</div>
-            <div style={{fontSize:13,color:T.muted,fontStyle:"italic"}}>"Now live like it."</div>
+      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"radial-gradient(ellipse at 50% 0%, rgba(160,120,64,0.1) 0%, transparent 55%), "+T.bg,fontFamily:"'EB Garamond',Georgia,serif",overflowY:"auto",padding:"0 16px 40px"}}>
+        <div style={{background:"rgba(13,26,42,0.98)",borderRadius:20,border:"1px solid "+T.goldB,padding:"32px 28px 36px",width:"100%",maxWidth:420,marginTop:"8vh",marginBottom:40,boxShadow:"0 12px 40px rgba(0,0,0,0.4)"}}>
+          <div style={{textAlign:"center",marginBottom:28}}>
+            <img src="/icon2.png" alt="" style={{width:56,height:56,borderRadius:14,display:"block",margin:"0 auto 12px",boxShadow:"0 4px 16px rgba(0,0,0,0.3)"}}/>
+            <div style={{fontSize:9,color:T.gold,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6}}>Elora Radiance Co.</div>
+            <div style={{fontSize:20,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
+            <div style={{fontSize:13,color:T.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
           </div>
 
-          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,padding:28}}>
-            {resetMode ? (
-              <>
-                <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14,textAlign:"center"}}>Reset Password</div>
-                {resetSent ? (
-                  <>
-                    <p style={{fontSize:14,color:T.text,lineHeight:1.7,marginBottom:16,textAlign:"center"}}>Check your email for a reset link.</p>
-                    <button onClick={()=>{setResetMode(false);setResetSent(false);}} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Back to Sign In</button>
-                  </>
-                ) : (
-                  <>
-                    <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{...INP,marginBottom:12}}/>
-                    {authErr&&<div style={{color:T.red,fontSize:13,marginBottom:12,textAlign:"center"}}>{authErr}</div>}
-                    <button onClick={handlePasswordReset} style={{width:"100%",background:"linear-gradient(135deg,"+T.goldF+","+T.goldF+")",border:"1px solid "+T.goldB,color:T.gold,padding:"14px",borderRadius:12,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:14}}>Send Reset Link</button>
-                    <div style={{textAlign:"center",fontSize:12,color:T.muted}}>
-                      <span style={{color:T.gold,cursor:"pointer"}} onClick={()=>{setResetMode(false);setAuthErr('');}}>Back to Sign In</span>
-                    </div>
-                  </>
-                )}
-              </>
+          {authErr&&<div style={{background:"rgba(201,72,72,0.1)",border:"1px solid rgba(201,72,72,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:"#C94848",lineHeight:1.6}}>{authErr}</div>}
+
+          {resetMode ? (
+            resetSent ? (
+              <div style={{background:"rgba(124,146,132,0.12)",border:"1px solid rgba(124,146,132,0.35)",borderRadius:12,padding:"16px",textAlign:"center"}}>
+                <div style={{fontSize:14,color:T.green,marginBottom:10}}>✓ Check your email for a reset link.</div>
+                <button onClick={()=>{setResetMode(false);setResetSent(false)}} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif"}}>Back to Sign In</button>
+              </div>
             ) : (
               <>
-                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{...INP,marginBottom:12}}/>
-                <input value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password" type="password" style={{...INP,marginBottom:12}}/>
-                {authMode==='signup'&&<input value={code} onChange={e=>setCode(e.target.value)} placeholder="Access Code" style={{...INP,marginBottom:12}}/>}
-                {authErr&&<div style={{color:T.red,fontSize:13,marginBottom:12,textAlign:"center"}}>{authErr}</div>}
-                <button onClick={async()=>{
-                  setAuthErr('');
-                  if(authMode==='login'){
-                    const{error}=await supabase.auth.signInWithPassword({email,password:pw});
-                    if(error)setAuthErr(error.message);
-                  } else {
-                    const{data:codeData,error:codeErr}=await supabase.from('access_codes').select('*').eq('code',code.trim().toUpperCase()).eq('used',false).maybeSingle();
-                    if(codeErr || !codeData){setAuthErr('Invalid or already used access code');return;}
-                    const{error}=await supabase.auth.signUp({email,password:pw});
-                    if(error){setAuthErr(error.message);return;}
-                    await supabase.from('access_codes').update({used:true,used_by:email}).eq('code',code.trim().toUpperCase());
-                  }
-                }} style={{width:"100%",background:"linear-gradient(135deg,"+T.goldF+","+T.goldF+")",border:"1px solid "+T.goldB,color:T.gold,padding:"14px",borderRadius:12,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:14}}>
-                  {authMode==='login'?'Sign In':'Create Account'}
-                </button>
-                <div style={{textAlign:"center",fontSize:12,color:T.muted,marginBottom:authMode==='login'?8:0}}>
-                  {authMode==='login'
-                    ?<>New here? <span style={{color:T.gold,cursor:"pointer"}} onClick={()=>setAuthMode('signup')}>Sign up with access code</span></>
-                    :<><span style={{color:T.gold,cursor:"pointer"}} onClick={()=>setAuthMode('login')}>Already have an account? Sign in</span></>}
-                </div>
-                {authMode==='login' && (
-                  <div style={{textAlign:"center",fontSize:11,color:T.muted}}>
-                    <span style={{color:T.gold,cursor:"pointer"}} onClick={()=>{setResetMode(true);setAuthErr('');}}>Forgot password?</span>
-                  </div>
-                )}
-                <div style={{marginTop:20,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:20}}>
-                  <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",textAlign:"center",marginBottom:14}}>New Subscriber? Choose Your Plan</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-                    <a href={STRIPE_LINKS.monthly} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:T.goldF,border:"1px solid "+T.goldB,borderRadius:12,padding:"14px 12px",textAlign:"center"}}>
-                      <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.08em",marginBottom:4}}>Monthly</div>
-                      <div style={{fontSize:22,fontWeight:600,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:2}}>$5.50</div>
-                      <div style={{fontSize:10,color:T.muted,marginBottom:10}}>per month</div>
-                      <div style={{background:T.goldF,borderRadius:6,padding:"6px",fontSize:11,color:T.gold,fontFamily:"Cinzel,serif"}}>Subscribe &#8594;</div>
-                    </a>
-                    <a href={STRIPE_LINKS.annual} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:T.goldF,border:"1px solid "+T.goldB,borderRadius:12,padding:"14px 12px",textAlign:"center",position:"relative"}}>
-                      <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:9,fontFamily:"Cinzel,serif",padding:"2px 10px",borderRadius:20,whiteSpace:"nowrap",fontWeight:600}}>SAVE 50%</div>
-                      <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.08em",marginBottom:4}}>Annual</div>
-                      <div style={{fontSize:22,fontWeight:600,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:2}}>$39</div>
-                      <div style={{fontSize:10,color:T.muted,marginBottom:10}}>per year</div>
-                      <div style={{background:T.goldF,borderRadius:6,padding:"6px",fontSize:11,color:T.gold,fontFamily:"Cinzel,serif"}}>Subscribe &#8594;</div>
-                    </a>
-                  </div>
-                </div>
+                <label style={LBL2}>Email</label>
+                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2}/>
+                <button onClick={handlePasswordReset} style={{...BTN2(true),marginBottom:12}}>Send Reset Link</button>
+                <div style={{textAlign:"center"}}><button onClick={()=>{setResetMode(false);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button></div>
               </>
-            )}
-          </div>
+            )
+          ) : (
+            <>
+              {authMode==="signup"&&<><label style={LBL2}>Access Code</label><input value={code} onChange={e=>setCode(e.target.value)} placeholder="e.g. AS-7X4K2M" style={{...INP2,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}/></>}
+              <label style={LBL2}>Email</label>
+              <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2} autoCapitalize="none"/>
+              <label style={LBL2}>Password</label>
+              <input value={pw} onChange={e=>setPw(e.target.value)} placeholder={authMode==="signup"?"At least 6 characters":"Your password"} type="password" style={{...INP2,marginBottom:20}}/>
+              <button onClick={async()=>{
+                setAuthErr("");
+                if(authMode==="login"){
+                  const{error}=await supabase.auth.signInWithPassword({email,password:pw});
+                  if(error)setAuthErr(error.message==="Invalid login credentials"?"Incorrect email or password.":error.message);
+                } else {
+                  const{data:codeData,error:codeErr}=await supabase.from("access_codes").select("*").eq("code",code.trim().toUpperCase()).eq("used",false).maybeSingle();
+                  if(codeErr||!codeData){setAuthErr("Invalid or already used access code.");return;}
+                  const{error}=await supabase.auth.signUp({email,password:pw});
+                  if(error){setAuthErr(error.message);return;}
+                  await supabase.from("access_codes").update({used:true,used_by:email}).eq("code",code.trim().toUpperCase());
+                }
+              }} style={{...BTN2(true),marginBottom:12}}>
+                {authMode==="login"?"Sign In":"Create Account"}
+              </button>
+              <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
+                {authMode==="login"&&<><button onClick={()=>{setAuthMode("signup");setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Create account</button><button onClick={()=>{setResetMode(true);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Forgot password?</button><button onClick={()=>setAuthMode("plans")} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>View plans →</button></>}
+                {authMode!=="login"&&<button onClick={()=>{setAuthMode("login");setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button>}
+              </div>
+              {authMode==="plans"&&(
+                <div style={{marginTop:20,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+                  <div style={{fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:14,textAlign:"center"}}>Choose Your Plan</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+                    {[["Monthly","$5.50/mo",STRIPE_LINKS.monthly,false],["Full Year","$39 / $3.25 mo",STRIPE_LINKS.annual,true]].map(([label,price,url,best])=>(
+                      <a key={label} href={url} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:best?"linear-gradient(145deg,"+T.goldF+",rgba(160,120,64,0.02))":"rgba(255,255,255,0.03)",border:"1px solid "+(best?T.goldB:"rgba(255,255,255,0.07)"),borderRadius:12,padding:"18px 12px",textAlign:"center",position:"relative"}}>
+                        {best&&<div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:8,fontFamily:"Cinzel,serif",padding:"2px 10px",borderRadius:20,fontWeight:700,letterSpacing:"0.08em",whiteSpace:"nowrap"}}>BEST VALUE</div>}
+                        <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:6}}>{label}</div>
+                        <div style={{fontSize:22,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:4}}>{price.split("/")[0]}</div>
+                        <div style={{fontSize:11,color:T.muted,marginBottom:10}}>{price.split("/")[1]||""}</div>
+                        <div style={{background:"rgba(160,120,64,0.15)",border:"1px solid "+T.goldB,borderRadius:8,padding:"8px",fontSize:12,color:T.gold}}>Subscribe →</div>
+                      </a>
+                    ))}
+                  </div>
+                  <p style={{fontSize:12,color:T.muted,lineHeight:1.7,textAlign:"center"}}>After subscribing, check your email for your access code, then create your account above.</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     );
   }
+
 
   if(showOnboarding){
     return <Onboarding onComplete={()=>{try{localStorage.setItem('y2_onboarding_complete','1');}catch{};setShowOnboarding(false);}} darkMode={darkMode} G={T}/>;
@@ -1183,7 +1177,7 @@ function AnchoredStepsY2Inner(){
               </div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
                 <button onClick={handleShareImage} disabled={sharingCard} style={{background:'linear-gradient(135deg,'+T.goldF+','+T.goldF+')',border:'1px solid '+T.goldB,color:T.gold,padding:'12px',borderRadius:10,cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',letterSpacing:'0.08em',opacity:sharingCard?0.6:1}}>
-                  {sharingCard?'Saving...':'Share Image'}
+                  {sharingCard?'Preparing…':'🔗 Share Image'}
                 </button>
                 <button onClick={()=>navigator.clipboard?.writeText(cardContent.body).then(()=>alert('Copied!'))} style={{background:'transparent',border:'1px solid '+T.border,color:T.muted,padding:'12px',borderRadius:10,cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',letterSpacing:'0.08em'}}>
                   Copy Text
@@ -1192,7 +1186,7 @@ function AnchoredStepsY2Inner(){
               <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:10,padding:'12px 14px',marginBottom:10}}>
                 <div style={{fontSize:9,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:8}}>Suggested Caption</div>
                 <p style={{fontSize:12,color:T.muted,lineHeight:1.7,margin:'0 0 8px',whiteSpace:'pre-line'}}>{caption2}</p>
-                <button onClick={()=>navigator.clipboard?.writeText(caption2).then(()=>alert('Caption copied!'))} style={{width:'100%',background:'transparent',border:'1px solid '+T.goldB,color:T.gold,padding:'7px',borderRadius:7,cursor:'pointer',fontSize:10,fontFamily:'Cinzel,serif',letterSpacing:'0.1em'}}>Copy Caption</button>
+                <button onClick={()=>{navigator.clipboard?.writeText(caption2);setCaptionCopied(true);setTimeout(()=>setCaptionCopied(false),2000)}} style={{width:'100%',background:captionCopied?T.greenF:'transparent',border:'1px solid '+(captionCopied?T.greenB:T.goldB),color:captionCopied?T.green:T.gold,padding:'9px',borderRadius:8,cursor:'pointer',fontSize:11,fontFamily:'Cinzel,serif',letterSpacing:'0.08em',transition:'all .25s'}}>{captionCopied?'✓ Copied':'Copy Caption'}</button>
               </div>
               <button onClick={()=>setShareVerse(null)} style={{width:'100%',background:'transparent',border:'none',color:T.muted,cursor:'pointer',fontSize:13,fontFamily:'EB Garamond,Georgia,serif',paddingTop:4}}>Close</button>
             </div>
