@@ -1,197 +1,77 @@
-import { useState } from "react";
+import { useState } from 'react'
 
-const G = {
-  bg:"#0F1A24",bgMid:"#1A2A38",
-  gold:"#B08A4E",goldB:"rgba(176,138,78,0.28)",goldF:"rgba(176,138,78,0.12)",
-  cream:"#F5F1E8",text:"#E6DED0",muted:"#A8B3BC",dim:"#6C7A86",
-};
+const SLIDES = [
+  { icon:'⚓', title:'Welcome to Anchored Steps Year 2',
+    subtitle:'A deeper dive — Year 2 builds on Year 1 with richer study, longer passages, and deeper application.',
+    detail:'Every week gives you seven sections: Passage, Context, Don\'t Miss, Study, Reflect, Apply, Prayer, and Tracker.' },
+  { icon:'📅', title:'52 More Weeks. Seven Sections.', 
+    subtitle:'Same daily rhythm. New depth. Each week covers a different theme across all seven study sections.',
+    detail:'Work through each section daily and complete the full study by Sunday.' },
+  { icon:'⚠️', title:'"Don\'t Miss This"',
+    subtitle:'Year 2 introduces a new section — a single line or idea in the passage that most readers skip over entirely.',
+    detail:'Often it\'s the most important thing Jesus said. Don\'t miss it.' },
+  { icon:'✍️', title:'Your Personal Journal',
+    subtitle:'Write your reflections on every section. Private, persistent, accessible on every device.',
+    detail:'Year 1 journal entries carry over — your whole journey is in one place.' },
+  { icon:'🧠', title:'Memorize the Word',
+    subtitle:'Built-in memorization for every key passage — Read & Recall, Fill the Gaps, and Write it Out.',
+    detail:'The sword of the Spirit is only as sharp as you keep it.' },
+  { icon:'📊', title:'Track Your Progress',
+    subtitle:'Your Tracker section gives you weekly check-ins, habit logs, and a progress view across all 52 weeks.',
+    detail:'Tap Progress in the top nav to see your full Year 2 journey.' },
+  { icon:'🌿', title:'You\'re Back.',
+    subtitle:'Year 2 rewards the person who stayed. Keep going.',
+    detail:null, isLast:true },
+]
 
-const STEPS = [
-  {
-    id: 1,
-    icon: null,
-    title: "Welcome to\nAnchored Steps",
-    body: "A guided journey to help you grow in faith with intention — through Scripture, reflection, and daily application.",
-    btn: "Begin",
-  },
-  {
-    id: 2,
-    icon: "🌿",
-    title: "If you've ever struggled\nwith consistency...",
-    body: "You're not alone. Many believers desire a deeper relationship with God but feel stuck, distracted, or unsure where to start.\n\nAnchored Steps gives you structure — without pressure.",
-    btn: "Continue",
-  },
-  {
-    id: 3,
-    icon: null,
-    title: "A Simple Weekly Rhythm",
-    body: null,
-    features: [
-      { icon: "📖", label: "Scripture", desc: "Engage God's Word intentionally" },
-      { icon: "🪞", label: "Reflection", desc: "Process what He's showing you" },
-      { icon: "⚡", label: "Application", desc: "Live it out in real life" },
-      { icon: "🙏", label: "Prayer", desc: "Stay connected to Him daily" },
-    ],
-    btn: "I'm Ready",
-  },
-  {
-    id: 4,
-    icon: null,
-    title: "Let's Begin",
-    body: "Take a moment. Slow down.\n\nYou don't need to rush.\nJust be present with God.",
-    verse: {
-      text: "Let your roots grow down into him, and let your lives be built on him.",
-      ref: "Colossians 2:7",
-    },
-    btn: "Enter Your Journal",
-  },
-];
-
-export default function Onboarding({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [animating, setAnimating] = useState(false);
-
-  const current = STEPS[step];
-
-  const next = () => {
-    if (animating) return;
-    if (step === STEPS.length - 1) {
-      localStorage.setItem("onboarding_complete", "true");
-      onComplete();
-      return;
-    }
-    setAnimating(true);
-    setTimeout(() => {
-      setStep(s => s + 1);
-      setAnimating(false);
-    }, 300);
-  };
+export default function Onboarding({ onComplete, darkMode, G: T }) {
+  const [slide, setSlide] = useState(0)
+  const current = SLIDES[slide]
+  const isLast = slide === SLIDES.length - 1
+  const G = T || {
+    bg:'#0D1820', gold:'#A07840', goldF:'rgba(160,120,64,0.12)', goldB:'rgba(160,120,64,0.28)',
+    cream:'#F0ECE3', text:'#E0D8CA', muted:'#A0AAB2', border:'rgba(255,255,255,0.06)',
+  }
+  const next = () => isLast ? onComplete() : setSlide(s => s + 1)
 
   return (
-    <div style={{
-      minHeight:"100vh",
-      background:"linear-gradient(155deg,"+G.bg+" 0%,"+G.bgMid+" 55%,"+G.bg+" 100%)",
-      display:"flex",flexDirection:"column",alignItems:"center",
-      justifyContent:"center",padding:"32px 24px",
-      fontFamily:"EB Garamond,Georgia,serif",
-      opacity: animating ? 0 : 1,
-      transition: "opacity 0.3s ease",
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+      background:`radial-gradient(ellipse at 50% 0%, rgba(160,120,64,0.1) 0%, transparent 55%), ${G.bg}`,
+      fontFamily:"EB Garamond,Georgia,serif", padding:'24px 20px' }}>
+      <div style={{ maxWidth:420, width:'100%', background:'rgba(13,26,42,0.98)', borderRadius:24,
+        border:`1px solid ${G.goldB}`, padding:'48px 32px 36px', boxShadow:'0 12px 40px rgba(0,0,0,0.5)', textAlign:'center' }}>
 
-      {/* Progress dots */}
-      <div style={{display:"flex",gap:8,marginBottom:40}}>
-        {STEPS.map((_,i) => (
-          <div key={i} style={{
-            width: i === step ? 24 : 8,
-            height:8,borderRadius:4,
-            background: i <= step ? G.gold : "rgba(255,255,255,0.1)",
-            transition:"all .3s ease"
-          }}/>
-        ))}
-      </div>
-
-      <div style={{width:"100%",maxWidth:400,textAlign:"center"}}>
-
-        {/* Icon / Image */}
-        {step === 0 && (
-          <img src="/icon2.png" alt="Anchored Steps"
-            style={{width:96,height:96,borderRadius:20,marginBottom:28,boxShadow:"0 12px 40px rgba(0,0,0,0.4)"}}
-          />
-        )}
-        {current.icon && (
-          <div style={{fontSize:48,marginBottom:20}}>{current.icon}</div>
-        )}
-
-        {/* Title */}
-        <h1 style={{
-          fontFamily:"Cinzel,serif",
-          fontSize: step === 0 ? 28 : 22,
-          fontWeight:500,color:G.cream,
-          marginBottom:20,lineHeight:1.4,
-          whiteSpace:"pre-line",
-        }}>
-          {current.title}
-        </h1>
-
-        {/* Body text */}
-        {current.body && (
-          <p style={{
-            fontSize:17,color:G.text,lineHeight:1.85,
-            marginBottom:28,whiteSpace:"pre-line",maxWidth:340,margin:"0 auto 28px"
-          }}>
-            {current.body}
+        <div style={{ fontSize:52, marginBottom:24, lineHeight:1, color:G.gold }}>{current.icon}</div>
+        <h2 style={{ fontSize:22, fontWeight:700, color:G.cream, fontFamily:'Cinzel,serif',
+          letterSpacing:'0.04em', lineHeight:1.25, marginBottom:16 }}>{current.title}</h2>
+        <p style={{ fontSize:16, color:G.text, lineHeight:1.8, marginBottom:current.detail?16:32 }}>{current.subtitle}</p>
+        {current.detail && (
+          <p style={{ fontSize:14, color:G.muted, lineHeight:1.75, marginBottom:32,
+            background:G.goldF, border:`1px solid ${G.goldB}`, borderRadius:10, padding:'12px 16px' }}>
+            {current.detail}
           </p>
         )}
 
-        {/* Features list (step 3) */}
-        {current.features && (
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:32}}>
-            {current.features.map((f,i) => (
-              <div key={i} style={{
-                background:"linear-gradient(145deg,rgba(176,138,78,0.1),rgba(176,138,78,0.03))",
-                border:"1px solid rgba(176,138,78,0.2)",
-                borderRadius:14,padding:"18px 14px",textAlign:"center"
-              }}>
-                <div style={{fontSize:28,marginBottom:8}}>{f.icon}</div>
-                <div style={{fontFamily:"Cinzel,serif",fontSize:12,color:G.gold,letterSpacing:"0.08em",marginBottom:4}}>{f.label}</div>
-                <div style={{fontSize:13,color:G.muted,lineHeight:1.5}}>{f.desc}</div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{ display:'flex', justifyContent:'center', gap:6, marginBottom:28 }}>
+          {SLIDES.map((_,i) => (
+            <div key={i} style={{ width:i===slide?20:6, height:6, borderRadius:3,
+              background:i===slide?G.gold:G.border, transition:'all .3s' }} />
+          ))}
+        </div>
 
-        {/* Verse (step 4) */}
-        {current.verse && (
-          <div style={{
-            background:"linear-gradient(145deg,rgba(176,138,78,0.1),rgba(176,138,78,0.03))",
-            border:"1px solid rgba(176,138,78,0.25)",
-            borderRadius:14,padding:"22px 20px",marginBottom:28,marginTop:8
-          }}>
-            <div style={{fontSize:28,color:G.gold,opacity:.3,marginBottom:6,fontFamily:"Georgia,serif"}}>&#8220;</div>
-            <p style={{fontSize:17,color:G.cream,fontStyle:"italic",lineHeight:1.85,marginBottom:10}}>
-              {current.verse.text}
-            </p>
-            <p style={{fontSize:11,color:G.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",margin:0,textTransform:"uppercase"}}>
-              {current.verse.ref}
-            </p>
-          </div>
-        )}
-
-        {/* Button */}
-        <button
-          onClick={next}
-          style={{
-            width:"100%",
-            background:"linear-gradient(135deg,rgba(176,138,78,0.35),rgba(176,138,78,0.15))",
-            border:"1px solid rgba(176,138,78,0.45)",
-            color:G.gold,padding:"15px",borderRadius:12,
-            cursor:"pointer",fontSize:15,
-            fontFamily:"Cinzel,serif",letterSpacing:"0.1em",
-            boxShadow:"0 4px 20px rgba(0,0,0,0.2)",
-            transition:"all .2s"
-          }}
-        >
-          {current.btn}
+        <button onClick={next} style={{ width:'100%', padding:'16px', borderRadius:14, cursor:'pointer',
+          background:'linear-gradient(135deg,rgba(160,120,64,0.4),rgba(160,120,64,0.2))',
+          border:`1px solid ${G.goldB}`, color:G.cream, fontSize:14,
+          fontFamily:'Cinzel,serif', letterSpacing:'0.09em', marginBottom:12 }}>
+          {isLast ? 'Begin Week 1 ⚓' : 'Continue →'}
         </button>
-
-        {/* Skip */}
-        {step < STEPS.length - 1 && (
-          <button
-            onClick={() => {
-              localStorage.setItem("onboarding_complete","true");
-              onComplete();
-            }}
-            style={{
-              marginTop:16,background:"transparent",border:"none",
-              color:G.dim,cursor:"pointer",fontSize:13,
-              fontFamily:"EB Garamond,Georgia,serif"
-            }}
-          >
+        {!isLast && (
+          <button onClick={onComplete} style={{ background:'transparent', border:'none',
+            color:G.muted, cursor:'pointer', fontSize:13, fontFamily:'EB Garamond,Georgia,serif' }}>
             Skip intro
           </button>
         )}
       </div>
     </div>
-  );
+  )
 }
