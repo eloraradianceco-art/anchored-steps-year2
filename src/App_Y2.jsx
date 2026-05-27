@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
-import Settings from "./components/Settings.jsx";
+import Settings from "./components/Settings_AS2.jsx";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL_Y2 || "";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
