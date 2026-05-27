@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
+import Settings from "./components/Settings_AS2.jsx";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL_Y2 || "";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
@@ -262,7 +263,8 @@ function AnchoredStepsY2Inner(){
   const [captionCopied,setCaptionCopied]=useState(false)
   const [sharingCard,setSharingCard]=useState(false)
   const [bookmarks,setBookmarks]=useState(()=>{try{return JSON.parse(localStorage.getItem('y2_bookmarks')||'[]')}catch{return []}});
-  const [showOnboarding,setShowOnboarding]=useState(()=>{
+  const [showSettings,setShowSettings]=useState(false);
+    const [showOnboarding,setShowOnboarding]=useState(()=>{
     try { return !localStorage.getItem('y2_onboarding_complete'); } catch { return false; }
   });
   const [profile,setProfile]=useState(null);
@@ -627,6 +629,20 @@ function AnchoredStepsY2Inner(){
   }
 
 
+  if(showSettings) return (
+    <Settings
+      profile={profile}
+      session={session}
+      supabase={supabase}
+      entries={entries}
+      wk={wk}
+      ALL_WEEKS={ALL_WEEKS}
+      darkMode={darkMode}
+      onToggleDarkMode={()=>setDarkMode(d=>!d)}
+      onClose={()=>setShowSettings(false)}
+    />
+  )
+
   if(showOnboarding){
     return <Onboarding onComplete={()=>{try{localStorage.setItem('y2_onboarding_complete','1');}catch{};setShowOnboarding(false);}} darkMode={darkMode} G={T}/>;
   }
@@ -668,7 +684,7 @@ function AnchoredStepsY2Inner(){
         </div>
         <div style={{display:"flex",gap:0,borderTop:"1px solid "+T.border,overflowX:"auto"}}>
           {['journal','progress','saved','settings'].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 8px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.04em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
+            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else setView(v); }} style={{background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 8px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.04em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
               {v==='journal'?'📖 Journal':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
