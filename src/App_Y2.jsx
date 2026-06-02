@@ -772,6 +772,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <div style={{ height:'100%', background:`linear-gradient(90deg,${T.gold},#C9A96E)`, width:`${Math.round((wk/52)*100)}%`, transition:'width .4s ease' }}/>
             </div>
             <div style={{ fontSize:12, color:T.muted, textAlign:'center', marginTop:8 }}>Week {wk} of 52 · {Math.round((wk/52)*100)}% complete</div>
+            <button onClick={()=>{ if(window.confirm('Reset to Week 1? Journal entries will be kept.')) goWk(1) }} style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.muted, padding:'10px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em', marginTop:10 }}>↺ Reset to Week 1</button>
           </div>
 
           {/* Account */}
