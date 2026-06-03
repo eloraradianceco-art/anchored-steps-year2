@@ -971,10 +971,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
           </div>
         </div>
-        <div style={{display:"flex",gap:0,borderTop:"1px solid "+T.border,overflowX:"auto"}}>
-          {['journal','progress','saved','settings'].map(v=>(
+        <div style={{display:"flex",justifyContent:"center",gap:2,padding:"5px 12px",borderTop:"1px solid "+T.border,overflowX:"auto",flexWrap:"nowrap"}}>
+          {['journal','search','progress','saved','settings'].map(v=>(
             <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else setView(v); }} style={{background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 8px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.04em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-              {v==='journal'?'📖 Journal':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
+              {v==='journal'?'📖 Journal':v==='search'?'🔍 Search':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
         </div>
