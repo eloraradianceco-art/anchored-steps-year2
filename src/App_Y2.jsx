@@ -237,6 +237,7 @@ function AnchoredStepsY2Inner(){
   const [pw,setPw]=useState('');
   const [authErr,setAuthErr]=useState('');
   const [authMode,setAuthMode]=useState('login');
+  const [justSignedUp,setJustSignedUp]=useState(false);
   const [code,setCode]=useState('');
   const [resetMode,setResetMode]=useState(false);
   const [resetSent,setResetSent]=useState(false);
@@ -595,6 +596,7 @@ function AnchoredStepsY2Inner(){
                   const{error}=await supabase.auth.signUp({email,password:pw});
                   if(error){setAuthErr(error.message);return;}
                   await supabase.from("access_codes").update({used:true,used_by:email}).eq("code",code.trim().toUpperCase());
+                  setJustSignedUp(true);
                 }
               }} style={{...BTN2(true),marginBottom:12}}>
                 {authMode==="login"?"Sign In":"Create Account"}
@@ -624,7 +626,50 @@ function AnchoredStepsY2Inner(){
           )}
         </div>
       </div>
-    );
+    
+    if(justSignedUp) return (
+      <div style={{minHeight:'100vh',background:T.bg,fontFamily:"'EB Garamond',Georgia,serif",
+        display:'flex',alignItems:'center',justifyContent:'center',padding:'0 16px'}}>
+        <div style={{background:T.bgMid,border:`1px solid ${T.goldB}`,borderRadius:20,
+          padding:'32px 28px',width:'100%',maxWidth:420}}>
+          <div style={{textAlign:'center',marginBottom:20}}>
+            <div style={{fontSize:26,marginBottom:8}}>⚓</div>
+            <div style={{fontSize:16,fontWeight:700,color:T.cream,fontFamily:"'Cinzel',Georgia,serif",
+              letterSpacing:'0.06em',marginBottom:4}}>Anchored Steps · Year 2</div>
+            <div style={{fontSize:13,color:T.green,fontFamily:"'Cinzel',Georgia,serif",
+              letterSpacing:'0.06em'}}>✓ Account Created</div>
+          </div>
+          <div style={{fontSize:10,color:T.gold,letterSpacing:'0.16em',textTransform:'uppercase',
+            fontFamily:"'Cinzel',Georgia,serif",marginBottom:8}}>📱 Add to Your Home Screen</div>
+          <p style={{fontSize:13,color:T.text,lineHeight:1.65,marginBottom:14}}>
+            Anchored Steps Year 2 works like a native app — add it to your home screen for instant one-tap access.
+          </p>
+          {[
+            {os:'🍎 iPhone / iPad (Safari)',steps:['Tap the Share button ⎋ at the bottom of Safari','Scroll and tap "Add to Home Screen"','Tap "Add" — done ✓']},
+            {os:'🤖 Android (Chrome)',steps:['Tap the three-dot menu ⋮ at the top right','Tap "Add to Home Screen" or "Install App"','Tap "Add" — done ✓']},
+          ].map(p=>(
+            <div key={p.os} style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.gold,fontFamily:"'Cinzel',Georgia,serif",
+                letterSpacing:'0.06em',marginBottom:6}}>{p.os}</div>
+              {p.steps.map((step,i)=>(
+                <div key={i} style={{display:'flex',gap:8,marginBottom:4}}>
+                  <span style={{fontSize:11,color:T.goldL,flexShrink:0,minWidth:14,
+                    fontFamily:"'Cinzel',Georgia,serif"}}>{i+1}.</span>
+                  <span style={{fontSize:13,color:T.muted,lineHeight:1.5}}>{step}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+          <button onClick={()=>setJustSignedUp(false)}
+            style={{width:'100%',padding:'14px',borderRadius:10,cursor:'pointer',
+              background:T.goldF,border:`1px solid ${T.goldB}`,color:T.cream,
+              fontSize:13,fontFamily:"'Cinzel',Georgia,serif",letterSpacing:'0.06em',marginTop:6}}>
+            ⚓ Enter Year 2 →
+          </button>
+        </div>
+      </div>
+    )
+);
   }
 
 
