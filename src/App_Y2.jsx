@@ -1279,36 +1279,64 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
         {/* SAVED VIEW */}
         {view==='search' && (
-          <div style={{padding:"0 0 80px"}}>
-            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Search</h2>
+          <div style={{padding:"0 18px 80px"}}>
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4,paddingTop:20}}>Search</h2>
             <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
             <input
-              autoFocus
               value={searchQuery}
-              onChange={e=>doSearch(e.target.value)}
-              placeholder="Search verses, themes, prayers, insights..."
-              style={{width:"100%",background:T.inputBg,border:"1px solid "+T.goldB,borderRadius:12,color:T.text,fontSize:16,padding:"13px 16px",fontFamily:"EB Garamond,Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:16}}
+              onChange={e=>{
+                const q=e.target.value; setSearchQuery(q);
+                if(!q.trim()){setSearchResults([]);return;}
+                const ql=q.toLowerCase();
+                const results=[];
+                (ALL_WEEKS||[]).forEach(w=>{
+                  const fields=['theme','passage','context','dontmiss','study','reflect','apply','prayer'];
+                  fields.forEach(f=>{
+                    const val=(w[f]||'').toLowerCase();
+                    if(val.includes(ql)){
+                      results.push({week:w.week,theme:w.theme,field:f,snippet:(w[f]||'').slice(0,120)});
+                    }
+                  });
+                });
+                setSearchResults(results.slice(0,40));
+              }}
+              placeholder="Search weeks, themes, study notes…"
+              style={{width:'100%',background:T.bgCard,border:'1px solid '+T.goldB,borderRadius:10,
+                color:T.cream,fontSize:16,padding:'12px 14px',outline:'none',
+                fontFamily:"'EB Garamond',Georgia,serif",boxSizing:'border-box',marginBottom:16}}
             />
-            {searchQuery && (
-              <div>
-                <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>{searchResults.length} weeks found</div>
-                {searchResults.length===0&&<p style={{fontSize:15,color:T.muted,fontStyle:"italic"}}>No results. Try a different word.</p>}
-                {searchResults.map(({week:w,hits})=>(
-                  <button key={w.week} onClick={()=>{setWk(w.week);setView('journal');setSec('passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,marginBottom:8,cursor:"pointer",textAlign:"left",background:T.cardBg,border:"1px solid "+T.border,transition:"all .2s"}}>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:10,color:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:2}}>WEEK {w.week}</div>
-                      <div style={{fontSize:13,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.theme}</div>
-                      <div style={{fontSize:12,color:T.muted,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.verseRef}</div>
-                      <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
-                        {hits.map(h=>(<span key={h} style={{fontSize:9,color:T.gold,background:T.goldF,border:"1px solid "+T.goldB,borderRadius:6,padding:"1px 6px",fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}>{h}</span>))}
-                      </div>
-                    </div>
-                    <span style={{color:T.gold,fontSize:14}}>›</span>
-                  </button>
-                ))}
+            {searchQuery.trim() && (
+              <div style={{fontSize:12,color:T.muted,marginBottom:12,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>
+                {searchResults.length} result{searchResults.length!==1?'s':''} for "{searchQuery}"
               </div>
             )}
-            {!searchQuery&&<div style={{textAlign:"center",padding:"32px 0"}}><div style={{fontSize:32,marginBottom:10}}>⚓</div><p style={{fontSize:14,color:T.muted,fontStyle:"italic"}}>Search all 52 weeks of Year 2.</p></div>}
+            {searchResults.map((r,i)=>(
+              <div key={i} onClick={()=>{ goWk(r.week); setView('journal'); setSearchQuery(''); }}
+                style={{background:T.bgCard,border:'1px solid '+T.border,borderRadius:12,
+                  padding:'14px 16px',marginBottom:8,cursor:'pointer',transition:'border-color .2s'}}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=T.goldB}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
+                  <span style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:'0.1em',textTransform:'uppercase'}}>
+                    Week {r.week} · {r.theme}
+                  </span>
+                  <span style={{fontSize:10,color:T.muted,fontFamily:"Cinzel,serif",letterSpacing:'0.06em',textTransform:'uppercase',background:T.goldF,border:'1px solid '+T.goldB,borderRadius:6,padding:'2px 8px'}}>
+                    {r.field==='dontmiss'?"Don't Miss":r.field.charAt(0).toUpperCase()+r.field.slice(1)}
+                  </span>
+                </div>
+                <p style={{fontSize:14,color:T.text,lineHeight:1.7,margin:0}}>{r.snippet}{r.snippet.length>=120?'…':''}</p>
+              </div>
+            ))}
+            {searchQuery.trim() && searchResults.length===0 && (
+              <div style={{textAlign:'center',padding:'48px 0',color:T.muted,fontSize:16,fontStyle:'italic'}}>
+                No results for "{searchQuery}"
+              </div>
+            )}
+            {!searchQuery.trim() && (
+              <div style={{textAlign:'center',padding:'48px 0',color:T.muted,fontSize:16,fontStyle:'italic'}}>
+                Start typing to search across all 52 weeks…
+              </div>
+            )}
           </div>
         )}
 
