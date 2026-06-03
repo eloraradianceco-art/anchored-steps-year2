@@ -238,6 +238,8 @@ function AnchoredStepsY2Inner(){
   const [authErr,setAuthErr]=useState('');
   const [authMode,setAuthMode]=useState('login');
   const [justSignedUp,setJustSignedUp]=useState(false);
+  const [searchQuery,setSearchQuery]=useState('');
+  const [searchResults,setSearchResults]=useState([]);
   const [code,setCode]=useState('');
   const [resetMode,setResetMode]=useState(false);
   const [resetSent,setResetSent]=useState(false);
