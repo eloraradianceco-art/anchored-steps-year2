@@ -658,7 +658,7 @@ function AnchoredStepsY2Inner(){
                       <div style={{background:"rgba(160,120,64,0.18)",border:"1px solid "+T.goldB,borderRadius:9,padding:"10px 14px",fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>⚓ Unlock All 52 Weeks →</div>
                     </a>
                   </div>
-                  <p style={{fontSize:12,color:T.muted,lineHeight:1.7,textAlign:"center"}}>After subscribing, check your email for your access code, then create your account above.</p>
+                  <p style={{fontSize:12,color:T.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, check your email for your access code, then create your account above.</p>
                 </div>
               )}
             </>
@@ -824,7 +824,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
               <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
-                {profile?.plan === ''Lifetime ✦'}
+                'Lifetime ✦'
               </span>
             </Row>
             <Row icon="🚪" label="Sign Out" border={false}>
@@ -1403,7 +1403,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
                 <span style={{fontSize:13,color:T.muted}}>Plan</span>
-                <span style={{fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",background:T.goldF,border:"1px solid "+T.goldB,padding:"3px 10px",borderRadius:12}}>{profile?.plan==='annual'?'Annual Access':profile?.plan===''Lifetime'}</span>
+                <span style={{fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",background:T.goldF,border:"1px solid "+T.goldB,padding:"3px 10px",borderRadius:12}}>'Lifetime Access'</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:14,borderTop:"1px solid "+T.border}}>
                 <span style={{fontSize:13,color:T.muted}}>Progress</span>
