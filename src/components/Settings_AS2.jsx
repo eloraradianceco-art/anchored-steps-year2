@@ -157,7 +157,7 @@ export default function Settings({ profile, session, supabase, entries, wk, ALL_
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
               <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
-                {profile?.plan === 'annual' ? 'Annual ✦' : 'Monthly ✦'}
+                {'Lifetime ✦'}
               </span>
             </Row>
             <Row icon="🚪" label="Sign Out" border={false}>
