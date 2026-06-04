@@ -8,11 +8,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ───────── Stripe Payment Links ─────────
-// TODO: Replace with real Stripe payment link URLs once configured
-const STRIPE_LINKS = {
-  monthly: "https://buy.stripe.com/YEAR2_MONTHLY",  // ← Update with real URL
-  annual:  "https://buy.stripe.com/YEAR2_ANNUAL",   // ← Update with real URL
-};
+const STRIPE_LINK = "https://buy.stripe.com/9B69AS77mgKa6yzcA357W08";
 
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const SECTIONS = [
@@ -653,16 +649,14 @@ function AnchoredStepsY2Inner(){
               {authMode==="plans"&&(
                 <div style={{marginTop:20,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
                   <div style={{fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:14,textAlign:"center"}}>Choose Your Plan</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-                    {[["Monthly","$5.50/mo",STRIPE_LINKS.monthly,false],["Full Year","$39 / $3.25 mo",STRIPE_LINKS.annual,true]].map(([label,price,url,best])=>(
-                      <a key={label} href={url} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:best?"linear-gradient(145deg,"+T.goldF+",rgba(160,120,64,0.02))":"rgba(255,255,255,0.03)",border:"1px solid "+(best?T.goldB:"rgba(255,255,255,0.07)"),borderRadius:12,padding:"18px 12px",textAlign:"center",position:"relative"}}>
-                        {best&&<div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:8,fontFamily:"Cinzel,serif",padding:"2px 10px",borderRadius:20,fontWeight:700,letterSpacing:"0.08em",whiteSpace:"nowrap"}}>BEST VALUE</div>}
-                        <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:6}}>{label}</div>
-                        <div style={{fontSize:22,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:4}}>{price.split("/")[0]}</div>
-                        <div style={{fontSize:11,color:T.muted,marginBottom:10}}>{price.split("/")[1]||""}</div>
-                        <div style={{background:"rgba(160,120,64,0.15)",border:"1px solid "+T.goldB,borderRadius:8,padding:"8px",fontSize:12,color:T.gold}}>Subscribe →</div>
-                      </a>
-                    ))}
+                  <div style={{marginBottom:12}}>
+                    <a href={STRIPE_LINK} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:"linear-gradient(135deg,rgba(160,120,64,0.22),rgba(160,120,64,0.10))",border:"2px solid "+T.gold,borderRadius:14,padding:"22px 18px",position:"relative",textAlign:"center"}}>
+                      <div style={{position:"absolute",top:-11,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:9,fontWeight:700,padding:"3px 12px",borderRadius:10,letterSpacing:"0.12em",fontFamily:"Cinzel,serif"}}>LIFETIME ACCESS</div>
+                      <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",marginBottom:8,textTransform:"uppercase"}}>Year 2 — Complete</div>
+                      <div style={{fontSize:34,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:4,lineHeight:1}}>$39</div>
+                      <div style={{fontSize:11,color:T.muted,marginBottom:14,letterSpacing:"0.04em"}}>one-time · no subscription</div>
+                      <div style={{background:"rgba(160,120,64,0.18)",border:"1px solid "+T.goldB,borderRadius:9,padding:"10px 14px",fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>⚓ Unlock All 52 Weeks →</div>
+                    </a>
                   </div>
                   <p style={{fontSize:12,color:T.muted,lineHeight:1.7,textAlign:"center"}}>After subscribing, check your email for your access code, then create your account above.</p>
                 </div>
@@ -830,7 +824,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
               <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
-                {profile?.plan === 'annual' ? 'Annual ✦' : 'Monthly ✦'}
+                {profile?.plan === ''Lifetime ✦'}
               </span>
             </Row>
             <Row icon="🚪" label="Sign Out" border={false}>
@@ -1409,7 +1403,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
                 <span style={{fontSize:13,color:T.muted}}>Plan</span>
-                <span style={{fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",background:T.goldF,border:"1px solid "+T.goldB,padding:"3px 10px",borderRadius:12}}>{profile?.plan==='annual'?'Annual Access':profile?.plan==='monthly'?'Monthly':'Active'}</span>
+                <span style={{fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",background:T.goldF,border:"1px solid "+T.goldB,padding:"3px 10px",borderRadius:12}}>{profile?.plan==='annual'?'Annual Access':profile?.plan===''Lifetime'}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:14,borderTop:"1px solid "+T.border}}>
                 <span style={{fontSize:13,color:T.muted}}>Progress</span>
