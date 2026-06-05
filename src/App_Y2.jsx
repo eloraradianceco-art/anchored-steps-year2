@@ -289,12 +289,20 @@ function AnchoredStepsY2Inner(){
   // Persist last visited week
   useEffect(()=>{
     try { localStorage.setItem('y2_last_week', String(wk)); } catch {}
-  }, [wk]);
+    if (session?.user?.id) {
+      supabase.from('profiles').update({ current_week: wk }).eq('user_id', session.user.id)
+        .then(({ error }) => { if (error) console.warn('week sync:', error.message) });
+    }
+  }, [wk, session]);
 
   // Persist dark mode preference
   useEffect(()=>{
     try { localStorage.setItem('y2_dark_mode', darkMode ? '1' : '0'); } catch {}
-  }, [darkMode]);
+    if (session?.user?.id) {
+      supabase.from('profiles').update({ dark_mode: darkMode }).eq('user_id', session.user.id)
+        .then(({ error }) => { if (error) console.warn('dark sync:', error.message) });
+    }
+  }, [darkMode, session]);
 
   // Auth session management
   useEffect(()=>{
@@ -308,8 +316,26 @@ function AnchoredStepsY2Inner(){
     if(!session) return;
     let cancelled = false;
 
-    supabase.from('profiles').select('*').eq('user_id',session.user.id).single().then(({data})=>{
-      if(!cancelled && data) setProfile(data);
+    supabase.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle().then(({data})=>{
+      if(cancelled || !data) return;
+      setProfile(data);
+      // Cross-device sync hydration
+      if (Array.isArray(data.bookmarks) && data.bookmarks.length > 0) {
+        setBookmarks(data.bookmarks);
+        try { localStorage.setItem('y2_bookmarks', JSON.stringify(data.bookmarks)) } catch {}
+      }
+      if (typeof data.dark_mode === 'boolean') {
+        setDarkMode(data.dark_mode);
+        try { localStorage.setItem('y2_dark_mode', data.dark_mode ? '1' : '0') } catch {}
+      }
+      if (typeof data.current_week === 'number' && data.current_week > 0) {
+        setWk(data.current_week);
+        try { localStorage.setItem('y2_last_week', String(data.current_week)) } catch {}
+      }
+      if (data.onboarded) {
+        try { localStorage.setItem('y2_onboarding_complete', '1') } catch {}
+        setShowOnboarding(false);
+      }
     });
 
     // Load entries for current week ± 5 weeks (smarter than loading all 1500+)
@@ -930,7 +956,13 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   )
 
   if(showOnboarding){
-    return <Onboarding onComplete={()=>{try{localStorage.setItem('y2_onboarding_complete','1');}catch{};setShowOnboarding(false);}} darkMode={darkMode} G={T}/>;
+    return <Onboarding onComplete={async ()=>{
+      try{localStorage.setItem('y2_onboarding_complete','1')}catch{}
+      if (session?.user?.id) {
+        try { await supabase.from('profiles').update({ onboarded: true }).eq('user_id', session.user.id) } catch(e) { console.warn('onboarded sync:', e) }
+      }
+      setShowOnboarding(false);
+    }} darkMode={darkMode} G={T}/>;
   }
 
   // No week found — show error state instead of crashing
