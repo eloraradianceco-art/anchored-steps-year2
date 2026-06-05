@@ -512,6 +512,9 @@ function AnchoredStepsY2Inner(){
     setSharingCard(true)
     try {
       const bg=shareCardLight?'#F2EDE3':'#0D1820'
+      // Wait for fonts + 2 RAFs so the first share captures aligned layout
+      try { await document.fonts.ready } catch {}
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
       const dataUrl=await toPng(shareCardRef.current,{cacheBust:true,pixelRatio:2,backgroundColor:bg})
       const res=await fetch(dataUrl)
       const blob=await res.blob()
@@ -1534,7 +1537,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   </div>
                 </div>
                 <div style={{fontSize:9,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.16em',textTransform:'uppercase',marginBottom:8}}>{ct.icon} {ct.label}</div>
-                <p style={{fontSize:ct.body.length>200?15:17,color:cText,fontStyle:'italic',lineHeight:1.9,margin:'0 0 10px',whiteSpace:'pre-line'}}>{ct.body}</p>
+                <p style={{fontSize:ct.body.length>200?16:18,color:cText,fontStyle:'italic',lineHeight:1.85,margin:'0 0 10px',whiteSpace:'pre-line'}}>{ct.body}</p>
                 {ct.ref&&<div style={{fontSize:10,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:6}}>{ct.ref}</div>}
                 <div style={{fontSize:9,color:cMuted,marginTop:6}}>Walk steadily. Stay anchored. — eloraradiance.com</div>
               </div>
