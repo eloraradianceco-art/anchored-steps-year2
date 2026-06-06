@@ -272,6 +272,23 @@ function AnchoredStepsY2Inner(){
   const [communityDone,setCommunityDone]=useState(false);
   const [communityNotes,setCommunityNotes]=useState([]);
   const [showSignOutConfirm,setShowSignOutConfirm]=useState(false);
+  const [speaking,setSpeaking]=useState(false);
+  const speak = entry => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    let text = entry.transliteration || "";
+    if (!text && entry.original) {
+      const m = entry.original.match(/\(([^)]+)\)/);
+      text = m ? m[1].trim() : entry.original;
+    }
+    if (!text) return;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 0.72;
+    utt.onstart = () => setSpeaking(true);
+    utt.onend = () => setSpeaking(false);
+    utt.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utt);
+  };
   const shareCardRef=useRef(null);
 
   // Debounce timer ref for saves
