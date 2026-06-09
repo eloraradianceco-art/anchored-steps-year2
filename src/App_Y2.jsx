@@ -232,6 +232,7 @@ function AnchoredStepsY2Inner(){
   const [loading,setLoading]=useState(true);
   const [email,setEmail]=useState('');
   const [pw,setPw]=useState('');
+  const [showPw,setShowPw]=useState(false)
   const [authErr,setAuthErr]=useState('');
   const [authMode,setAuthMode]=useState('login');
   const [justSignedUp,setJustSignedUp]=useState(false);
@@ -672,7 +673,10 @@ function AnchoredStepsY2Inner(){
               <label style={LBL2}>Email</label>
               <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2} autoCapitalize="none"/>
               <label style={LBL2}>Password</label>
-              <input value={pw} onChange={e=>setPw(e.target.value)} placeholder={authMode==="signup"?"At least 6 characters":"Your password"} type="password" style={{...INP2,marginBottom:20}}/>
+              <div style={{position:"relative",marginBottom:20}}>
+                <input value={pw} onChange={e=>setPw(e.target.value)} placeholder={authMode==="signup"?"At least 6 characters":"Your password"} type={showPw?"text":"password"} style={{...INP2,marginBottom:0,paddingRight:64}}/>
+                <button type="button" onClick={()=>setShowPw(s=>!s)} aria-label={showPw?"Hide password":"Show password"} style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", background:"transparent", border:"none", color:T.gold, fontSize:10, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", padding:"8px 10px", touchAction:"manipulation" }}>{showPw?"Hide":"Show"}</button>
+              </div>
               <button onClick={async()=>{
                 setAuthErr("");
                 if(authMode==="login"){
