@@ -1498,7 +1498,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
               <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Support</div>
               <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Questions, feedback, or need help with your account?</p>
-              <a href="mailto:support@eloraradiance.com" style={{display:"block",textAlign:"center",width:"100%",boxSizing:"border-box",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textDecoration:"none"}}>
+              <a href="mailto:eloraradiance.co@gmail.com" style={{display:"block",textAlign:"center",width:"100%",boxSizing:"border-box",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textDecoration:"none"}}>
                 Email Support
               </a>
             </div>
