@@ -595,9 +595,9 @@ function AnchoredStepsY2Inner(){
   );
 
   if(!session){
-    const INP2={width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.goldB,borderRadius:10,color:T.cream,fontSize:16,padding:"14px 16px",fontFamily:"'EB Garamond',Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:12};
+    const INP2={width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.goldB,borderRadius:10,color:DARK_THEME.cream,fontSize:16,padding:"14px 16px",fontFamily:"'EB Garamond',Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:12};
     const BTN2=(a)=>({width:"100%",padding:"16px",borderRadius:12,cursor:a?"pointer":"default",fontSize:14,fontFamily:"Cinzel,serif",letterSpacing:"0.09em",transition:"all .25s",touchAction:"manipulation",border:"none",background:a?"linear-gradient(135deg,rgba(160,120,64,0.4),rgba(160,120,64,0.2))":"rgba(160,120,64,0.08)",color:a?T.cream:T.muted});
-    const LBL2={fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6,display:"block"};
+    const LBL2={fontSize:10,color:DARK_THEME.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6,display:"block"};
     if(justSignedUp) return (
     <div style={{minHeight:'100vh',background:T.bg,fontFamily:"'EB Garamond',Georgia,serif",
       display:'flex',alignItems:'center',justifyContent:'center',padding:'0 16px'}}>
@@ -647,8 +647,8 @@ function AnchoredStepsY2Inner(){
           <div style={{textAlign:"center",marginBottom:28}}>
             <img src="/icon2.png" alt="" style={{width:56,height:56,borderRadius:14,display:"block",margin:"0 auto 12px",boxShadow:"0 4px 16px rgba(0,0,0,0.3)"}}/>
             <div style={{fontSize:9,color:T.gold,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6}}>Elora Radiance Co.</div>
-            <div style={{fontSize:20,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
-            <div style={{fontSize:13,color:T.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
+            <div style={{fontSize:20,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
+            <div style={{fontSize:13,color:DARK_THEME.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
           </div>
 
           {authErr&&<div style={{background:"rgba(201,72,72,0.1)",border:"1px solid rgba(201,72,72,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:"#C94848",lineHeight:1.6}}>{authErr}</div>}
@@ -664,7 +664,7 @@ function AnchoredStepsY2Inner(){
                 <label style={LBL2}>Email</label>
                 <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2}/>
                 <button onClick={handlePasswordReset} style={{...BTN2(true),marginBottom:12}}>Send Reset Link</button>
-                <div style={{textAlign:"center"}}><button onClick={()=>{setResetMode(false);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button></div>
+                <div style={{textAlign:"center"}}><button onClick={()=>{setResetMode(false);setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button></div>
               </>
             )
           ) : (
@@ -694,22 +694,22 @@ function AnchoredStepsY2Inner(){
                 {authMode==="login"?"Sign In":"Create Account"}
               </button>
               <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
-                {authMode==="login"&&<><button onClick={()=>{setAuthMode("signup");setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Create account</button><button onClick={()=>{setResetMode(true);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Forgot password?</button><button onClick={()=>setAuthMode("plans")} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>View plans →</button></>}
-                {authMode!=="login"&&<button onClick={()=>{setAuthMode("login");setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button>}
+                {authMode==="login"&&<><button onClick={()=>{setAuthMode("signup");setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Create account</button><button onClick={()=>{setResetMode(true);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Forgot password?</button><button onClick={()=>setAuthMode("plans")} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>View plans →</button></>}
+                {authMode!=="login"&&<button onClick={()=>{setAuthMode("login");setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button>}
               </div>
               {authMode==="plans"&&(
                 <div style={{marginTop:20,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-                  <div style={{fontSize:10,color:T.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:14,textAlign:"center"}}>Choose Your Plan</div>
+                  <div style={{fontSize:10,color:DARK_THEME.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:14,textAlign:"center"}}>Choose Your Plan</div>
                   <div style={{marginBottom:12}}>
                     <a href={STRIPE_LINK} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:"linear-gradient(135deg,rgba(160,120,64,0.22),rgba(160,120,64,0.10))",border:"2px solid "+T.gold,borderRadius:14,padding:"22px 18px",position:"relative",textAlign:"center"}}>
                       <div style={{position:"absolute",top:-11,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:9,fontWeight:700,padding:"3px 12px",borderRadius:10,letterSpacing:"0.12em",fontFamily:"Cinzel,serif"}}>LIFETIME ACCESS</div>
                       <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",marginBottom:8,textTransform:"uppercase"}}>Year 2 — Complete</div>
-                      <div style={{fontSize:34,fontWeight:700,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:4,lineHeight:1}}>$39</div>
-                      <div style={{fontSize:11,color:T.muted,marginBottom:14,letterSpacing:"0.04em"}}>one-time · no subscription</div>
+                      <div style={{fontSize:34,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",marginBottom:4,lineHeight:1}}>$39</div>
+                      <div style={{fontSize:11,color:DARK_THEME.muted,marginBottom:14,letterSpacing:"0.04em"}}>one-time · no subscription</div>
                       <div style={{background:"rgba(160,120,64,0.18)",border:"1px solid "+T.goldB,borderRadius:9,padding:"10px 14px",fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>⚓ Unlock All 52 Weeks →</div>
                     </a>
                   </div>
-                  <p style={{fontSize:12,color:T.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, check your email for your access code, then create your account above.</p>
+                  <p style={{fontSize:12,color:DARK_THEME.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, check your email for your access code, then create your account above.</p>
                 </div>
               )}
             </>
