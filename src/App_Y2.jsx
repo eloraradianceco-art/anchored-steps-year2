@@ -31,7 +31,7 @@ const DARK_THEME = {
   green:"#7C9284",greenF:"rgba(124,146,132,0.12)",greenB:"rgba(124,146,132,0.28)",
   purple:"#A89ACF",purpleF:"rgba(168,154,207,0.08)",purpleB:"rgba(168,154,207,0.22)",
   red:"#D97A7A",redF:"rgba(217,122,122,0.08)",redB:"rgba(217,122,122,0.24)",
-  cream:"#F0ECE3",text:"#E0D8CA",muted:"#A0AAB2",dim:"#66737E",border:"rgba(255,255,255,0.06)",
+  cream:"#F0ECE3",text:"#E0D8CA",muted:"#BAC4CC",dim:"#92A1AD",border:"rgba(255,255,255,0.06)",
 };
 
 const LIGHT_THEME = {
