@@ -537,7 +537,7 @@ function AnchoredStepsY2Inner(){
       const dataUrl=await toPng(shareCardRef.current,{cacheBust:true,pixelRatio:2,backgroundColor:bg})
       const res=await fetch(dataUrl)
       const blob=await res.blob()
-      const file=new File([blob],'anchored-steps-y2-card.png',{type:'image/png'})
+      const file=new File([blob],'anchored-steps-year2-card.png',{type:'image/png'})
       const body=shareCardType==='prayer'?(week?.prayer||'')
                :shareCardType==='dontmiss'?(week?.dontMissThis||'')
                :shareCardType==='study'?(week?.studyNotes||'')
@@ -554,12 +554,12 @@ function AnchoredStepsY2Inner(){
         '',
         'Anchored Steps: Year 2 — Deeper faith. Harder truth. Real growth.',
         '',
-        'anchored-steps-y2.vercel.app',
+        'anchored-steps-year2.vercel.app',
       ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n').trim()
       if(navigator.canShare?.({files:[file]})){
         await navigator.share({files:[file],title:'Anchored Steps Year 2',text:caption})
       } else {
-        const a=document.createElement('a');a.href=dataUrl;a.download='anchored-steps-y2-card.png';a.click()
+        const a=document.createElement('a');a.href=dataUrl;a.download='anchored-steps-year2-card.png';a.click()
       }
     } catch(err){console.error('Share failed:',err)}
     setSharingCard(false)
@@ -749,11 +749,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   const versesMemorized = entries?.filter(e => e.field_key?.startsWith('mem_') && e.field_value === '1').length || 0
   const bookmarks = entries?.filter(e => e.field_key === 'bookmark' && e.field_value === '1').length || 0
 
-  const shareText = `I've been using Anchored Steps Year 2 — deeper Scripture, harder questions, and a faith that doesn't quit. 52 weeks of going further with God.\n\nanchored-steps-y2.vercel.app`
+  const shareText = `I've been using Anchored Steps Year 2 — deeper Scripture, harder questions, and a faith that doesn't quit. 52 weeks of going further with God.\n\nanchored-steps-year2.vercel.app`
 
   const handleShare = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: 'Anchored Steps Year 2', text: shareText, url: 'https://anchored-steps-y2.vercel.app' }) } catch {}
+      try { await navigator.share({ title: 'Anchored Steps Year 2', text: shareText, url: 'https://anchored-steps-year2.vercel.app' }) } catch {}
     } else {
       try { await navigator.clipboard.writeText(shareText); setCopiedShare(true); setTimeout(() => setCopiedShare(false), 2500) } catch {}
     }
@@ -785,7 +785,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url; a.download = `anchored-steps-y2-${new Date().toISOString().split('T')[0]}.txt`; a.click()
+      a.href = url; a.download = `anchored-steps-year2-${new Date().toISOString().split('T')[0]}.txt`; a.click()
       URL.revokeObjectURL(url)
     } catch(e) { console.error(e) }
     setExporting(false)
@@ -817,7 +817,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         if (prayer)  html += `<h3>Prayer</h3><p>${prayer.split('\n').join('<br/>')}</p>`
       }
     }
-    html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — anchored-steps-y2.vercel.app</p></body></html>`
+    html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — anchored-steps-year2.vercel.app</p></body></html>`
     win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500)
   }
 
@@ -1472,9 +1472,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Refer a Friend</div>
               <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Share Anchored Steps Year 2 with someone ready to go deeper.</p>
               <div style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:10,padding:"12px 14px",marginBottom:12,fontFamily:"Cinzel,serif",fontSize:12,color:T.gold,letterSpacing:"0.04em"}}>
-                anchored-steps-y2.vercel.app
+                anchored-steps-year2.vercel.app
               </div>
-              <button onClick={()=>{navigator.clipboard.writeText("anchored-steps-y2.vercel.app").then(()=>alert("Link copied!"));}} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
+              <button onClick={()=>{navigator.clipboard.writeText("anchored-steps-year2.vercel.app").then(()=>alert("Link copied!"));}} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
                 Copy Link
               </button>
             </div>
@@ -1551,7 +1551,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           'Week '+wk+': '+(week?.theme||''),
           '',
           'Anchored Steps Year 2 — 52 weeks of faith in action.',
-          'anchored-steps-y2.vercel.app',
+          'anchored-steps-year2.vercel.app',
         ].filter(Boolean).join('\n')
         const cBg=shareCardLight?'linear-gradient(155deg,#F2EDE3 0%,#E8E1D4 100%)':'linear-gradient(155deg,#0D1820 0%,#172330 100%)'
         const cBord=shareCardLight?'rgba(0,0,0,0.1)':T.goldB
