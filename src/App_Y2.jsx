@@ -767,7 +767,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
       const lines = []
       lines.push('ANCHORED STEPS — YEAR 2 JOURNAL')
-      lines.push('Elora Radiance Co. | anchored-steps-y2.vercel.app')
+      lines.push('Elora Radiance Co. | anchored-steps-year2.vercel.app')
       lines.push(`Exported: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`)
       lines.push('='.repeat(50))
       if (ALL_WEEKS) {
@@ -916,11 +916,13 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>More from Elora Radiance Co.</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'12px 16px' }}>
-            <p style={{ fontSize:13, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>Scripture-based tools for the believer who is serious about their faith.</p>
+            <p style={{ fontSize:13, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
             {[
               { label:'Armed & Anchored', desc:'Spiritual warfare training — 23 weapons', url:'https://armedandanchored.vercel.app/', icon:'⚔️' },
               { label:'Anchored Steps · Year 1', desc:'52 weeks of faith in action', url:'https://anchored-steps.vercel.app/', icon:'⚓' },
               { label:'The Red Letters', desc:'Complete words of Jesus by theme — free', url:'https://redletters.vercel.app/', icon:'✦' },
+              { label:'Anchored Verse', desc:'Scripture for every emotion — free', url:'https://anchoredverse.vercel.app/', icon:'📖' },
+              { label:'The Living Planner', desc:'Faith-centered life planner', url:'https://the-living-planner.vercel.app/', icon:'📓' },
             ].map(app => (
               <a key={app.url} href={app.url} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:14, padding:'13px 14px', borderRadius:12, marginBottom:8, background:T.goldF, border:`1px solid ${T.goldB}`, textDecoration:'none', transition:'all .2s' }}>
                 <span style={{ fontSize:22, flexShrink:0 }}>{app.icon}</span>
