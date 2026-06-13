@@ -960,9 +960,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <Row icon="⚓" label="Anchored Steps · Year 2">
               <span style={{ fontSize:11, color:T.dim }}>v1.0</span>
             </Row>
+            <a href="https://eloraradiance.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
             <Row icon="🌿" label="Elora Radiance Co." border={false}>
-              <span style={{ fontSize:11, color:T.dim }}>eloraradiance.com</span>
+              <span style={{ fontSize:11, color:T.gold }}>eloraradiance.com &rarr;</span>
             </Row>
+            </a>
           </div>
 
           {/* Export */}
