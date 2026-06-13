@@ -797,7 +797,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     if (!session?.user?.id) return
     const { data } = await supabase.from('y2_entries').select('*').eq('user_id', session.user.id)
     const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
-    const win = window.open('', '_blank')
     let html = `<!DOCTYPE html><html><head><title>Anchored Steps Year 2 Journal</title>
     <style>body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:40px;color:#1a1209;line-height:1.8}
     h1{font-size:26px;text-align:center;margin-bottom:4px}
@@ -820,7 +819,19 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       }
     }
     html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — anchored-steps-year2.vercel.app</p></body></html>`
-    win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500)
+    // Print via a hidden iframe so we never navigate away or trap the user (critical in standalone PWA mode)
+    const frame = document.createElement('iframe')
+    frame.setAttribute('aria-hidden', 'true')
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0'
+    document.body.appendChild(frame)
+    const cleanup = () => setTimeout(() => { try { frame.remove() } catch (e) {} }, 1500)
+    const fdoc = frame.contentWindow.document
+    fdoc.open(); fdoc.write(html); fdoc.close()
+    frame.contentWindow.onafterprint = cleanup
+    setTimeout(() => {
+      try { frame.contentWindow.focus(); frame.contentWindow.print() } catch (e) { console.error(e) }
+      cleanup()
+    }, 400)
   }
 
   const handleSignOut = async () => { setSigningOut(true); await supabase.auth.signOut() }
