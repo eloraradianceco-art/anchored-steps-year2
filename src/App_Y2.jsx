@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
+import Reviews from "./Reviews";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL_Y2 || "";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
@@ -725,6 +726,7 @@ function AnchoredStepsY2Inner(){
 
 function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode, onToggleDarkMode, onClose }) {
   const [copiedShare, setCopiedShare] = useState(false)
+  const [showReviews, setShowReviews] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [exporting, setExporting] = useState(false)
 
@@ -836,6 +838,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   return (
     <div style={{ position:'fixed', inset:0, zIndex:400, background: darkMode ? '#0D1820' : '#F2EDE3', fontFamily:"'EB Garamond',Georgia,serif", overflowY:'auto' }}>
       <div style={{ maxWidth:560, margin:'0 auto', padding:'0 0 80px' }}>
+      {showReviews && <Reviews app="as2" appName="Anchored Steps · Year 2" eyebrow="Anchored Steps · Year 2" userEmail={session?.user?.email || profile?.email} C={{ ...T, red: T.gold, redL: T.gold }} lightMode={!darkMode} onClose={() => setShowReviews(false)} />}
 
         {/* Sticky header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:`1px solid ${T.border}`, position:'sticky', top:0, zIndex:10, background: darkMode ? '#0D1820' : '#F2EDE3', backdropFilter:'blur(12px)' }}>
@@ -877,6 +880,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
                 'Lifetime ✦'
               </span>
+            </Row>
+            <Row icon="⭐" label="Ratings & Reviews">
+              <button onClick={() => setShowReviews(true)} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em' }}>Open</button>
             </Row>
             <Row icon="🚪" label="Sign Out" border={false}>
               <button onClick={handleSignOut} disabled={signingOut} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.07em' }}>
