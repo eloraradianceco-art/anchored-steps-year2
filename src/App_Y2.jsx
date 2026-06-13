@@ -765,7 +765,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     if (!session?.user?.id || exporting) return
     setExporting(true)
     try {
-      const { data } = await supabase.from('y2_entries').select('*').eq('user_id', session.user.id)
+      const { data } = await supabase.from('journal_entries').select('*').eq('user_id', session.user.id)
       const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
       const lines = []
       lines.push('ANCHORED STEPS — YEAR 2 JOURNAL')
@@ -795,7 +795,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
   const handlePrintPDF = async () => {
     if (!session?.user?.id) return
-    const { data } = await supabase.from('y2_entries').select('*').eq('user_id', session.user.id)
+    const { data } = await supabase.from('journal_entries').select('*').eq('user_id', session.user.id)
     const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
     let html = `<!DOCTYPE html><html><head><title>Anchored Steps Year 2 Journal</title>
     <style>body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:40px;color:#1a1209;line-height:1.8}
