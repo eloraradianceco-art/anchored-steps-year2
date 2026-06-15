@@ -190,7 +190,7 @@ function MemorizeModal({verse,onClose,onPass,T}){
                 <div style={{fontSize:48,fontWeight:700,color:score>=80?T.green:score>=50?T.gold:T.red,fontFamily:"Cinzel,serif",marginBottom:4}}>{score}%</div>
                 <div style={{fontSize:13,color:T.muted,marginBottom:16}}>{score>=90?"Nearly perfect!":score>=70?"Great progress!":score>=50?"Good start!":"Keep practicing!"}</div>
                 <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px",marginBottom:14,textAlign:"left"}}>
-                  <p style={{fontSize:14,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>"{verseText}"</p>
+                  <p style={{fontSize:16,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>"{verseText}"</p>
                 </div>
                 {score>=70&&<button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>✓ Mark as Memorized</button>}
                 <button onClick={()=>{setTyped('');setScore(null);}} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
@@ -1132,7 +1132,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   </div>
                   <label style={{...LBL,marginTop:20}}>Read in Context</label>
                   <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px 20px",marginBottom:14}}>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.readInContext || 'No context available for this week.'}</p>
+                    <p style={{fontSize:18,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.readInContext || 'No context available for this week.'}</p>
                     <div style={{marginTop:12,paddingTop:10,borderTop:"1px solid "+T.border,display:"flex",justifyContent:"flex-end",gap:8}}>
                       <CopyBtn text={week.readInContext||''} label="Copy Context" T={T}/>
                     </div>
@@ -1147,7 +1147,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 <div>
                   <label style={LBL}>Where Are We in the Story?</label>
                   <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.whereAreWe || 'Context information not available.'}</p>
+                    <p style={{fontSize:18,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.whereAreWe || 'Context information not available.'}</p>
                     <div style={{marginTop:12,paddingTop:10,borderTop:"1px solid "+T.border,display:"flex",justifyContent:"flex-end",gap:8}}>
                       <CopyBtn text={week.whereAreWe||''} label="Copy Story Context" T={T}/>
                     </div>
@@ -1176,7 +1176,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <label style={LBL}>Passage Study Prompt</label>
                   <div style={{background:T.purpleF,border:"1px solid "+T.purpleB,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
                     <div style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt || 'Study prompt not available.'}</p>
+                    <p style={{fontSize:18,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt || 'Study prompt not available.'}</p>
                     <div style={{borderTop:"1px solid "+T.purpleB,paddingTop:16}}>
                       <a href={enduringWordUrl(week.verseRef||'')} target="_blank" rel="noreferrer" style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read full commentary: {week.verseRef || ''} ↗</a>
                       <p style={{fontSize:17,color:T.cream,lineHeight:1.9,fontStyle:"italic",margin:0}}>&#8220;{week.verseText || ''}&#8221;</p>
@@ -1184,7 +1184,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   </div>
                   <label style={LBL}>Study Notes</label>
                   <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
-                    <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyNotes || 'No study notes for this week.'}</p>
+                    <p style={{fontSize:18,color:T.text,lineHeight:1.85,margin:0,whiteSpace:"pre-line"}}>{week.studyNotes || 'No study notes for this week.'}</p>
                     <div style={{marginTop:12,paddingTop:10,borderTop:"1px solid "+T.border,display:"flex",justifyContent:"flex-end",gap:8}}>
                       <CopyBtn text={(week.verseRef||'')+" — Study Notes\n\n"+(week.studyNotes||'')} label="Copy Study Notes" T={T}/>
                     </div>
