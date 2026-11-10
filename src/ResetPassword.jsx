@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Uses the same env vars as App_Y2
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL_Y2 || "",
-  import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || ""
-);
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
+
+// Same shared database as App_Y2
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const G = {
   bg: "#0D1820", bgMid: "#172330",

@@ -4,9 +4,41 @@ import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
 import Reviews from "./Reviews";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL_Y2 || "";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY_Y2 || "";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const Y2_PENDING_CODE_KEY = "as2_pending_code";
+
+// Signed in, but Year 2 isn't on this account (e.g. they came from Year 1 or Armed & Anchored).
+function Y2NoAccess({ supabase, email, buyLink, onUnlocked, onSignOut }) {
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const redeem = async () => {
+    if (!code.trim()) { setErr("Enter the access code from your purchase email."); return; }
+    setBusy(true); setErr("");
+    const { data, error } = await supabase.rpc("redeem_access_code", { input_code: code.trim(), for_app: "as2" });
+    setBusy(false);
+    if (error || !data) { setErr("That code isn't valid or has already been used."); return; }
+    onUnlocked();
+  };
+  const buy = buyLink + (email ? "?prefilled_email=" + encodeURIComponent(email) : "");
+  return (
+    <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0F1A24 0%,#1A2A38 55%,#0F1A24 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 20px", textAlign:"center", fontFamily:"'EB Garamond',Georgia,serif" }}>
+      <img src="/icon2.png" alt="" style={{ width:64, height:64, borderRadius:14, marginBottom:16 }}/>
+      <div style={{ fontFamily:"Cinzel,serif", fontSize:20, color:"#F5F1E8", marginBottom:8 }}>Unlock Year 2</div>
+      <p style={{ fontSize:16, color:"#A8B3BC", lineHeight:1.7, margin:"0 0 22px", maxWidth:360 }}>You're signed in as {email}, but Year 2 isn't on this account yet. Enter your access code, or get access below.</p>
+      <div style={{ width:"100%", maxWidth:340 }}>
+        <input value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&redeem()} placeholder="e.g. Y2-7X4K2M" autoCapitalize="characters" style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(176,138,78,0.35)", borderRadius:10, color:"#F5F1E8", fontSize:16, padding:"14px 16px", fontFamily:"Cinzel,serif", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:10 }}/>
+        {err && <div style={{ fontSize:14, color:"#C94848", marginBottom:10 }}>{err}</div>}
+        <button onClick={redeem} disabled={busy} style={{ width:"100%", padding:"15px", borderRadius:12, border:"none", background:"linear-gradient(135deg,rgba(176,138,78,0.4),rgba(176,138,78,0.2))", color:"#F5F1E8", fontFamily:"Cinzel,serif", fontSize:14, letterSpacing:"0.09em", marginBottom:12 }}>{busy ? "Checking..." : "Unlock with Code"}</button>
+        <a href={buy} target="_blank" rel="noreferrer" style={{ display:"block", border:"1px solid rgba(176,138,78,0.45)", borderRadius:12, padding:"13px", color:"#B08A4E", textDecoration:"none", fontFamily:"Cinzel,serif", fontSize:13, letterSpacing:"0.08em", marginBottom:8 }}>Get Year 2 · $39</a>
+        <p style={{ fontSize:13, color:"#6C7A86", lineHeight:1.6, margin:"0 0 18px" }}>After purchase, your access code arrives by email.</p>
+        <button onClick={onSignOut} style={{ background:"transparent", border:"none", color:"#6C7A86", cursor:"pointer", fontSize:13, fontFamily:"EB Garamond,Georgia,serif" }}>Sign out</button>
+      </div>
+    </div>
+  );
+}
 
 // ───────── Stripe Payment Links ─────────
 const STRIPE_LINK = "https://buy.stripe.com/9B69AS77mgKa6yzcA357W08";
@@ -269,6 +301,7 @@ function AnchoredStepsY2Inner(){
     try { return !localStorage.getItem('y2_onboarding_complete'); } catch { return false; }
   });
   const [profile,setProfile]=useState(null);
+  const [access,setAccess]=useState('checking'); // 'checking' | 'yes' | 'no' — is Year 2 unlocked on this account
   const [day,setDay]=useState(-1);
   const [communityInput,setCommunityInput]=useState('');
   const [communityDone,setCommunityDone]=useState(false);
@@ -310,7 +343,7 @@ function AnchoredStepsY2Inner(){
   useEffect(()=>{
     try { localStorage.setItem('y2_last_week', String(wk)); } catch {}
     if (session?.user?.id) {
-      supabase.from('profiles').update({ current_week: wk }).eq('user_id', session.user.id)
+      supabase.from('as2_profiles').update({ current_week: wk }).eq('user_id', session.user.id)
         .then(({ error }) => { if (error) console.warn('week sync:', error.message) });
     }
   }, [wk, session]);
@@ -319,7 +352,7 @@ function AnchoredStepsY2Inner(){
   useEffect(()=>{
     try { localStorage.setItem('y2_dark_mode', darkMode ? '1' : '0'); } catch {}
     if (session?.user?.id) {
-      supabase.from('profiles').update({ dark_mode: darkMode }).eq('user_id', session.user.id)
+      supabase.from('as2_profiles').update({ dark_mode: darkMode }).eq('user_id', session.user.id)
         .then(({ error }) => { if (error) console.warn('dark sync:', error.message) });
     }
   }, [darkMode, session]);
@@ -327,7 +360,7 @@ function AnchoredStepsY2Inner(){
   // Auth session management
   useEffect(()=>{
     supabase.auth.getSession().then(({data:{session}})=>{setSession(session);setLoading(false);});
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,s)=>{setSession(s);setLoading(false);});
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,s)=>{setSession(s);setLoading(false);if(!s)setAccess('checking');});
     return ()=>subscription.unsubscribe();
   },[]);
 
@@ -336,8 +369,24 @@ function AnchoredStepsY2Inner(){
     if(!session) return;
     let cancelled = false;
 
-    supabase.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle().then(({data})=>{
-      if(cancelled || !data) return;
+    const fetchProfile = () => supabase.from('as2_profiles').select('*').eq('user_id',session.user.id).maybeSingle();
+    (async () => {
+      let { data, error } = await fetchProfile();
+      // An as2_profiles row means Year 2 is unlocked. Apply a code saved during sign-up, if any.
+      if (!data && !error) {
+        let pending = null;
+        try { pending = localStorage.getItem(Y2_PENDING_CODE_KEY) } catch {}
+        if (pending) {
+          const { error: redeemErr } = await supabase.rpc('redeem_access_code', { input_code: pending, for_app: 'as2' });
+          if (!redeemErr) { try { localStorage.removeItem(Y2_PENDING_CODE_KEY) } catch {} }
+          ({ data, error } = await fetchProfile());
+        }
+      }
+      return { data, error };
+    })().then(({data, error})=>{
+      if(cancelled) return;
+      setAccess(data ? 'yes' : (error ? 'yes' : 'no'));
+      if(!data) return;
       setProfile(data);
       // Cross-device sync hydration
       if (Array.isArray(data.bookmarks) && data.bookmarks.length > 0) {
@@ -361,7 +410,7 @@ function AnchoredStepsY2Inner(){
     // Load entries for current week ± 5 weeks (smarter than loading all 1500+)
     const minWeek = Math.max(1, wk - 5);
     const maxWeek = Math.min(52, wk + 5);
-    supabase.from('journal_entries')
+    supabase.from('as2_journal_entries')
       .select('*')
       .eq('user_id', session.user.id)
       .gte('week', minWeek)
@@ -371,7 +420,7 @@ function AnchoredStepsY2Inner(){
       });
 
     // Also load just field_key='tr_*' across all weeks for progress stats
-    supabase.from('journal_entries')
+    supabase.from('as2_journal_entries')
       .select('id, week, field_key, field_value, user_id')
       .eq('user_id', session.user.id)
       .like('field_key', 'tr_%')
@@ -389,7 +438,7 @@ function AnchoredStepsY2Inner(){
     const channel = supabase
       .channel('y2_entries_'+session.user.id)
       .on('postgres_changes', {
-        event: '*', schema: 'public', table: 'journal_entries',
+        event: '*', schema: 'public', table: 'as2_journal_entries',
         filter: `user_id=eq.${session.user.id}`,
       }, payload => {
         if(cancelled) return;
@@ -459,9 +508,9 @@ function AnchoredStepsY2Inner(){
       // Find existing real row
       const existing = entries.find(e => e.week===wk && e.field_key===key && !e._temp);
       if(existing) {
-        await supabase.from('journal_entries').update({field_value:valueToSave}).eq('id',existing.id);
+        await supabase.from('as2_journal_entries').update({field_value:valueToSave}).eq('id',existing.id);
       } else {
-        const {data} = await supabase.from('journal_entries')
+        const {data} = await supabase.from('as2_journal_entries')
           .insert({user_id:session.user.id, week:wk, field_key:key, field_value:valueToSave})
           .select().single();
         if(data) {
@@ -491,9 +540,9 @@ function AnchoredStepsY2Inner(){
       const val = pending[fullKey];
       const existing = entries.find(e => e.week===wkNum && e.field_key===key && !e._temp);
       if(existing) {
-        await supabase.from('journal_entries').update({field_value:val}).eq('id',existing.id);
+        await supabase.from('as2_journal_entries').update({field_value:val}).eq('id',existing.id);
       } else if(session) {
-        await supabase.from('journal_entries').insert({user_id:session.user.id, week:wkNum, field_key:key, field_value:val});
+        await supabase.from('as2_journal_entries').insert({user_id:session.user.id, week:wkNum, field_key:key, field_value:val});
       }
     }
 
@@ -520,7 +569,7 @@ function AnchoredStepsY2Inner(){
     try { localStorage.setItem('y2_bookmarks',JSON.stringify(updated)); } catch {}
     // Also sync bookmarks to Supabase profile
     if(session) {
-      supabase.from('profiles').update({bookmarks: updated}).eq('user_id', session.user.id);
+      supabase.from('as2_profiles').update({bookmarks: updated}).eq('user_id', session.user.id);
     }
   };
 
@@ -650,6 +699,7 @@ function AnchoredStepsY2Inner(){
             <div style={{fontSize:9,color:T.gold,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6}}>Elora Radiance Co.</div>
             <div style={{fontSize:20,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
             <div style={{fontSize:13,color:DARK_THEME.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
+            {!resetMode&&authMode==="signup"&&<div style={{fontSize:13,color:DARK_THEME.muted,lineHeight:1.6,marginTop:10}}>Already use Year 1 or Armed &amp; Anchored? Use that same email and password.</div>}
           </div>
 
           {authErr&&<div style={{background:"rgba(201,72,72,0.1)",border:"1px solid rgba(201,72,72,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:"#C94848",lineHeight:1.6}}>{authErr}</div>}
@@ -670,7 +720,7 @@ function AnchoredStepsY2Inner(){
             )
           ) : (
             <>
-              {authMode==="signup"&&<><label style={LBL2}>Access Code</label><input value={code} onChange={e=>setCode(e.target.value)} placeholder="e.g. AS-7X4K2M" style={{...INP2,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}/></>}
+              {authMode==="signup"&&<><label style={LBL2}>Access Code</label><input value={code} onChange={e=>setCode(e.target.value)} placeholder="e.g. Y2-7X4K2M" style={{...INP2,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}/></>}
               <label style={LBL2}>Email</label>
               <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2} autoCapitalize="none"/>
               <label style={LBL2}>Password</label>
@@ -684,11 +734,20 @@ function AnchoredStepsY2Inner(){
                   const{error}=await supabase.auth.signInWithPassword({email,password:pw});
                   if(error)setAuthErr(error.message==="Invalid login credentials"?"Incorrect email or password.":error.message);
                 } else {
-                  const{data:codeData,error:codeErr}=await supabase.from("access_codes").select("*").eq("code",code.trim().toUpperCase()).eq("used",false).maybeSingle();
-                  if(codeErr||!codeData){setAuthErr("Invalid or already used access code.");return;}
-                  const{error}=await supabase.auth.signUp({email,password:pw});
+                  if(!code.trim()){setAuthErr("Please enter your access code.");return;}
+                  if(!email||pw.length<6){setAuthErr("Enter your email and a password of at least 6 characters.");return;}
+                  const{data:codeRows,error:codeErr}=await supabase.rpc("validate_access_code_for",{input_code:code.trim(),for_app:"as2"});
+                  if(codeErr||!codeRows?.length){setAuthErr("Invalid or already used access code.");return;}
+                  try{localStorage.setItem(Y2_PENDING_CODE_KEY,code.trim())}catch{}
+                  let{data:authData,error}=await supabase.auth.signUp({email,password:pw,options:{data:{app:"as2"}}});
+                  if(error&&/already (registered|exists)/i.test(error.message)){
+                    // One account works across Elora Radiance apps: sign in with it and add Year 2
+                    const res=await supabase.auth.signInWithPassword({email,password:pw});
+                    if(res.error){setAuthErr("This email already has an Elora Radiance account (from Year 1 or Armed & Anchored). Enter that password to add Year 2 to it, or use Forgot password.");return;}
+                    authData=res.data;error=null;
+                  }
                   if(error){setAuthErr(error.message);return;}
-                  await supabase.from("access_codes").update({used:true,used_by:email}).eq("code",code.trim().toUpperCase());
+                  if(!authData?.session){setAuthErr("Check your email to confirm your account, then sign in. Your code will be applied then.");return;}
                   setJustSignedUp(true);
                 }
               }} style={{...BTN2(true),marginBottom:12}}>
@@ -720,6 +779,20 @@ function AnchoredStepsY2Inner(){
     
 );
   }
+
+  // Signed in, but Year 2 isn't unlocked on this account yet
+  if(access==='checking') return (
+    <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
+      <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,opacity:.5,animation:"pulse 2s ease-in-out infinite"}}/>
+      <div style={{color:T.gold,fontFamily:"Cinzel,serif",fontSize:12,letterSpacing:"0.14em",textTransform:"uppercase"}}>Anchored Steps</div>
+      <style>{`@keyframes pulse { 0%, 100% { opacity: .3 } 50% { opacity: .8 } }`}</style>
+    </div>
+  );
+  if(access==='no') return (
+    <Y2NoAccess supabase={supabase} email={session.user?.email} buyLink={STRIPE_LINK}
+      onUnlocked={()=>{ setAccess('checking'); setSession(s=>({...s})); }}
+      onSignOut={()=>supabase.auth.signOut()} />
+  );
 
 
 
@@ -765,7 +838,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     if (!session?.user?.id || exporting) return
     setExporting(true)
     try {
-      const { data } = await supabase.from('journal_entries').select('*').eq('user_id', session.user.id)
+      const { data } = await supabase.from('as2_journal_entries').select('*').eq('user_id', session.user.id)
       const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
       const lines = []
       lines.push('ANCHORED STEPS — YEAR 2 JOURNAL')
@@ -795,7 +868,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
   const handlePrintPDF = async () => {
     if (!session?.user?.id) return
-    const { data } = await supabase.from('journal_entries').select('*').eq('user_id', session.user.id)
+    const { data } = await supabase.from('as2_journal_entries').select('*').eq('user_id', session.user.id)
     const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
     let html = `<!DOCTYPE html><html><head><title>Anchored Steps Year 2 Journal</title>
     <style>body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:40px;color:#1a1209;line-height:1.8}
@@ -1005,7 +1078,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     return <Onboarding onComplete={async ()=>{
       try{localStorage.setItem('y2_onboarding_complete','1')}catch{}
       if (session?.user?.id) {
-        try { await supabase.from('profiles').update({ onboarded: true }).eq('user_id', session.user.id) } catch(e) { console.warn('onboarded sync:', e) }
+        try { await supabase.from('as2_profiles').update({ onboarded: true }).eq('user_id', session.user.id) } catch(e) { console.warn('onboarded sync:', e) }
       }
       setShowOnboarding(false);
     }} darkMode={darkMode} G={T}/>;
@@ -1459,7 +1532,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                           const updated = bookmarks.filter(b => b.key !== bm.key);
                           setBookmarks(updated);
                           try { localStorage.setItem('y2_bookmarks', JSON.stringify(updated)); } catch {}
-                          if (session?.user?.id) supabase.from('profiles').update({ bookmarks: updated }).eq('user_id', session.user.id);
+                          if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id);
                         }
                       }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,padding:"2px 6px"}}>✕</button>
                     </div>
