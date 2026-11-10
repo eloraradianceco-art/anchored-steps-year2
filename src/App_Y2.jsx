@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
 import Reviews from "./Reviews";
+import DailySteps from "./DailySteps.jsx";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -287,7 +288,7 @@ function AnchoredStepsY2Inner(){
   const [darkMode,setDarkMode]=useState(()=>{
     try { return localStorage.getItem('y2_dark_mode') !== '0'; } catch { return true; }
   });
-  const [view,setView]=useState('journal');
+  const [view,setView]=useState('steps');
   const [animK,setAnimK]=useState(0);
   const [quizVerse,setQuizVerse]=useState(null);
   const [shareVerse,setShareVerse]=useState(null);
@@ -416,7 +417,25 @@ function AnchoredStepsY2Inner(){
       .gte('week', minWeek)
       .lte('week', maxWeek)
       .then(({data})=>{
-        if(!cancelled && data) setEntries(data);
+        // Merge, so step progress and tracker rows loaded in parallel aren't dropped
+        if(!cancelled && data) setEntries(prev => {
+          const ids = new Set(data.map(d => d.id));
+          return [...data, ...prev.filter(e => !ids.has(e.id) && e.user_id === session.user.id)];
+        });
+      });
+
+    // Step progress across all weeks (Steps year strip and streak)
+    supabase.from('as2_journal_entries')
+      .select('id, week, field_key, field_value, user_id')
+      .eq('user_id', session.user.id)
+      .like('field_key', 'ds_%')
+      .then(({data})=>{
+        if(!cancelled && data) {
+          setEntries(prev => {
+            const existing = new Set(prev.map(e => e.id));
+            return [...prev, ...data.filter(d => !existing.has(d.id))];
+          });
+        }
       });
 
     // Also load just field_key='tr_*' across all weeks for progress stats
@@ -1118,10 +1137,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
           </div>
         </div>
-        <div style={{display:"flex",justifyContent:"center",gap:2,padding:"5px 12px",borderTop:"1px solid "+T.border,overflowX:"auto",flexWrap:"nowrap"}}>
-          {['journal','search','progress','saved','settings'].map(v=>(
-            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else setView(v); }} style={{background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 8px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.04em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-              {v==='journal'?'📖 Journal':v==='search'?'🔍 Search':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
+        <div style={{display:"flex",justifyContent:"flex-start",gap:2,padding:"5px 8px",borderTop:"1px solid "+T.border,overflowX:"auto",flexWrap:"nowrap"}}>
+          {['steps','journal','search','progress','saved','settings'].map((v,i,all)=>(
+            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else setView(v); }} style={{marginLeft:i===0?"auto":0,marginRight:i===all.length-1?"auto":0,background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 7px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.03em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
+              {v==='steps'?'⚓ Steps':v==='journal'?'📖 Journal':v==='search'?'🔍 Search':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
             </button>
           ))}
         </div>
@@ -1129,6 +1148,14 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
       <div style={{maxWidth:680,margin:"0 auto",padding:"0 0 80px"}}>
         {/* JOURNAL VIEW */}
+        {view==='steps' && week && (
+          <div className="fi" style={{padding:"22px 18px 0"}}>
+            <DailySteps week={week} wk={wk} totalWeeks={52} entries={entries} get={get} set={set} darkMode={darkMode}
+              onOpenWeek={()=>{ setView('journal'); setSec('passage'); window.scrollTo(0,0); }}
+              onGoWeek={n=>goWk(n)} />
+          </div>
+        )}
+
         {view==='journal' && week && (
           <div className="fi">
             {/* Week nav */}
