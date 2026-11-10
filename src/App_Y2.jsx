@@ -816,7 +816,7 @@ function AnchoredStepsY2Inner(){
 
 
 
-function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode, onToggleDarkMode, onClose }) {
+function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode, onToggleDarkMode, onClose, savedCount, onOpenSaved }) {
   const [copiedShare, setCopiedShare] = useState(false)
   const [showReviews, setShowReviews] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -841,7 +841,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     entries?.some(e => e.week === w.week && ['study','apply','prayer'].includes(e.field_key) && (e.field_value||'').trim())
   ).length : 0
   const versesMemorized = entries?.filter(e => e.field_key?.startsWith('mem_') && e.field_value === '1').length || 0
-  const bookmarks = entries?.filter(e => e.field_key === 'bookmark' && e.field_value === '1').length || 0
+  const bookmarks = typeof savedCount === 'number' ? savedCount : (entries?.filter(e => e.field_key === 'bookmark' && e.field_value === '1').length || 0)
 
   const shareText = `I've been using Anchored Steps Year 2 — deeper Scripture, harder questions, and a faith that doesn't quit. 52 weeks of going further with God.\n\nanchored-steps-year2.vercel.app`
 
@@ -974,6 +974,17 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <button onClick={()=>{ if(window.confirm('Reset to Week 1? Journal entries will be kept.')) goWk(1) }} style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.muted, padding:'10px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em', marginTop:10 }}>↺ Reset to Week 1</button>
           </div>
 
+          {/* Saved verses */}
+          {onOpenSaved && (
+            <button onClick={onOpenSaved} style={{ width:'100%', marginTop:10, display:'flex', alignItems:'center', justifyContent:'space-between', background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'14px 16px', cursor:'pointer', textAlign:'left' }}>
+              <span style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <span style={{ fontSize:18, width:26, textAlign:'center', color:T.gold }}>☆</span>
+                <span style={{ fontSize:16, color:T.text, fontFamily:"'EB Garamond',Georgia,serif" }}>Saved verses</span>
+              </span>
+              <span style={{ fontSize:13, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>{bookmarks} →</span>
+            </button>
+          )}
+
           {/* Account */}
           <div style={{ marginTop:24, marginBottom:8 }}>
             <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Account</div>
@@ -1089,6 +1100,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       ALL_WEEKS={ALL_WEEKS}
       darkMode={darkMode}
       onToggleDarkMode={()=>setDarkMode(d=>!d)}
+      savedCount={bookmarks.length}
+      onOpenSaved={()=>{ setShowSettings(false); setSearchQuery(''); setSearchResults([]); setView('search'); window.scrollTo(0,0); }}
       onClose={()=>setShowSettings(false)}
     />
   )
@@ -1116,6 +1129,34 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     );
   }
 
+  // Saved verses (shown on the Search screen before you type)
+  const savedCards = (
+    <>
+      {bookmarks.map((bm,i)=>(
+        <div key={i} style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:10}}>
+          <p style={{fontSize:16,color:T.text,fontStyle:"italic",lineHeight:1.75,marginBottom:8}}>&#8220;{bm.text}&#8221;</p>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}>
+              <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>{bm.ref}</span>
+              <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:11,textDecoration:"underline"}}>Open</button>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <span style={{fontSize:11,color:T.muted}}>Week {bm.week}</span>
+              <button onClick={()=>{
+                if(window.confirm(`Remove ${bm.ref} from saved?`)) {
+                  const updated = bookmarks.filter(b => b.key !== bm.key);
+                  setBookmarks(updated);
+                  try { localStorage.setItem('y2_bookmarks', JSON.stringify(updated)); } catch {}
+                  if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id);
+                }
+              }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,padding:"2px 6px"}}>✕</button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"EB Garamond,Georgia,serif"}}>
       {/* Header */}
@@ -1138,11 +1179,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           </div>
         </div>
         <div style={{display:"flex",justifyContent:"flex-start",gap:2,padding:"5px 8px",borderTop:"1px solid "+T.border,overflowX:"auto",flexWrap:"nowrap"}}>
-          {['steps','journal','search','progress','saved','settings'].map((v,i,all)=>(
-            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else setView(v); }} style={{marginLeft:i===0?"auto":0,marginRight:i===all.length-1?"auto":0,background:view===v?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(view===v?"rgba(176,138,78,0.4)":"transparent"),color:view===v?T.gold:T.muted,padding:"4px 7px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"Cinzel,serif",letterSpacing:"0.03em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-              {v==='steps'?'⚓ Steps':v==='journal'?'📖 Journal':v==='search'?'🔍 Search':v==='progress'?'📊 Progress':v==='saved'?'☆ Saved':'⚙ Settings'}
+          {['steps','contents','search','progress','settings'].map((v,i,all)=>{ const on=view===v||(v==='steps'&&view==='journal'); return (
+            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else { setView(v); window.scrollTo(0,0); } }} style={{marginLeft:i===0?"auto":0,marginRight:i===all.length-1?"auto":0,background:on?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(on?"rgba(176,138,78,0.4)":"transparent"),color:on?T.gold:T.muted,padding:"6px 9px",borderRadius:7,cursor:"pointer",fontSize:11.5,fontFamily:"Cinzel,serif",letterSpacing:"0.03em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
+              {v==='steps'?'Steps':v==='contents'?'Contents':v==='search'?'Search':v==='progress'?'Progress':'Settings'}
             </button>
-          ))}
+          ); })}
         </div>
       </div>
 
@@ -1442,6 +1483,29 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         )}
 
         {/* PROGRESS VIEW */}
+        {view==='contents' && (
+          <div className="fi" style={{padding:18}}>
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Table of Contents</h2>
+            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:20}}>52 weeks of deeper formation. Tap any week to open it.</p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(225px,1fr))",gap:8}}>
+              {ALL_WEEKS.map(w=>{
+                const done=daysComplete(w.week);
+                const cur=w.week===wk;
+                return (
+                  <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} style={{background:cur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":done>0?"linear-gradient(145deg,"+T.greenF+","+T.greenF+")":T.bgCard,border:"1px solid "+(cur?T.goldB:done>0?T.greenB:T.border),borderRadius:12,padding:"13px 16px",cursor:"pointer",textAlign:"left",transition:"all .25s"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                      <span style={{fontSize:9,color:cur?T.gold:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em"}}>WEEK {w.week}</span>
+                      {done>0&&<span style={{fontSize:9,color:T.green}}>{done}/7</span>}
+                    </div>
+                    <div style={{fontSize:13,color:cur?T.cream:T.text,fontWeight:600,lineHeight:1.3}}>{w.theme}</div>
+                    {w.verseRef&&<div style={{fontSize:10,color:T.muted,marginTop:2,fontStyle:"italic"}}>{w.verseRef}</div>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {view==='progress' && (
           <div className="fi" style={{padding:18}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Your Progress</h2>
@@ -1460,23 +1524,34 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 ))}
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:6}}>
-              {ALL_WEEKS.map(w=>{
-                const done=daysComplete(w.week);
-                const cur=w.week===wk;
-                return (
-                  <button key={w.week} onClick={()=>{setWk(w.week);setView('journal');setSec('passage');setAnimK(a=>a+1);}} style={{background:cur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":done>0?"linear-gradient(145deg,"+T.greenF+","+T.greenF+")":T.bgCard,border:"1px solid "+(cur?T.goldB:done>0?T.greenB:T.border),borderRadius:12,padding:"13px 16px",cursor:"pointer",textAlign:"left",transition:"all .25s"}}>
-                    <div style={{fontSize:9,color:cur?T.gold:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:3}}>WEEK {w.week}</div>
-                    <div style={{fontSize:11,color:T.text,lineHeight:1.3}}>{w.theme}</div>
-                    {done>0&&<div style={{fontSize:9,color:T.green,marginTop:4}}>{done}/7 days</div>}
-                  </button>
-                );
-              })}
+            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px",marginBottom:18}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
+                <span style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase"}}>Year Progress</span>
+                <span style={{fontSize:11,color:T.muted}}>Week {wk} of 52 · {Math.round((wk/52)*100)}%</span>
+              </div>
+              <div style={{background:T.border,borderRadius:5,height:7,overflow:"hidden"}}>
+                <div style={{height:"100%",background:"linear-gradient(90deg,#A07840,#C9A96E)",width:((wk/52)*100)+"%",transition:"width .6s ease"}} />
+              </div>
+            </div>
+            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px"}}>
+              <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:14}}>Your Journey Map</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                {ALL_WEEKS.map(w=>{
+                  const done=daysComplete(w.week);
+                  const cur=w.week===wk;
+                  const pct=done/7;
+                  const bg=cur?T.gold:pct===1?T.green:pct>0?"rgba(124,146,132,"+(0.25+pct*0.55)+")":T.bgCard;
+                  return (
+                    <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} title={"Week "+w.week+": "+w.theme} style={{width:26,height:26,borderRadius:6,background:bg,border:"1px solid "+(cur?T.goldB:T.border),cursor:"pointer",fontSize:9,color:pct>0||cur?"#fff":T.muted,fontFamily:"Cinzel,serif",padding:0}}>
+                      {w.week}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
-        {/* SAVED VIEW */}
         {view==='search' && (
           <div style={{padding:"0 18px 80px"}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4,paddingTop:20}}>Search</h2>
@@ -1531,42 +1606,18 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 No results for "{searchQuery}"
               </div>
             )}
-            {!searchQuery.trim() && (
+            {!searchQuery.trim() && bookmarks.length===0 && (
               <div style={{textAlign:'center',padding:'48px 0',color:T.muted,fontSize:16,fontStyle:'italic'}}>
-                Start typing to search across all 52 weeks…
+                Start typing to search across all 52 weeks.
+                <div style={{fontSize:14,marginTop:6}}>Tap ☆ on any verse to save it. Your saved verses show up here.</div>
               </div>
             )}
-          </div>
-        )}
-
-        {view==='saved' && (
-          <div className="fi" style={{padding:18}}>
-            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Saved Verses</h2>
-            {bookmarks.length===0
-              ? <p style={{color:T.muted,fontStyle:"italic"}}>No saved verses yet. Tap ☆ on any verse to save it.</p>
-              : bookmarks.map((bm,i)=>(
-                <div key={i} style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px 18px",marginBottom:10}}>
-                  <p style={{fontSize:16,color:T.text,fontStyle:"italic",lineHeight:1.75,marginBottom:8}}>&#8220;{bm.text}&#8221;</p>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div style={{display:"flex",gap:10,alignItems:"center"}}>
-                      <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>{bm.ref}</span>
-                      <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:11,textDecoration:"underline"}}>Open</button>
-                    </div>
-                    <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                      <span style={{fontSize:11,color:T.muted}}>Week {bm.week}</span>
-                      <button onClick={()=>{
-                        if(window.confirm(`Remove ${bm.ref} from saved?`)) {
-                          const updated = bookmarks.filter(b => b.key !== bm.key);
-                          setBookmarks(updated);
-                          try { localStorage.setItem('y2_bookmarks', JSON.stringify(updated)); } catch {}
-                          if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id);
-                        }
-                      }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,padding:"2px 6px"}}>✕</button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            }
+            {!searchQuery.trim() && bookmarks.length>0 && (
+              <div>
+                <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>☆ Saved verses · {bookmarks.length}</div>
+                {savedCards}
+              </div>
+            )}
           </div>
         )}
 
