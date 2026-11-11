@@ -201,7 +201,7 @@ function MemorizeModal({verse,onClose,onPass,T}){
     if(pct>=70)onPass();
   };
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px))",overflowY:"auto"}} onClick={()=>{if(!mode)onClose();}}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(16px + var(--safe-top, env(safe-area-inset-top, 0px))) 16px calc(16px + env(safe-area-inset-bottom, 0px))",overflowY:"auto"}} onClick={()=>{if(!mode)onClose();}}>
       <div onClick={e=>e.stopPropagation()} style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:24,maxWidth:420,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
           <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.16em",textTransform:"uppercase"}}>{mode?"← ":""}✦ Memorize</div>
@@ -290,7 +290,7 @@ function MemorizeModal({verse,onClose,onPass,T}){
 function ContextModal({ae,onClose,T}){
   if(!ae) return null;
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.78)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={onClose}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.78)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + var(--safe-top, env(safe-area-inset-top, 0px))) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={onClose}>
       <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:28,maxWidth:420,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase"}}>Scripture Context</div>
@@ -993,7 +993,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       {showReviews && <Reviews app="as2" appName="Anchored Steps · Year 2" eyebrow="Anchored Steps · Year 2" userEmail={session?.user?.email || profile?.email} C={{ ...T, red: T.gold, redL: T.gold }} lightMode={!darkMode} onClose={() => setShowReviews(false)} />}
 
         {/* Sticky header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'calc(16px + env(safe-area-inset-top, 0px)) 20px 16px', borderBottom:`1px solid ${T.border}`, position:'sticky', top:0, zIndex:10, background: darkMode ? '#0D1820' : '#F2EDE3', backdropFilter:'blur(12px)' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'calc(16px + var(--safe-top, env(safe-area-inset-top, 0px))) 20px 16px', borderBottom:`1px solid ${T.border}`, position:'sticky', top:0, zIndex:10, background: darkMode ? '#0D1820' : '#F2EDE3', backdropFilter:'blur(12px)' }}>
           <div>
             <div style={{ fontSize:9, color:T.gold, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif" }}>Anchored Steps · Year 2</div>
             <div style={{ fontSize:18, fontWeight:700, color:T.cream, fontFamily:"'Cinzel',Georgia,serif" }}>Settings</div>
@@ -1221,7 +1221,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"EB Garamond,Georgia,serif"}}>
       {/* Header */}
-      <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"env(safe-area-inset-top, 0px)",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"#0D1820":"#F0EAE0",borderBottom:"1px solid "+T.border}}>
+      <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"var(--safe-top, env(safe-area-inset-top, 0px))",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"#0D1820":"#F0EAE0",borderBottom:"1px solid "+T.border}}>
         <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <img src="/icon2.png" alt="⚓" style={{width:36,height:36,borderRadius:9,boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}/>
@@ -1744,7 +1744,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
       {/* Sign Out Confirm Modal */}
       {showSignOutConfirm && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={()=>setShowSignOutConfirm(false)}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + var(--safe-top, env(safe-area-inset-top, 0px))) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={()=>setShowSignOutConfirm(false)}>
           <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:18,padding:24,maxWidth:340,width:"100%"}} onClick={e=>e.stopPropagation()}>
             <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,textAlign:"center"}}>Sign Out?</div>
             <p style={{fontSize:14,color:T.text,lineHeight:1.7,marginBottom:18,textAlign:"center"}}>Your progress is saved automatically. You can sign back in anytime.</p>
@@ -1790,7 +1790,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         const cGold=shareCardLight?T.goldL:T.gold
         const cMuted=T.muted
         return(
-          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:500,display:'flex',alignItems:'flex-start',justifyContent:'center',overflowY:'auto',padding:'calc(16px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px))'}} onClick={()=>setShareVerse(null)}>
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:500,display:'flex',alignItems:'flex-start',justifyContent:'center',overflowY:'auto',padding:'calc(16px + var(--safe-top, env(safe-area-inset-top, 0px))) 16px calc(48px + env(safe-area-inset-bottom, 0px))'}} onClick={()=>setShareVerse(null)}>
             <div style={{background:'linear-gradient(145deg,'+T.bg+',#172330)',border:'1px solid '+T.goldB,borderRadius:20,padding:22,width:'100%',maxWidth:420,marginTop:24}} onClick={e=>e.stopPropagation()}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
                 <div style={{fontSize:10,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.18em',textTransform:'uppercase'}}>Share Card</div>
