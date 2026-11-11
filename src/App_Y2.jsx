@@ -108,10 +108,10 @@ const DARK_THEME = {
 const LIGHT_THEME = {
   bg:"#F0EAE0",bgCard:"rgba(0,0,0,0.04)",bgMid:"#E4DDCF",
   gold:"#7A5A28",goldL:"#A07840",goldF:"rgba(122,90,40,0.10)",goldB:"rgba(122,90,40,0.30)",
-  green:"#5C7264",greenF:"rgba(92,114,100,0.10)",greenB:"rgba(92,114,100,0.30)",
-  purple:"#7A6CB0",purpleF:"rgba(122,108,176,0.08)",purpleB:"rgba(122,108,176,0.25)",
-  red:"#A85050",redF:"rgba(168,80,80,0.08)",redB:"rgba(168,80,80,0.25)",
-  cream:"#1A1008",text:"#2C1F0E",muted:"#5A4535",dim:"#8A7060",border:"rgba(0,0,0,0.10)",
+  green:"#3F5F4C",greenF:"rgba(92,114,100,0.10)",greenB:"rgba(92,114,100,0.30)",
+  purple:"#4E3F8C",purpleF:"rgba(78,63,140,0.08)",purpleB:"rgba(78,63,140,0.25)",
+  red:"#8E2B27",redF:"rgba(168,80,80,0.08)",redB:"rgba(168,80,80,0.25)",
+  cream:"#1A1008",text:"#2C1F0E",muted:"#5A4535",dim:"#6A5545",border:"rgba(0,0,0,0.10)",
 };
 
 const ALL_WEEKS = (typeof window !== 'undefined' && window.__APPDATA_Y2__?.ALL_WEEKS) || [];
@@ -860,9 +860,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     border: darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
     cream: darkMode ? '#F0ECE3' : '#1A1209',
     text: darkMode ? '#E0D8CA' : '#3D2E1A',
-    muted: darkMode ? '#A0AAB2' : '#7A6A5A',
-    dim: darkMode ? '#607080' : '#B0A090',
-    gold: darkMode ? '#A07840' : '#8B6A30',
+    muted: darkMode ? '#A0AAB2' : '#5E4E3C',
+    dim: darkMode ? '#607080' : '#6E6052',
+    gold: darkMode ? '#A07840' : '#6B4E18',
     goldF: darkMode ? 'rgba(160,120,64,0.12)' : 'rgba(139,106,48,0.1)',
     goldB: darkMode ? 'rgba(160,120,64,0.28)' : 'rgba(139,106,48,0.28)',
     green: '#7C9284', greenF: 'rgba(124,146,132,0.15)', greenB: 'rgba(124,146,132,0.4)',
@@ -1044,7 +1044,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           <AccountPrivacy supabase={supabase} theme={{
             text: T.text, muted: T.muted, card: T.bgCard, border: T.border, dark: darkMode,
-            danger: darkMode ? '#D9786B' : '#A8443A', dangerF: darkMode ? 'rgba(217,120,107,0.12)' : 'rgba(168,68,58,0.08)', dangerB: darkMode ? 'rgba(217,120,107,0.35)' : 'rgba(168,68,58,0.3)',
+            danger: darkMode ? '#D9786B' : '#8E2B27', dangerF: darkMode ? 'rgba(217,120,107,0.12)' : 'rgba(168,68,58,0.08)', dangerB: darkMode ? 'rgba(217,120,107,0.35)' : 'rgba(168,68,58,0.3)',
           }} />
 
           <ScriptureCredits notices={['NIV_ALL', 'KJV']} theme={{ text: T.text, muted: T.muted, card: T.bgCard, border: T.border }} />

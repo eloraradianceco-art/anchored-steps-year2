@@ -732,7 +732,7 @@ export default function DailySteps({ week, wk, totalWeeks = 52, entries = [], ge
    ───────────────────────────────────────────────────────────── */
 const CSS = `
 .ds-root{--bg:#0D1820;--panel:#172330;--ink:#F0ECE3;--body:#E0D8CA;--muted:#A3AEB8;--line:rgba(255,255,255,.1);--gold:#A07840;--goldL:#C49A5A;--goldSoft:rgba(160,120,64,.18);--onGold:#0D1820;--sage:#8FA697;--sageSoft:rgba(124,146,132,.18);--rose:#D97A7A;--roseSoft:rgba(217,122,122,.14);font-family:"EB Garamond",Garamond,Georgia,serif;color:var(--body);-webkit-font-smoothing:antialiased;font-size:18px;line-height:1.55}
-.ds-root.ds-light{--bg:#F0EAE0;--panel:#FAF6EF;--ink:#1A1008;--body:#2C1F0E;--muted:#6E5A48;--line:rgba(0,0,0,.12);--gold:#7A5A28;--goldL:#7A5A28;--goldSoft:rgba(122,90,40,.12);--onGold:#FAF6EF;--sage:#56705F;--sageSoft:rgba(92,114,100,.14);--rose:#A85050;--roseSoft:rgba(168,80,80,.12)}
+.ds-root.ds-light{--bg:#F0EAE0;--panel:#FAF6EF;--ink:#1A1008;--body:#2C1F0E;--muted:#5E4E3C;--line:rgba(0,0,0,.12);--gold:#7A5A28;--goldL:#7A5A28;--goldSoft:rgba(122,90,40,.12);--onGold:#FAF6EF;--sage:#56705F;--sageSoft:rgba(92,114,100,.14);--rose:#A85050;--roseSoft:rgba(168,80,80,.12)}
 .ds-root *,.ds-root *::before,.ds-root *::after{box-sizing:border-box}
 .ds-root p,.ds-root h1,.ds-root h2,.ds-root h3,.ds-root blockquote,.ds-root ol{margin:0;padding:0}
 .ds-root button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
@@ -773,6 +773,7 @@ const CSS = `
 .is-cur .ds-meta{color:var(--gold);font-weight:600}
 .is-done .ds-meta{color:var(--sage)}
 .is-locked .ds-name,.is-locked .ds-blurb,.is-locked .ds-mark{opacity:.55}
+.ds-light .is-locked .ds-name,.ds-light .is-locked .ds-blurb,.ds-light .is-locked .ds-mark{opacity:.92}
 .ds-anchor-row{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:center;margin-top:4px}
 .ds-anchor-ic{width:44px;height:48px;display:grid;place-items:center;color:var(--muted);position:relative;z-index:1}
 .ds-anchor-ic::before{content:"";position:absolute;inset:3px 1px;border-radius:50%;background:var(--panel);z-index:-1}
