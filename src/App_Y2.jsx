@@ -78,6 +78,20 @@ function Y2NoAccess({ email, userId, buyLink, onUnlocked, onSignOut }) {
   );
 }
 
+// Safari (iOS 26) colors the status-bar area and its bottom bar from the page background,
+// and the phone's Reduce Transparency setting decides whether that area is see-through
+// (blurred page) or solid. Keeping the page background, the header and theme-color one
+// solid color makes the top of the app look the same with the setting on or off.
+function paintChrome(color) {
+  try {
+    document.documentElement.style.backgroundColor = color;
+    document.body.style.backgroundColor = color;
+    let m = document.querySelector('meta[name="theme-color"]');
+    if (!m) { m = document.createElement("meta"); m.setAttribute("name", "theme-color"); document.head.appendChild(m); }
+    m.setAttribute("content", color);
+  } catch { /* no DOM */ }
+}
+
 // ───────── Stripe Payment Links ─────────
 const STRIPE_LINK = "https://buy.stripe.com/9B69AS77mgKa6yzcA357W08";
 
@@ -370,6 +384,9 @@ function AnchoredStepsY2Inner(){
 
   // Active theme
   const T = darkMode ? DARK_THEME : LIGHT_THEME;
+  // The unlock screen is always dark; everything else follows the theme.
+  const chromeColor = (darkMode || access === 'no') ? "#0D1820" : "#F0EAE0";
+  useEffect(() => { paintChrome(chromeColor); }, [chromeColor]);
 
   const week = useMemo(() => ALL_WEEKS.find(w=>w.week===wk), [wk]);
 
@@ -1204,7 +1221,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"EB Garamond,Georgia,serif"}}>
       {/* Header */}
-      <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"env(safe-area-inset-top, 0px)",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"rgba(13,24,32,0.97)":"rgba(240,234,224,0.97)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+T.border}}>
+      <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"env(safe-area-inset-top, 0px)",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"#0D1820":"#F0EAE0",borderBottom:"1px solid "+T.border}}>
         <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <img src="/icon2.png" alt="⚓" style={{width:36,height:36,borderRadius:9,boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}/>
