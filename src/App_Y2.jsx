@@ -646,7 +646,10 @@ function AnchoredStepsY2Inner(){
   };
 
   const isBookmarked=(ref,weekNum)=>bookmarks.some(b=>b.key===`${ref}_${weekNum}`);
-  const daysComplete=n=>entries.filter(e=>e.week===n&&e.field_key.startsWith('tr_')&&(e.field_value||'').trim()).length;
+  // A week's progress (0-7): the Daily Steps done, or the older daily tracker if that's further along.
+  const trackerDays=n=>entries.filter(e=>e.week===n&&e.field_key.startsWith('tr_')&&(e.field_value||'').trim()).length;
+  const stepsDone=n=>entries.filter(e=>e.week===n&&/^ds_[1-7]$/.test(e.field_key)&&(e.field_value||'').trim()).length;
+  const daysComplete=n=>Math.max(stepsDone(n),trackerDays(n));
 
   const handleShareImage=async()=>{
     if(!shareCardRef.current||!shareVerse) return
@@ -1575,7 +1578,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center"}}>
                 {[
                   ["Weeks Active",ALL_WEEKS.filter(w=>daysComplete(w.week)>0).length],
-                  ["Days Logged",entries.filter(e=>e.field_key.startsWith('tr_')&&(e.field_value||'').trim()).length],
+                  ["Days Logged",ALL_WEEKS.reduce((a,w)=>a+daysComplete(w.week),0)],
                   ["Prayers Written",entries.filter(e=>e.field_key==='prayer'&&(e.field_value||'').trim()).length],
                 ].map(([label,val])=>(
                   <div key={label}>
@@ -1731,7 +1734,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
               <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Support</div>
               <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Questions, feedback, or need help with your account?</p>
-              <a href="mailto:eloraradiance.co@gmail.com" style={{display:"block",textAlign:"center",width:"100%",boxSizing:"border-box",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textDecoration:"none"}}>
+              <a href="mailto:support@eloraradiance.com" style={{display:"block",textAlign:"center",width:"100%",boxSizing:"border-box",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textDecoration:"none"}}>
                 Email Support
               </a>
             </div>
