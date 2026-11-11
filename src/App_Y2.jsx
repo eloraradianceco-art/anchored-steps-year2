@@ -5,6 +5,7 @@ import Onboarding from "./Onboarding.jsx";
 import Reviews from "./Reviews";
 import DailySteps from "./DailySteps.jsx";
 import ReminderSettings from "./ReminderSettings.jsx";
+import AccountPrivacy from "./AccountPrivacy.jsx";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1010,6 +1011,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               </button>
             </Row>
           </div>
+
+          <AccountPrivacy supabase={supabase} theme={{
+            text: T.text, muted: T.muted, card: T.bgCard, border: T.border, dark: darkMode,
+            danger: darkMode ? '#D9786B' : '#A8443A', dangerF: darkMode ? 'rgba(217,120,107,0.12)' : 'rgba(168,68,58,0.08)', dangerB: darkMode ? 'rgba(217,120,107,0.35)' : 'rgba(168,68,58,0.3)',
+          }} />
 
           {/* Appearance */}
           <div style={{ marginTop:24, marginBottom:8 }}>
