@@ -10,33 +10,67 @@ import AccountPrivacy from "./AccountPrivacy.jsx";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const Y2_PENDING_CODE_KEY = "as2_pending_code";
+const Y2_CHECKOUT_KEY = "as2_checkout_session";
+const Y2_JUST_PAID_KEY = "as2_just_paid";
 
-// Signed in, but Year 2 isn't on this account (e.g. they came from Year 1 or Armed & Anchored).
-function Y2NoAccess({ supabase, email, buyLink, onUnlocked, onSignOut }) {
-  const [code, setCode] = useState("");
+// Stripe sends buyers back with ?paid=true&session_id=… . Keep the checkout id until the
+// purchase is applied to an account (they may still need to create one), then tidy the URL.
+(function rememberCheckout() {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const s = q.get("session_id");
+    if (s && /^cs_/.test(s)) localStorage.setItem(Y2_CHECKOUT_KEY, s);
+    if (q.get("paid") === "true" || s) sessionStorage.setItem(Y2_JUST_PAID_KEY, "1");
+    if (q.has("session_id") || q.has("paid")) {
+      q.delete("session_id"); q.delete("paid");
+      const rest = q.toString();
+      window.history.replaceState(null, "", window.location.pathname + (rest ? "?" + rest : "") + window.location.hash);
+    }
+  } catch { /* storage unavailable */ }
+})();
+
+const y2JustPaid = () => { try { return sessionStorage.getItem(Y2_JUST_PAID_KEY) === "1" } catch { return false } };
+
+// No access codes: a Year 2 purchase unlocks the account with the same email, the account
+// that was signed in at checkout, or the checkout this browser just came back from.
+async function claimY2Purchase() {
+  let checkout = null;
+  try { checkout = localStorage.getItem(Y2_CHECKOUT_KEY) } catch {}
+  const { data, error } = await supabase.rpc("claim_purchase", { p_app: "as2", checkout_session: checkout });
+  if (error) { console.error("claim_purchase:", error.message); return false; }
+  if (data) { try { localStorage.removeItem(Y2_CHECKOUT_KEY); sessionStorage.removeItem(Y2_JUST_PAID_KEY) } catch {} }
+  return !!data;
+}
+
+function y2BuyLink(base, email, userId) {
+  const q = new URLSearchParams();
+  if (email) q.set("prefilled_email", email);
+  if (userId) q.set("client_reference_id", userId);
+  const qs = q.toString();
+  return base + (qs ? "?" + qs : "");
+}
+
+// Signed in, but no Year 2 purchase is linked to this account yet (e.g. they came from Year 1 or Armed & Anchored).
+function Y2NoAccess({ email, userId, buyLink, onUnlocked, onSignOut }) {
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const redeem = async () => {
-    if (!code.trim()) { setErr("Enter the access code from your purchase email."); return; }
-    setBusy(true); setErr("");
-    const { data, error } = await supabase.rpc("redeem_access_code", { input_code: code.trim(), for_app: "as2" });
+  const [msg, setMsg] = useState("");
+  const check = async () => {
+    setBusy(true); setMsg("");
+    const ok = await claimY2Purchase();
     setBusy(false);
-    if (error || !data) { setErr("That code isn't valid or has already been used."); return; }
-    onUnlocked();
+    if (ok) onUnlocked();
+    else setMsg("We don't see a Year 2 purchase for " + (email || "this account") + " yet. If you just paid, give it a minute and check again.");
   };
-  const buy = buyLink + (email ? "?prefilled_email=" + encodeURIComponent(email) : "");
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0F1A24 0%,#1A2A38 55%,#0F1A24 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 20px", textAlign:"center", fontFamily:"'EB Garamond',Georgia,serif" }}>
       <img src="/icon2.png" alt="" style={{ width:64, height:64, borderRadius:14, marginBottom:16 }}/>
       <div style={{ fontFamily:"Cinzel,serif", fontSize:20, color:"#F5F1E8", marginBottom:8 }}>Unlock Year 2</div>
-      <p style={{ fontSize:16, color:"#A8B3BC", lineHeight:1.7, margin:"0 0 22px", maxWidth:360 }}>You're signed in as {email}, but Year 2 isn't on this account yet. Enter your access code, or get access below.</p>
+      <p style={{ fontSize:16, color:"#A8B3BC", lineHeight:1.7, margin:"0 0 22px", maxWidth:360 }}>You're signed in as {email}, but Year 2 isn't on this account yet. Already bought it? It unlocks for the email you used at checkout.</p>
       <div style={{ width:"100%", maxWidth:340 }}>
-        <input value={code} onChange={e=>setCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&redeem()} placeholder="e.g. Y2-7X4K2M" autoCapitalize="characters" style={{ width:"100%", boxSizing:"border-box", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(176,138,78,0.35)", borderRadius:10, color:"#F5F1E8", fontSize:16, padding:"14px 16px", fontFamily:"Cinzel,serif", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:10 }}/>
-        {err && <div style={{ fontSize:14, color:"#C94848", marginBottom:10 }}>{err}</div>}
-        <button onClick={redeem} disabled={busy} style={{ width:"100%", padding:"15px", borderRadius:12, border:"none", background:"linear-gradient(135deg,rgba(176,138,78,0.4),rgba(176,138,78,0.2))", color:"#F5F1E8", fontFamily:"Cinzel,serif", fontSize:14, letterSpacing:"0.09em", marginBottom:12 }}>{busy ? "Checking..." : "Unlock with Code"}</button>
-        <a href={buy} target="_blank" rel="noreferrer" style={{ display:"block", border:"1px solid rgba(176,138,78,0.45)", borderRadius:12, padding:"13px", color:"#B08A4E", textDecoration:"none", fontFamily:"Cinzel,serif", fontSize:13, letterSpacing:"0.08em", marginBottom:8 }}>Get Year 2 · $39</a>
-        <p style={{ fontSize:13, color:"#6C7A86", lineHeight:1.6, margin:"0 0 18px" }}>After purchase, your access code arrives by email.</p>
+        <a href={y2BuyLink(buyLink, email, userId)} target="_blank" rel="noreferrer" style={{ display:"block", borderRadius:12, padding:"15px", background:"linear-gradient(135deg,rgba(176,138,78,0.4),rgba(176,138,78,0.2))", color:"#F5F1E8", textDecoration:"none", fontFamily:"Cinzel,serif", fontSize:14, letterSpacing:"0.09em", marginBottom:10 }}>Get Lifetime Access · $39</a>
+        <button onClick={check} disabled={busy} style={{ width:"100%", padding:"13px", borderRadius:12, border:"1px solid rgba(176,138,78,0.45)", background:"transparent", color:"#B08A4E", fontFamily:"Cinzel,serif", fontSize:13, letterSpacing:"0.08em", marginBottom:10, cursor:busy?"default":"pointer" }}>{busy ? "Checking..." : "I've Paid · Check Again"}</button>
+        {msg && <div style={{ fontSize:14, color:"#A8B3BC", lineHeight:1.6, marginBottom:10 }}>{msg}</div>}
+        <p style={{ fontSize:13, color:"#6C7A86", lineHeight:1.6, margin:"0 0 18px" }}>Paid with a different email? Sign out and sign in with that one.</p>
         <button onClick={onSignOut} style={{ background:"transparent", border:"none", color:"#6C7A86", cursor:"pointer", fontSize:13, fontFamily:"EB Garamond,Georgia,serif" }}>Sign out</button>
       </div>
     </div>
@@ -270,11 +304,10 @@ function AnchoredStepsY2Inner(){
   const [pw,setPw]=useState('');
   const [showPw,setShowPw]=useState(false)
   const [authErr,setAuthErr]=useState('');
-  const [authMode,setAuthMode]=useState('login');
+  const [authMode,setAuthMode]=useState(()=>y2JustPaid()?'signup':'login');
   const [justSignedUp,setJustSignedUp]=useState(false);
   const [searchQuery,setSearchQuery]=useState('');
   const [searchResults,setSearchResults]=useState([]);
-  const [code,setCode]=useState('');
   const [resetMode,setResetMode]=useState(false);
   const [resetSent,setResetSent]=useState(false);
 
@@ -375,15 +408,15 @@ function AnchoredStepsY2Inner(){
     const fetchProfile = () => supabase.from('as2_profiles').select('*').eq('user_id',session.user.id).maybeSingle();
     (async () => {
       let { data, error } = await fetchProfile();
-      // An as2_profiles row means Year 2 is unlocked. Apply a code saved during sign-up, if any.
+      // An as2_profiles row means Year 2 is unlocked. Otherwise apply a matching purchase.
+      // Right after checkout Stripe's notice can take a few seconds, so keep trying briefly.
       if (!data && !error) {
-        let pending = null;
-        try { pending = localStorage.getItem(Y2_PENDING_CODE_KEY) } catch {}
-        if (pending) {
-          const { error: redeemErr } = await supabase.rpc('redeem_access_code', { input_code: pending, for_app: 'as2' });
-          if (!redeemErr) { try { localStorage.removeItem(Y2_PENDING_CODE_KEY) } catch {} }
-          ({ data, error } = await fetchProfile());
+        const tries = y2JustPaid() ? 8 : 1;
+        for (let i = 0; i < tries && !cancelled; i++) {
+          if (await claimY2Purchase()) break;
+          if (i < tries - 1) await new Promise(r => setTimeout(r, 2000));
         }
+        ({ data, error } = await fetchProfile());
       }
       return { data, error };
     })().then(({data, error})=>{
@@ -720,9 +753,10 @@ function AnchoredStepsY2Inner(){
             <div style={{fontSize:9,color:T.gold,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6}}>Elora Radiance Co.</div>
             <div style={{fontSize:20,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
             <div style={{fontSize:13,color:DARK_THEME.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
-            {!resetMode&&authMode==="signup"&&<div style={{fontSize:13,color:DARK_THEME.muted,lineHeight:1.6,marginTop:10}}>Already use Year 1 or Armed &amp; Anchored? Use that same email and password.</div>}
+            {!resetMode&&authMode==="signup"&&<div style={{fontSize:13,color:DARK_THEME.muted,lineHeight:1.6,marginTop:10}}>Use the email you paid with. Already use Year 1 or Armed &amp; Anchored? Use that same email and password.</div>}
           </div>
 
+          {!authErr&&!resetMode&&y2JustPaid()&&<div style={{background:"rgba(124,146,132,0.12)",border:"1px solid rgba(124,146,132,0.35)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:T.green,lineHeight:1.6}}>Payment received. Create your account (or sign in) to open Year 2.</div>}
           {authErr&&<div style={{background:"rgba(201,72,72,0.1)",border:"1px solid rgba(201,72,72,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:"#C94848",lineHeight:1.6}}>{authErr}</div>}
 
           {resetMode ? (
@@ -741,7 +775,6 @@ function AnchoredStepsY2Inner(){
             )
           ) : (
             <>
-              {authMode==="signup"&&<><label style={LBL2}>Access Code</label><input value={code} onChange={e=>setCode(e.target.value)} placeholder="e.g. Y2-7X4K2M" style={{...INP2,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textTransform:"uppercase"}}/></>}
               <label style={LBL2}>Email</label>
               <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2} autoCapitalize="none"/>
               <label style={LBL2}>Password</label>
@@ -755,11 +788,7 @@ function AnchoredStepsY2Inner(){
                   const{error}=await supabase.auth.signInWithPassword({email,password:pw});
                   if(error)setAuthErr(error.message==="Invalid login credentials"?"Incorrect email or password.":error.message);
                 } else {
-                  if(!code.trim()){setAuthErr("Please enter your access code.");return;}
                   if(!email||pw.length<6){setAuthErr("Enter your email and a password of at least 6 characters.");return;}
-                  const{data:codeRows,error:codeErr}=await supabase.rpc("validate_access_code_for",{input_code:code.trim(),for_app:"as2"});
-                  if(codeErr||!codeRows?.length){setAuthErr("Invalid or already used access code.");return;}
-                  try{localStorage.setItem(Y2_PENDING_CODE_KEY,code.trim())}catch{}
                   let{data:authData,error}=await supabase.auth.signUp({email,password:pw,options:{data:{app:"as2"}}});
                   if(error&&/already (registered|exists)/i.test(error.message)){
                     // One account works across Elora Radiance apps: sign in with it and add Year 2
@@ -768,7 +797,7 @@ function AnchoredStepsY2Inner(){
                     authData=res.data;error=null;
                   }
                   if(error){setAuthErr(error.message);return;}
-                  if(!authData?.session){setAuthErr("Check your email to confirm your account, then sign in. Your code will be applied then.");return;}
+                  if(!authData?.session){setAuthErr("Check your email to confirm your account, then sign in.");return;}
                   setJustSignedUp(true);
                 }
               }} style={{...BTN2(true),marginBottom:12}}>
@@ -790,7 +819,7 @@ function AnchoredStepsY2Inner(){
                       <div style={{background:"rgba(160,120,64,0.18)",border:"1px solid "+T.goldB,borderRadius:9,padding:"10px 14px",fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>⚓ Unlock All 52 Weeks →</div>
                     </a>
                   </div>
-                  <p style={{fontSize:12,color:DARK_THEME.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, check your email for your access code, then create your account above.</p>
+                  <p style={{fontSize:12,color:DARK_THEME.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, create your account above with the same email you used at checkout.</p>
                 </div>
               )}
             </>
@@ -810,7 +839,7 @@ function AnchoredStepsY2Inner(){
     </div>
   );
   if(access==='no') return (
-    <Y2NoAccess supabase={supabase} email={session.user?.email} buyLink={STRIPE_LINK}
+    <Y2NoAccess email={session.user?.email} userId={session.user?.id} buyLink={STRIPE_LINK}
       onUnlocked={()=>{ setAccess('checking'); setSession(s=>({...s})); }}
       onSignOut={()=>supabase.auth.signOut()} />
   );
