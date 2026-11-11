@@ -98,10 +98,10 @@ const SECTIONS = [
 // ───────── Complete Theme System (Dark + Light) ─────────
 const DARK_THEME = {
   bg:"#0D1820",bgCard:"rgba(255,255,255,0.035)",bgMid:"#172330",
-  gold:"#A07840",goldL:"#C49A5A",goldF:"rgba(160,120,64,0.12)",goldB:"rgba(160,120,64,0.28)",
-  green:"#7C9284",greenF:"rgba(124,146,132,0.12)",greenB:"rgba(124,146,132,0.28)",
-  purple:"#A89ACF",purpleF:"rgba(168,154,207,0.08)",purpleB:"rgba(168,154,207,0.22)",
-  red:"#D97A7A",redF:"rgba(217,122,122,0.08)",redB:"rgba(217,122,122,0.24)",
+  gold:"#C9A15F",goldL:"#D6B97A",goldF:"rgba(160,120,64,0.12)",goldB:"rgba(160,120,64,0.28)",
+  green:"#9DB5A6",greenF:"rgba(124,146,132,0.12)",greenB:"rgba(124,146,132,0.28)",
+  purple:"#BCB0E0",purpleF:"rgba(168,154,207,0.08)",purpleB:"rgba(168,154,207,0.22)",
+  red:"#E89090",redF:"rgba(217,122,122,0.08)",redB:"rgba(217,122,122,0.24)",
   cream:"#F0ECE3",text:"#E0D8CA",muted:"#BAC4CC",dim:"#92A1AD",border:"rgba(255,255,255,0.06)",
 };
 
@@ -861,8 +861,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     cream: darkMode ? '#F0ECE3' : '#1A1209',
     text: darkMode ? '#E0D8CA' : '#3D2E1A',
     muted: darkMode ? '#A0AAB2' : '#5E4E3C',
-    dim: darkMode ? '#607080' : '#6E6052',
-    gold: darkMode ? '#A07840' : '#6B4E18',
+    dim: darkMode ? '#8A9AAA' : '#6E6052',
+    gold: darkMode ? '#C9A15F' : '#6B4E18',
     goldF: darkMode ? 'rgba(160,120,64,0.12)' : 'rgba(139,106,48,0.1)',
     goldB: darkMode ? 'rgba(160,120,64,0.28)' : 'rgba(139,106,48,0.28)',
     green: '#7C9284', greenF: 'rgba(124,146,132,0.15)', greenB: 'rgba(124,146,132,0.4)',
@@ -1586,7 +1586,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   const pct=done/7;
                   const bg=cur?T.gold:pct===1?T.green:pct>0?"rgba(124,146,132,"+(0.25+pct*0.55)+")":T.bgCard;
                   return (
-                    <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} title={"Week "+w.week+": "+w.theme} style={{width:26,height:26,borderRadius:6,background:bg,border:"1px solid "+(cur?T.goldB:T.border),cursor:"pointer",fontSize:9,color:pct>0||cur?"#fff":T.muted,fontFamily:"Cinzel,serif",padding:0}}>
+                    <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} title={"Week "+w.week+": "+w.theme} style={{width:26,height:26,borderRadius:6,background:bg,border:"1px solid "+(cur?T.goldB:T.border),cursor:"pointer",fontSize:9,color:cur?T.bg:pct===1?(darkMode?T.bg:"#fff"):pct>0?T.cream:T.muted,fontFamily:"Cinzel,serif",padding:0}}>
                       {w.week}
                     </button>
                   );
