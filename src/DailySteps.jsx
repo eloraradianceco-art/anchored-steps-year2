@@ -687,7 +687,7 @@ export default function DailySteps({ week, wk, totalWeeks = 52, entries = [], ge
           <button className="ds-arrow" onClick={() => onGoWeek && onGoWeek(wk + 1)} disabled={wk >= totalWeeks} aria-label="Next week">{"\u203A"}</button>
         </div>
         <h1 className="ds-title">{week.theme}</h1>
-        <p className="ds-sub">{week.verseRef}</p>
+        <p className="ds-sub">{week.verseRef}{week.verseTranslation ? " (" + week.verseTranslation + ")" : ""}</p>
         {yearStrip}
         <div className="ds-year-meta">
           <span className="ds-streak"><Flame />{streakN > 0 ? <span><b>{streakN}</b>-day streak</span> : <span>Start your streak today</span>}</span>
