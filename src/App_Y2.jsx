@@ -4,6 +4,7 @@ import { toPng } from "html-to-image";
 import Onboarding from "./Onboarding.jsx";
 import Reviews from "./Reviews";
 import DailySteps from "./DailySteps.jsx";
+import ReminderSettings from "./ReminderSettings.jsx";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -984,6 +985,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <span style={{ fontSize:13, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>{bookmarks} →</span>
             </button>
           )}
+
+          <ReminderSettings supabase={supabase} app="as2" theme={{
+            text: T.text, muted: T.muted, accent: T.gold, accentF: T.goldF, accentB: T.goldB,
+            card: T.bgCard, border: T.border, dark: darkMode,
+          }} />
 
           {/* Account */}
           <div style={{ marginTop:24, marginBottom:8 }}>
