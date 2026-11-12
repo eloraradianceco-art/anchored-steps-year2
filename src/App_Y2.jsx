@@ -641,7 +641,9 @@ function AnchoredStepsY2Inner(){
     try { localStorage.setItem('y2_bookmarks',JSON.stringify(updated)); } catch {}
     // Also sync bookmarks to Supabase profile
     if(session) {
-      supabase.from('as2_profiles').update({bookmarks: updated}).eq('user_id', session.user.id);
+      // .then() sends it: an unawaited Supabase query never runs
+      supabase.from('as2_profiles').update({bookmarks: updated}).eq('user_id', session.user.id)
+        .then(({error})=>{ if(error) console.warn('bookmarks sync:', error.message); });
     }
   };
 
@@ -1211,7 +1213,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   const updated = bookmarks.filter(b => b.key !== bm.key);
                   setBookmarks(updated);
                   try { localStorage.setItem('y2_bookmarks', JSON.stringify(updated)); } catch {}
-                  if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id);
+                  if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id)
+                    .then(({error})=>{ if(error) console.warn('bookmarks sync:', error.message); });
                 }
               }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,padding:"2px 6px"}}>✕</button>
             </div>
