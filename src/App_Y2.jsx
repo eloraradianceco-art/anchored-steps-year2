@@ -679,7 +679,7 @@ function AnchoredStepsY2Inner(){
         '',
         'Anchored Steps: Year 2 — Deeper faith. Harder truth. Real growth.',
         '',
-        'anchored-steps-year2.vercel.app',
+        'steps2.eloraradiance.com',
       ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n').trim()
       if(navigator.canShare?.({files:[file]})){
         await navigator.share({files:[file],title:'Anchored Steps Year 2',text:caption})
@@ -895,11 +895,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   const versesMemorized = entries?.filter(e => e.field_key?.startsWith('mem_') && e.field_value === '1').length || 0
   const bookmarks = typeof savedCount === 'number' ? savedCount : (entries?.filter(e => e.field_key === 'bookmark' && e.field_value === '1').length || 0)
 
-  const shareText = `I've been using Anchored Steps Year 2 — deeper Scripture, harder questions, and a faith that doesn't quit. 52 weeks of going further with God.\n\nanchored-steps-year2.vercel.app`
+  const shareText = `I've been using Anchored Steps Year 2 — deeper Scripture, harder questions, and a faith that doesn't quit. 52 weeks of going further with God.\n\nsteps2.eloraradiance.com`
 
   const handleShare = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: 'Anchored Steps Year 2', text: shareText, url: 'https://anchored-steps-year2.vercel.app' }) } catch {}
+      try { await navigator.share({ title: 'Anchored Steps Year 2', text: shareText, url: 'https://steps2.eloraradiance.com' }) } catch {}
     } else {
       try { await navigator.clipboard.writeText(shareText); setCopiedShare(true); setTimeout(() => setCopiedShare(false), 2500) } catch {}
     }
@@ -913,7 +913,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       const get = (week, key) => data?.find(e => e.week === week && e.field_key === key)?.field_value || ''
       const lines = []
       lines.push('ANCHORED STEPS — YEAR 2 JOURNAL')
-      lines.push('Elora Radiance Co. | anchored-steps-year2.vercel.app')
+      lines.push('Elora Radiance Co. | steps2.eloraradiance.com')
       lines.push(`Exported: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`)
       lines.push('='.repeat(50))
       if (ALL_WEEKS) {
@@ -962,7 +962,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         if (prayer)  html += `<h3>Prayer</h3><p>${prayer.split('\n').join('<br/>')}</p>`
       }
     }
-    html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — anchored-steps-year2.vercel.app</p></body></html>`
+    html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — steps2.eloraradiance.com</p></body></html>`
     // Print via a hidden iframe so we never navigate away or trap the user (critical in standalone PWA mode)
     const frame = document.createElement('iframe')
     frame.setAttribute('aria-hidden', 'true')
@@ -1102,11 +1102,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'12px 16px' }}>
             <p style={{ fontSize:13, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
             {[
-              { label:'Armed & Anchored', desc:'Spiritual warfare training — 26 weapons', url:'https://armedandanchored.vercel.app/', icon:'⚔️' },
-              { label:'Anchored Steps · Year 1', desc:'52 weeks of faith in action', url:'https://anchored-steps.vercel.app/', icon:'⚓' },
-              { label:'The Red Letters', desc:'The words of Jesus by theme — free', url:'https://redletters.vercel.app/', icon:'✦' },
-              { label:'Anchored Verse', desc:'Scripture for every emotion — free', url:'https://anchoredverse.vercel.app/', icon:'📖' },
-              { label:'The Living Planner', desc:'Faith-centered life planner', url:'https://the-living-planner.vercel.app/', icon:'📓' },
+              { label:'Armed & Anchored', desc:'Spiritual warfare training — 26 weapons', url:'https://armed.eloraradiance.com/', icon:'⚔️' },
+              { label:'Anchored Steps · Year 1', desc:'52 weeks of faith in action', url:'https://steps.eloraradiance.com/', icon:'⚓' },
+              { label:'The Red Letters', desc:'The words of Jesus by theme — free', url:'https://redletters.eloraradiance.com/', icon:'✦' },
+              { label:'Anchored Verse', desc:'Scripture for every emotion — free', url:'https://verse.eloraradiance.com/', icon:'📖' },
+              { label:'The Living Planner', desc:'Faith-centered life planner', url:'https://planner.eloraradiance.com/', icon:'📓' },
             ].map(app => (
               <a key={app.url} href={app.url} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:14, padding:'13px 14px', borderRadius:12, marginBottom:8, background:T.goldF, border:`1px solid ${T.goldB}`, textDecoration:'none', transition:'all .2s' }}>
                 <span style={{ fontSize:22, flexShrink:0 }}>{app.icon}</span>
@@ -1706,9 +1706,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Refer a Friend</div>
               <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Share Anchored Steps Year 2 with someone ready to go deeper.</p>
               <div style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:10,padding:"12px 14px",marginBottom:12,fontFamily:"Cinzel,serif",fontSize:12,color:T.gold,letterSpacing:"0.04em"}}>
-                anchored-steps-year2.vercel.app
+                steps2.eloraradiance.com
               </div>
-              <button onClick={()=>{navigator.clipboard.writeText("anchored-steps-year2.vercel.app").then(()=>alert("Link copied!"));}} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
+              <button onClick={()=>{navigator.clipboard.writeText("steps2.eloraradiance.com").then(()=>alert("Link copied!"));}} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
                 Copy Link
               </button>
             </div>
@@ -1785,7 +1785,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           'Week '+wk+': '+(week?.theme||''),
           '',
           'Anchored Steps Year 2 — 52 weeks of faith in action.',
-          'anchored-steps-year2.vercel.app',
+          'steps2.eloraradiance.com',
         ].filter(Boolean).join('\n')
         const cBg=shareCardLight?'linear-gradient(155deg,#F2EDE3 0%,#E8E1D4 100%)':'linear-gradient(155deg,#0D1820 0%,#172330 100%)'
         const cBord=shareCardLight?'rgba(0,0,0,0.1)':T.goldB
