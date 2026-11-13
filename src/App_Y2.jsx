@@ -7,6 +7,8 @@ import DailySteps from "./DailySteps.jsx";
 import ReminderSettings from "./ReminderSettings.jsx";
 import AccountPrivacy from "./AccountPrivacy.jsx";
 import ScriptureCredits from "./ScriptureCredits.jsx";
+import { Welcome, AuthCard, HomeScreenTip } from "./EntryScreens.jsx";
+import { BRAND } from "./entryBrand.js";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -62,20 +64,8 @@ function Y2NoAccess({ email, userId, buyLink, onUnlocked, onSignOut }) {
     if (ok) onUnlocked();
     else setMsg("We don't see a Year 2 purchase for " + (email || "this account") + " yet. If you just paid, give it a minute and check again.");
   };
-  return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0F1A24 0%,#1A2A38 55%,#0F1A24 100%)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 20px", textAlign:"center", fontFamily:"'EB Garamond',Georgia,serif" }}>
-      <img src="/icon2.png" alt="" style={{ width:64, height:64, borderRadius:14, marginBottom:16 }}/>
-      <div style={{ fontFamily:"Cinzel,serif", fontSize:20, color:"#F5F1E8", marginBottom:8 }}>Unlock Year 2</div>
-      <p style={{ fontSize:16, color:"#A8B3BC", lineHeight:1.7, margin:"0 0 22px", maxWidth:360 }}>You're signed in as {email}, but Year 2 isn't on this account yet. Already bought it? It unlocks for the email you used at checkout.</p>
-      <div style={{ width:"100%", maxWidth:340 }}>
-        <a href={y2BuyLink(buyLink, email, userId)} target="_blank" rel="noreferrer" style={{ display:"block", borderRadius:12, padding:"15px", background:"linear-gradient(135deg,rgba(176,138,78,0.4),rgba(176,138,78,0.2))", color:"#F5F1E8", textDecoration:"none", fontFamily:"Cinzel,serif", fontSize:14, letterSpacing:"0.09em", marginBottom:10 }}>Get Lifetime Access · $39</a>
-        <button onClick={check} disabled={busy} style={{ width:"100%", padding:"13px", borderRadius:12, border:"1px solid rgba(176,138,78,0.45)", background:"transparent", color:"#B08A4E", fontFamily:"Cinzel,serif", fontSize:13, letterSpacing:"0.08em", marginBottom:10, cursor:busy?"default":"pointer" }}>{busy ? "Checking..." : "I've Paid · Check Again"}</button>
-        {msg && <div style={{ fontSize:14, color:"#A8B3BC", lineHeight:1.6, marginBottom:10 }}>{msg}</div>}
-        <p style={{ fontSize:13, color:"#6C7A86", lineHeight:1.6, margin:"0 0 18px" }}>Paid with a different email? Sign out and sign in with that one.</p>
-        <button onClick={onSignOut} style={{ background:"transparent", border:"none", color:"#6C7A86", cursor:"pointer", fontSize:13, fontFamily:"EB Garamond,Georgia,serif" }}>Sign out</button>
-      </div>
-    </div>
-  );
+  return <Welcome brand={BRAND} session={{ user: { email } }} buyHref={y2BuyLink(buyLink, email, userId)}
+    onCheckAgain={check} checking={busy} checkMessage={msg} onSignOut={onSignOut} />;
 }
 
 // Safari (iOS 26) colors the status-bar area and its bottom bar from the page background,
@@ -325,6 +315,9 @@ function AnchoredStepsY2Inner(){
   const [searchResults,setSearchResults]=useState([]);
   const [resetMode,setResetMode]=useState(false);
   const [resetSent,setResetSent]=useState(false);
+  // Signed out: the welcome page first, the sign-in card after "Sign in" (straight there after checkout)
+  const [entry,setEntry]=useState(()=>y2JustPaid()?'auth':'welcome');
+  const [authBusy,setAuthBusy]=useState(false);
 
   // Restore last visited week
   const [wk,setWk]=useState(()=>{
@@ -722,135 +715,44 @@ function AnchoredStepsY2Inner(){
   );
 
   if(!session){
-    const INP2={width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.goldB,borderRadius:10,color:DARK_THEME.cream,fontSize:16,padding:"14px 16px",fontFamily:"'EB Garamond',Georgia,serif",outline:"none",boxSizing:"border-box",marginBottom:12};
-    const BTN2=(a)=>({width:"100%",padding:"16px",borderRadius:12,cursor:a?"pointer":"default",fontSize:14,fontFamily:"Cinzel,serif",letterSpacing:"0.09em",transition:"all .25s",touchAction:"manipulation",border:"none",background:a?"linear-gradient(135deg,rgba(160,120,64,0.4),rgba(160,120,64,0.2))":"rgba(160,120,64,0.08)",color:a?T.cream:T.muted});
-    const LBL2={fontSize:10,color:DARK_THEME.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6,display:"block"};
     if(justSignedUp) return (
-    <div style={{minHeight:'100vh',background:T.bg,fontFamily:"'EB Garamond',Georgia,serif",
-      display:'flex',alignItems:'center',justifyContent:'center',padding:'0 16px'}}>
-      <div style={{background:T.bgMid,border:`1px solid ${T.goldB}`,borderRadius:20,
-        padding:'32px 28px',width:'100%',maxWidth:420}}>
-        <div style={{textAlign:'center',marginBottom:20}}>
-          <div style={{fontSize:26,marginBottom:8}}>⚓</div>
-          <div style={{fontSize:16,fontWeight:700,color:T.cream,fontFamily:"'Cinzel',Georgia,serif",
-            letterSpacing:'0.06em',marginBottom:4}}>Anchored Steps · Year 2</div>
-          <div style={{fontSize:13,color:T.green,fontFamily:"'Cinzel',Georgia,serif",
-            letterSpacing:'0.06em'}}>✓ Account Created</div>
-        </div>
-        <div style={{fontSize:10,color:T.gold,letterSpacing:'0.16em',textTransform:'uppercase',
-          fontFamily:"'Cinzel',Georgia,serif",marginBottom:8}}>📱 Add to Your Home Screen</div>
-        <p style={{fontSize:13,color:T.text,lineHeight:1.65,marginBottom:14}}>
-          Anchored Steps Year 2 works like a native app — add it to your home screen for instant one-tap access.
-        </p>
-        {[
-          {os:'🍎 iPhone / iPad (Safari)',steps:['Tap the Share button ⎋ at the bottom of Safari','Scroll and tap "Add to Home Screen"','Tap "Add" — done ✓']},
-          {os:'🤖 Android (Chrome)',steps:['Tap the three-dot menu ⋮ at the top right','Tap "Add to Home Screen" or "Install App"','Tap "Add" — done ✓']},
-        ].map(p=>(
-          <div key={p.os} style={{marginBottom:12}}>
-            <div style={{fontSize:11,color:T.gold,fontFamily:"'Cinzel',Georgia,serif",
-              letterSpacing:'0.06em',marginBottom:6}}>{p.os}</div>
-            {p.steps.map((step,i)=>(
-              <div key={i} style={{display:'flex',gap:8,marginBottom:4}}>
-                <span style={{fontSize:11,color:T.goldL,flexShrink:0,minWidth:14,
-                  fontFamily:"'Cinzel',Georgia,serif"}}>{i+1}.</span>
-                <span style={{fontSize:13,color:T.muted,lineHeight:1.5}}>{step}</span>
-              </div>
-            ))}
-          </div>
-        ))}
-        <button onClick={()=>setJustSignedUp(false)}
-          style={{width:'100%',padding:'14px',borderRadius:10,cursor:'pointer',
-            background:T.goldF,border:`1px solid ${T.goldB}`,color:T.cream,
-            fontSize:13,fontFamily:"'Cinzel',Georgia,serif",letterSpacing:'0.06em',marginTop:6}}>
-          ⚓ Enter Year 2 →
-        </button>
-      </div>
-    </div>
-  )
-
-  return (
-      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"radial-gradient(ellipse at 50% 0%, rgba(160,120,64,0.1) 0%, transparent 55%), "+T.bg,fontFamily:"'EB Garamond',Georgia,serif",overflowY:"auto",padding:"0 16px 40px"}}>
-        <div style={{background:"rgba(13,26,42,0.98)",borderRadius:20,border:"1px solid "+T.goldB,padding:"32px 28px 36px",width:"100%",maxWidth:420,marginTop:"8vh",marginBottom:40,boxShadow:"0 12px 40px rgba(0,0,0,0.4)"}}>
-          <div style={{textAlign:"center",marginBottom:28}}>
-            <img src="/icon2.png" alt="" style={{width:56,height:56,borderRadius:14,display:"block",margin:"0 auto 12px",boxShadow:"0 4px 16px rgba(0,0,0,0.3)"}}/>
-            <div style={{fontSize:9,color:T.gold,letterSpacing:"0.2em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:6}}>Elora Radiance Co.</div>
-            <div style={{fontSize:20,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.05em",marginBottom:6}}>Anchored Steps · Year 2</div>
-            <div style={{fontSize:13,color:DARK_THEME.muted,fontStyle:"italic"}}>{resetMode?"Reset your password":authMode==="login"?"Welcome back":"Create your account"}</div>
-            {!resetMode&&authMode==="signup"&&<div style={{fontSize:13,color:DARK_THEME.muted,lineHeight:1.6,marginTop:10}}>Use the email you paid with. Already use Year 1 or Armed &amp; Anchored? Use that same email and password.</div>}
-          </div>
-
-          {!authErr&&!resetMode&&y2JustPaid()&&<div style={{background:"rgba(124,146,132,0.12)",border:"1px solid rgba(124,146,132,0.35)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:T.green,lineHeight:1.6}}>Payment received. Create your account (or sign in) to open Year 2.</div>}
-          {authErr&&<div style={{background:"rgba(201,72,72,0.1)",border:"1px solid rgba(201,72,72,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:14,color:"#C94848",lineHeight:1.6}}>{authErr}</div>}
-
-          {resetMode ? (
-            resetSent ? (
-              <div style={{background:"rgba(124,146,132,0.12)",border:"1px solid rgba(124,146,132,0.35)",borderRadius:12,padding:"16px",textAlign:"center"}}>
-                <div style={{fontSize:14,color:T.green,marginBottom:10}}>✓ Check your email for a reset link.</div>
-                <button onClick={()=>{setResetMode(false);setResetSent(false)}} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif"}}>Back to Sign In</button>
-              </div>
-            ) : (
-              <>
-                <label style={LBL2}>Email</label>
-                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2}/>
-                <button onClick={handlePasswordReset} style={{...BTN2(true),marginBottom:12}}>Send Reset Link</button>
-                <div style={{textAlign:"center"}}><button onClick={()=>{setResetMode(false);setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button></div>
-              </>
-            )
-          ) : (
-            <>
-              <label style={LBL2}>Email</label>
-              <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" type="email" style={INP2} autoCapitalize="none"/>
-              <label style={LBL2}>Password</label>
-              <div style={{position:"relative",marginBottom:20}}>
-                <input value={pw} onChange={e=>setPw(e.target.value)} placeholder={authMode==="signup"?"At least 6 characters":"Your password"} type={showPw?"text":"password"} style={{...INP2,marginBottom:0,paddingRight:64}}/>
-                <button type="button" onClick={()=>setShowPw(s=>!s)} aria-label={showPw?"Hide password":"Show password"} style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", background:"transparent", border:"none", color:T.gold, fontSize:10, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", padding:"8px 10px", touchAction:"manipulation" }}>{showPw?"Hide":"Show"}</button>
-              </div>
-              <button onClick={async()=>{
-                setAuthErr("");
-                if(authMode==="login"){
-                  const{error}=await supabase.auth.signInWithPassword({email,password:pw});
-                  if(error)setAuthErr(error.message==="Invalid login credentials"?"Incorrect email or password.":error.message);
-                } else {
-                  if(!email||pw.length<6){setAuthErr("Enter your email and a password of at least 6 characters.");return;}
-                  let{data:authData,error}=await supabase.auth.signUp({email,password:pw,options:{data:{app:"as2"}}});
-                  if(error&&/already (registered|exists)/i.test(error.message)){
-                    // One account works across Elora Radiance apps: sign in with it and add Year 2
-                    const res=await supabase.auth.signInWithPassword({email,password:pw});
-                    if(res.error){setAuthErr("This email already has an Elora Radiance account (from Year 1 or Armed & Anchored). Enter that password to add Year 2 to it, or use Forgot password.");return;}
-                    authData=res.data;error=null;
-                  }
-                  if(error){setAuthErr(error.message);return;}
-                  if(!authData?.session){setAuthErr("Check your email to confirm your account, then sign in.");return;}
-                  setJustSignedUp(true);
-                }
-              }} style={{...BTN2(true),marginBottom:12}}>
-                {authMode==="login"?"Sign In":"Create Account"}
-              </button>
-              <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
-                {authMode==="login"&&<><button onClick={()=>{setAuthMode("signup");setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Create account</button><button onClick={()=>{setResetMode(true);setAuthErr("")}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>Forgot password?</button><button onClick={()=>setAuthMode("plans")} style={{background:"transparent",border:"none",color:T.gold,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>View plans →</button></>}
-                {authMode!=="login"&&<button onClick={()=>{setAuthMode("login");setAuthErr("")}} style={{background:"transparent",border:"none",color:DARK_THEME.muted,cursor:"pointer",fontSize:13,fontFamily:"'EB Garamond',Georgia,serif"}}>← Back to sign in</button>}
-              </div>
-              {authMode==="plans"&&(
-                <div style={{marginTop:20,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-                  <div style={{fontSize:10,color:DARK_THEME.muted,letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:14,textAlign:"center"}}>Choose Your Plan</div>
-                  <div style={{marginBottom:12}}>
-                    <a href={STRIPE_LINK} target="_blank" rel="noreferrer" style={{textDecoration:"none",display:"block",background:"linear-gradient(135deg,rgba(160,120,64,0.22),rgba(160,120,64,0.10))",border:"2px solid "+T.gold,borderRadius:14,padding:"22px 18px",position:"relative",textAlign:"center"}}>
-                      <div style={{position:"absolute",top:-11,left:"50%",transform:"translateX(-50%)",background:T.gold,color:T.bg,fontSize:9,fontWeight:700,padding:"3px 12px",borderRadius:10,letterSpacing:"0.12em",fontFamily:"Cinzel,serif"}}>LIFETIME ACCESS</div>
-                      <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",marginBottom:8,textTransform:"uppercase"}}>Year 2 — Complete</div>
-                      <div style={{fontSize:34,fontWeight:700,color:DARK_THEME.cream,fontFamily:"Cinzel,serif",marginBottom:4,lineHeight:1}}>$39</div>
-                      <div style={{fontSize:11,color:DARK_THEME.muted,marginBottom:14,letterSpacing:"0.04em"}}>one-time · no subscription</div>
-                      <div style={{background:"rgba(160,120,64,0.18)",border:"1px solid "+T.goldB,borderRadius:9,padding:"10px 14px",fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>⚓ Unlock All 52 Weeks →</div>
-                    </a>
-                  </div>
-                  <p style={{fontSize:12,color:DARK_THEME.muted,lineHeight:1.7,textAlign:"center"}}>After purchase, create your account above with the same email you used at checkout.</p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    
-);
+      <AuthCard brand={BRAND} mode="signup" onMode={()=>{}} email={email} onEmail={setEmail} password={pw} onPassword={setPw} onSubmit={()=>{}} hideForm>
+        <HomeScreenTip brand={BRAND} onContinue={()=>setJustSignedUp(false)} continueLabel="⚓ Open Year 2 →" />
+      </AuthCard>
+    );
+    if(entry==='welcome') return <Welcome brand={BRAND} buyHref={STRIPE_LINK} onSignIn={()=>setEntry('auth')} />;
+    const mode = resetMode ? 'forgot' : authMode==='signup' ? 'signup' : 'signin';
+    const submitAuth = async () => {
+      setAuthErr('');
+      if(mode==='forgot'){ setAuthBusy(true); await handlePasswordReset(); setAuthBusy(false); return; }
+      setAuthBusy(true);
+      try {
+        if(mode==='signin'){
+          const{error}=await supabase.auth.signInWithPassword({email,password:pw});
+          if(error)setAuthErr(error.message==="Invalid login credentials"?"Incorrect email or password.":error.message);
+        } else {
+          if(!email||pw.length<6){setAuthErr("Enter your email and a password of at least 6 characters.");return;}
+          let{data:authData,error}=await supabase.auth.signUp({email,password:pw,options:{data:{app:"as2"}}});
+          if(error&&/already (registered|exists)/i.test(error.message)){
+            // One account works across Elora Radiance apps: sign in with it and add Year 2
+            const res=await supabase.auth.signInWithPassword({email,password:pw});
+            if(res.error){setAuthErr("This email already has an Elora Radiance account (from Year 1 or Armed & Anchored). Enter that password to add Year 2 to it, or use Forgot password.");return;}
+            authData=res.data;error=null;
+          }
+          if(error){setAuthErr(error.message);return;}
+          if(!authData?.session){setAuthErr("Check your email to confirm your account, then sign in.");return;}
+          setJustSignedUp(true);
+        }
+      } finally { setAuthBusy(false); }
+    };
+    return (
+      <AuthCard brand={BRAND} mode={mode}
+        onMode={(m)=>{ setAuthErr(''); setResetSent(false); if(m==='forgot'){ setResetMode(true); } else { setResetMode(false); setAuthMode(m==='signup'?'signup':'login'); } }}
+        email={email} onEmail={setEmail} password={pw} onPassword={setPw} onSubmit={submitAuth} loading={authBusy}
+        error={authErr} message={!authErr&&mode!=='forgot'&&y2JustPaid()?'Payment received. Create your account (or sign in) to open Year 2.':''}
+        resetSent={resetSent} onResetDone={()=>{ setResetMode(false); setResetSent(false); }}
+        onBack={()=>setEntry('welcome')} />
+    );
   }
 
   // Signed in, but Year 2 isn't unlocked on this account yet
