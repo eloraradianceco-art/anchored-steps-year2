@@ -132,7 +132,7 @@ class ErrorBoundary extends React.Component {
           <div style={{maxWidth:380,textAlign:"center"}}>
             <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,marginBottom:16,opacity:.6}}/>
             <div style={{fontFamily:"Cinzel,serif",fontSize:14,color:DARK_THEME.gold,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>Something went wrong</div>
-            <p style={{fontSize:14,color:DARK_THEME.muted,marginBottom:20,lineHeight:1.7}}>The page hit an unexpected error. Reload to try again.</p>
+            <p style={{fontSize:16,color:DARK_THEME.muted,marginBottom:20,lineHeight:1.7}}>The page hit an unexpected error. Reload to try again.</p>
             <button onClick={()=>window.location.reload()} style={{background:"rgba(160,120,64,0.18)",border:"1px solid rgba(160,120,64,0.4)",color:DARK_THEME.gold,padding:"12px 28px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Reload</button>
           </div>
         </div>
@@ -200,14 +200,14 @@ function MemorizeModal({verse,onClose,onPass,T}){
         <div style={{fontSize:14,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.1em",marginBottom:16,paddingBottom:14,borderBottom:"1px solid "+T.goldB,textAlign:"center"}}>{verseRef}</div>
         {!mode?(
           <div>
-            <p style={{fontSize:14,color:T.muted,textAlign:"center",marginBottom:16,fontStyle:"italic",lineHeight:1.6}}>Choose your memorization method:</p>
+            <p style={{fontSize:16,color:T.muted,textAlign:"center",marginBottom:16,fontStyle:"italic",lineHeight:1.6}}>Choose your memorization method:</p>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {[{id:"recall",icon:"🧠",title:"Read & Recall",desc:"See the reference, recite aloud, then reveal to check"},{id:"blanks",icon:"✏️",title:"Fill the Gaps",desc:"Read the verse with every 3rd word blanked out"},{id:"type",icon:"⌨️",title:"Write it Out",desc:"Type the verse from memory and get a score"}].map(m=>(
                 <button key={m.id} onClick={()=>{setMode(m.id);setRevealed(false);setTyped('');setScore(null);}} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",borderRadius:12,cursor:"pointer",textAlign:"left",background:T.goldF,border:"1px solid "+T.goldB,transition:"all .2s"}}>
                   <span style={{fontSize:22,flexShrink:0}}>{m.icon}</span>
                   <span>
                     <span style={{display:"block",fontSize:13,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.06em",marginBottom:2}}>{m.title}</span>
-                    <span style={{display:"block",fontSize:12,color:T.muted,fontStyle:"italic"}}>{m.desc}</span>
+                    <span style={{display:"block",fontSize:15,color:T.muted,fontStyle:"italic"}}>{m.desc}</span>
                   </span>
                 </button>
               ))}
@@ -217,20 +217,20 @@ function MemorizeModal({verse,onClose,onPass,T}){
           <div>
             {!revealed?(
               <div style={{textAlign:"center"}}>
-                <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:20,lineHeight:1.7}}>Say the verse aloud from memory, then reveal to check yourself.</p>
+                <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20,lineHeight:1.7}}>Say the verse aloud from memory, then reveal to check yourself.</p>
                 <button onClick={()=>setRevealed(true)} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px 28px",borderRadius:50,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Reveal Verse</button>
               </div>
             ):(
               <div>
                 <p style={{fontSize:17,color:T.cream,fontStyle:"italic",lineHeight:1.85,marginBottom:20,textAlign:"center"}}>"{verseText}"</p>
                 <button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"13px",borderRadius:12,cursor:"pointer",fontSize:13,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>✓ I've Got It — Mark Memorized</button>
-                <button onClick={()=>setRevealed(false)} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
+                <button onClick={()=>setRevealed(false)} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:16,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
               </div>
             )}
           </div>
         ):mode==='blanks'?(
           <div>
-            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:14,lineHeight:1.6,textAlign:"center"}}>Read aloud, filling in the blanked words from memory.</p>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:14,lineHeight:1.6,textAlign:"center"}}>Read aloud, filling in the blanked words from memory.</p>
             <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:12,padding:"16px",marginBottom:16}}>
               <p style={{fontSize:17,color:T.cream,fontStyle:"italic",lineHeight:2.1,margin:0}}>
                 {blankedWords.map((w,i)=>(
@@ -242,7 +242,7 @@ function MemorizeModal({verse,onClose,onPass,T}){
               <button onClick={()=>setRevealed(true)} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>Reveal Missing Words</button>
             ):(
               <div style={{background:"rgba(124,146,132,0.08)",border:"1px solid rgba(124,146,132,0.25)",borderRadius:10,padding:"12px 14px",marginBottom:12}}>
-                <p style={{fontSize:14,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>
+                <p style={{fontSize:16,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>
                   {words.map((w,i)=>(
                     <span key={i} style={{color:(i+1)%3===0?T.green:T.text,fontWeight:(i+1)%3===0?600:400}}>{w}{i<words.length-1?" ":""}</span>
                   ))}
@@ -253,21 +253,21 @@ function MemorizeModal({verse,onClose,onPass,T}){
           </div>
         ):(
           <div>
-            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:12,lineHeight:1.6,textAlign:"center"}}>Type the verse from memory, then check your score.</p>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:12,lineHeight:1.6,textAlign:"center"}}>Type the verse from memory, then check your score.</p>
             {score===null?(
               <div>
-                <textarea rows={5} value={typed} onChange={e=>setTyped(e.target.value)} placeholder="Type the verse here from memory..." style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,color:T.cream,fontSize:15,padding:"12px",fontFamily:"EB Garamond,Georgia,serif",outline:"none",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.7}}/>
+                <textarea rows={5} value={typed} onChange={e=>setTyped(e.target.value)} placeholder="Type the verse here from memory..." style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,color:T.cream,fontSize:16,padding:"12px",fontFamily:"EB Garamond,Georgia,serif",outline:"none",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.7}}/>
                 <button onClick={checkScore} disabled={!typed.trim()} style={{width:"100%",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",opacity:typed.trim()?1:0.4}}>Check My Score</button>
               </div>
             ):(
               <div style={{textAlign:"center"}}>
                 <div style={{fontSize:48,fontWeight:700,color:score>=80?T.green:score>=50?T.gold:T.red,fontFamily:"Cinzel,serif",marginBottom:4}}>{score}%</div>
-                <div style={{fontSize:13,color:T.muted,marginBottom:16}}>{score>=90?"Nearly perfect!":score>=70?"Great progress!":score>=50?"Good start!":"Keep practicing!"}</div>
+                <div style={{fontSize:16,color:T.muted,marginBottom:16}}>{score>=90?"Nearly perfect!":score>=70?"Great progress!":score>=50?"Good start!":"Keep practicing!"}</div>
                 <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px",marginBottom:14,textAlign:"left"}}>
                   <p style={{fontSize:16,color:T.text,fontStyle:"italic",lineHeight:1.8,margin:0}}>"{verseText}"</p>
                 </div>
                 {score>=70&&<button onClick={markMemo} style={{width:"100%",background:"rgba(124,146,132,0.15)",border:"1px solid rgba(124,146,132,0.4)",color:T.green,padding:"12px",borderRadius:12,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",marginBottom:10}}>✓ Mark as Memorized</button>}
-                <button onClick={()=>{setTyped('');setScore(null);}} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
+                <button onClick={()=>{setTyped('');setScore(null);}} style={{width:"100%",background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:16,fontFamily:"EB Garamond,Georgia,serif"}}>Try Again</button>
               </div>
             )}
           </div>
@@ -283,7 +283,7 @@ function ContextModal({ae,onClose,T}){
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.78)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + var(--safe-top, env(safe-area-inset-top, 0px))) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={onClose}>
       <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:20,padding:28,maxWidth:420,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase"}}>Scripture Context</div>
+          <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase"}}>Scripture Context</div>
           <button onClick={onClose} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:20,lineHeight:1}}>&#215;</button>
         </div>
         {ae.ref&&<div style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:10,padding:"10px 14px",marginBottom:20}}>
@@ -291,11 +291,11 @@ function ContextModal({ae,onClose,T}){
         </div>}
         {[["Author",ae.author],["Location",ae.location],["Audience",ae.audience],["Commentary",ae.commentary]].map(([lb,val])=>val?(
           <div key={lb} style={{marginBottom:16,paddingBottom:16,borderBottom:"1px solid "+T.border}}>
-            <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:7}}>{lb}</div>
-            <p style={{fontSize:15,color:T.text,lineHeight:1.85,margin:0}}>{val}</p>
+            <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:7}}>{lb}</div>
+            <p style={{fontSize:16,color:T.text,lineHeight:1.85,margin:0}}>{val}</p>
           </div>
         ):null)}
-        <button onClick={onClose} style={{width:"100%",marginTop:4,background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"11px",borderRadius:8,cursor:"pointer",fontSize:13,fontFamily:"EB Garamond,Georgia,serif"}}>Close</button>
+        <button onClick={onClose} style={{width:"100%",marginTop:4,background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"11px",borderRadius:8,cursor:"pointer",fontSize:16,fontFamily:"EB Garamond,Georgia,serif"}}>Close</button>
       </div>
     </div>
   );
@@ -387,8 +387,8 @@ function AnchoredStepsY2Inner(){
 
   const week = useMemo(() => ALL_WEEKS.find(w=>w.week===wk), [wk]);
 
-  const LBL = {fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,display:"block"};
-  const INP = {width:"100%",background:darkMode?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px",color:T.text,fontSize:15,fontFamily:"EB Garamond,Georgia,serif",resize:"vertical",boxSizing:"border-box",outline:"none",lineHeight:1.7};
+  const LBL = {fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,display:"block"};
+  const INP = {width:"100%",background:darkMode?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px",color:T.text,fontSize:16,fontFamily:"EB Garamond,Georgia,serif",resize:"vertical",boxSizing:"border-box",outline:"none",lineHeight:1.7};
 
   // Persist last visited week
   useEffect(()=>{
@@ -906,7 +906,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         {/* Sticky header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'calc(16px + var(--safe-top, env(safe-area-inset-top, 0px))) 20px 16px', borderBottom:`1px solid ${T.border}`, position:'sticky', top:0, zIndex:10, background: darkMode ? '#0D1820' : '#F2EDE3', backdropFilter:'blur(12px)' }}>
           <div>
-            <div style={{ fontSize:9, color:T.gold, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif" }}>Anchored Steps · Year 2</div>
+            <div style={{ fontSize:11, color:T.gold, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif" }}>Anchored Steps · Year 2</div>
             <div style={{ fontSize:18, fontWeight:700, color:T.cream, fontFamily:"'Cinzel',Georgia,serif" }}>Settings</div>
           </div>
           <button onClick={onClose} style={{ background:T.bgCard, border:`1px solid ${T.border}`, color:T.muted, width:36, height:36, borderRadius:9, cursor:'pointer', fontSize:18 }}>←</button>
@@ -916,21 +916,21 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           {/* Progress */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Progress</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Progress</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:14 }}>
               {[[weeksJournaled,'Weeks','📖'],[versesMemorized,'Memorized','✦'],[bookmarks,'Saved','☆']].map(([v,l,icon]) => (
                 <div key={l} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, borderRadius:12, padding:'14px 8px', textAlign:'center' }}>
                   <div style={{ fontSize:26, fontWeight:700, color:T.gold, fontFamily:"'Cinzel',Georgia,serif", lineHeight:1 }}>{v}</div>
-                  <div style={{ fontSize:10, color:T.muted, marginTop:4 }}>{l}</div>
+                  <div style={{ fontSize:14, color:T.muted, marginTop:4 }}>{l}</div>
                 </div>
               ))}
             </div>
             <div style={{ height:5, background:T.bgCard, borderRadius:3, overflow:'hidden', border:`1px solid ${T.border}` }}>
               <div style={{ height:'100%', background:`linear-gradient(90deg,${T.gold},#C9A96E)`, width:`${Math.round((wk/52)*100)}%`, transition:'width .4s ease' }}/>
             </div>
-            <div style={{ fontSize:12, color:T.muted, textAlign:'center', marginTop:8 }}>Week {wk} of 52 · {Math.round((wk/52)*100)}% complete</div>
+            <div style={{ fontSize:15, color:T.muted, textAlign:'center', marginTop:8 }}>Week {wk} of 52 · {Math.round((wk/52)*100)}% complete</div>
             <button onClick={()=>{ if(window.confirm('Reset to Week 1? Journal entries will be kept.')) goWk(1) }} style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.muted, padding:'10px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em', marginTop:10 }}>↺ Reset to Week 1</button>
           </div>
 
@@ -952,7 +952,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           {/* Account */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Account</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Account</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
@@ -979,7 +979,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           {/* Appearance */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Appearance</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Appearance</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon={darkMode ? '🌙' : '☀️'} label={darkMode ? 'Dark Mode' : 'Light Mode'} border={false}>
@@ -991,11 +991,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           {/* Share */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Share & Referral</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Share & Referral</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
-            <p style={{ fontSize:15, color:T.text, lineHeight:1.75, marginBottom:14 }}>Know someone who finished Year 1 and is ready to go deeper? Share Year 2 with them.</p>
-            <div style={{ background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', border:`1px solid ${T.border}`, borderRadius:10, padding:'12px 14px', marginBottom:12, fontSize:13, color:T.muted, fontStyle:'italic', lineHeight:1.7 }}>
+            <p style={{ fontSize:16, color:T.text, lineHeight:1.75, marginBottom:14 }}>Know someone who finished Year 1 and is ready to go deeper? Share Year 2 with them.</p>
+            <div style={{ background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', border:`1px solid ${T.border}`, borderRadius:10, padding:'12px 14px', marginBottom:12, fontSize:16, color:T.muted, fontStyle:'italic', lineHeight:1.7 }}>
               "{shareText.split('\n')[0]}"
             </div>
             <button onClick={handleShare} style={{ width:'100%', background: copiedShare ? T.greenF : T.goldF, border:`1px solid ${copiedShare ? T.greenB : T.goldB}`, color: copiedShare ? T.green : T.gold, padding:'13px', borderRadius:12, cursor:'pointer', fontSize:13, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em', transition:'all .25s' }}>
@@ -1005,10 +1005,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
           {/* More from Elora Radiance */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>More from Elora Radiance Co.</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>More from Elora Radiance Co.</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'12px 16px' }}>
-            <p style={{ fontSize:13, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
+            <p style={{ fontSize:16, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
             {[
               { label:'Armed & Anchored', desc:'Spiritual warfare training — 26 weapons', url:'https://armed.eloraradiance.com/', icon:'⚔️' },
               { label:'Anchored Steps · Year 1', desc:'52 weeks of faith in action', url:'https://steps.eloraradiance.com/', icon:'⚓' },
@@ -1020,34 +1020,34 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 <span style={{ fontSize:22, flexShrink:0 }}>{app.icon}</span>
                 <span style={{ flex:1 }}>
                   <span style={{ display:'block', fontSize:13, color:T.cream, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.05em', marginBottom:2 }}>{app.label}</span>
-                  <span style={{ display:'block', fontSize:12, color:T.muted, fontStyle:'italic' }}>{app.desc}</span>
+                  <span style={{ display:'block', fontSize:15, color:T.muted, fontStyle:'italic' }}>{app.desc}</span>
                 </span>
-                <span style={{ fontSize:13, color:T.gold }}>↗</span>
+                <span style={{ fontSize:16, color:T.gold }}>↗</span>
               </a>
             ))}
           </div>
 
           {/* About */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>About</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>About</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="⚓" label="Anchored Steps · Year 2">
-              <span style={{ fontSize:11, color:T.dim }}>v1.0</span>
+              <span style={{ fontSize:14, color:T.dim }}>v1.0</span>
             </Row>
             <a href="https://eloraradiance.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
             <Row icon="🌿" label="Elora Radiance Co." border={false}>
-              <span style={{ fontSize:11, color:T.gold }}>eloraradiance.com &rarr;</span>
+              <span style={{ fontSize:14, color:T.gold }}>eloraradiance.com &rarr;</span>
             </Row>
             </a>
           </div>
 
           {/* Export */}
           <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:9, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Data</div>
+            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Data</div>
           </div>
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
-            <p style={{ fontSize:14, color:T.text, lineHeight:1.7, marginBottom:14 }}>Download all your journal entries as a text file, or print as a formatted PDF.</p>
+            <p style={{ fontSize:16, color:T.text, lineHeight:1.7, marginBottom:14 }}>Download all your journal entries as a text file, or print as a formatted PDF.</p>
             <button onClick={handleExportTxt} disabled={exporting} style={{ width:'100%', background: exporting ? 'transparent' : T.goldF, border:`1px solid ${exporting ? T.border : T.goldB}`, color: exporting ? T.muted : T.gold, padding:'13px', borderRadius:12, cursor: exporting ? 'default' : 'pointer', fontSize:13, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em', transition:'all .25s', marginBottom:8 }}>
               {exporting ? 'Preparing Export…' : '📥 Export Journal'}
             </button>
@@ -1088,7 +1088,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 background:'transparent',border:'none',cursor:'pointer',touchAction:'manipulation',padding:'8px 2px 6px',position:'relative'}}>
               {on && <span style={{position:'absolute',top:0,left:'28%',right:'28%',height:2,borderRadius:2,background:T.gold}}/>}
               <span style={{fontSize:21,lineHeight:1,filter:on?'none':'saturate(0.55)',opacity:on?1:0.78}}>{icon}</span>
-              <span style={{fontSize:9.5,letterSpacing:'0.08em',textTransform:'uppercase',fontFamily:'Cinzel,serif',fontWeight:on?700:500,color:on?T.gold:T.muted}}>{label}</span>
+              <span style={{fontSize:11,letterSpacing:'0.08em',textTransform:'uppercase',fontFamily:'Cinzel,serif',fontWeight:on?700:500,color:on?T.gold:T.muted}}>{label}</span>
             </button>
           );
         })}
@@ -1147,10 +1147,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",gap:10,alignItems:"center"}}>
               <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>{bm.ref}</span>
-              <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:11,textDecoration:"underline"}}>Open</button>
+              <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,textDecoration:"underline"}}>Open</button>
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:11,color:T.muted}}>Week {bm.week}</span>
+              <span style={{fontSize:14,color:T.muted}}>Week {bm.week}</span>
               <button onClick={()=>{
                 if(window.confirm(`Remove ${bm.ref} from saved?`)) {
                   const updated = bookmarks.filter(b => b.key !== bm.key);
@@ -1159,7 +1159,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   if (session?.user?.id) supabase.from('as2_profiles').update({ bookmarks: updated }).eq('user_id', session.user.id)
                     .then(({error})=>{ if(error) console.warn('bookmarks sync:', error.message); });
                 }
-              }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,padding:"2px 6px"}}>✕</button>
+              }} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:16,padding:"2px 6px"}}>✕</button>
             </div>
           </div>
         </div>
@@ -1185,7 +1185,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 {saveStatus==='saving'?"Saving…":"✓ Saved"}
               </div>
             )}
-            <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
+            <span style={{fontSize:15,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
           </div>
         </div>
       </div>
@@ -1206,7 +1206,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <div style={{display:"flex",alignItems:"center",gap:10,padding:"18px 18px 0"}}>
               <button onClick={()=>goWk(Math.max(1,wk-1))} disabled={wk===1} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===1?.3:1}}>&#8249;</button>
               <div style={{flex:1,textAlign:"center"}}>
-                <button onClick={()=>setShowWeekJump(v=>!v)} style={{fontSize:10,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4,background:"transparent",border:"none",cursor:"pointer",padding:0}}>
+                <button onClick={()=>setShowWeekJump(v=>!v)} style={{fontSize:11,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4,background:"transparent",border:"none",cursor:"pointer",padding:0}}>
                   Week {wk} of 52 {showWeekJump?"▲":"▼"}
                 </button>
                 <div style={{fontSize:18,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.02em",lineHeight:1.2}}>{week.theme}</div>
@@ -1240,7 +1240,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   (s.id==='tracker'&&(DAYS.some((_,i)=>(get('tr_'+i)||'').trim())||(get('gratitude')||'').trim())) ||
                   (s.id==='community'&&communityDone);
                 return (
-                  <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:11,transition:"all .18s",position:"relative"}}>
+                  <button key={s.id} onClick={()=>{setSec(s.id);setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:sec===s.id?"linear-gradient(135deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(sec===s.id?T.goldB:T.border),color:sec===s.id?T.gold:T.muted,padding:"6px 10px",borderRadius:8,cursor:"pointer",fontSize:14,transition:"all .18s",position:"relative"}}>
                     {s.label}
                     {hasData&&<span style={{position:"absolute",top:2,right:2,width:5,height:5,borderRadius:"50%",background:T.green,display:"block"}}/>}
                   </button>
@@ -1265,10 +1265,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                             <button onClick={()=>setQuizVerse({text:week.verseText,ref:week.verseRef})} style={{background:get("mem_"+week.verseRef)?T.greenF:T.purpleF,border:"1px solid "+(get("mem_"+week.verseRef)?T.greenB:T.purpleB),color:get("mem_"+week.verseRef)?T.green:T.purple,padding:"3px 11px",borderRadius:12,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif"}}>
                               {get("mem_"+week.verseRef)?"✓ Memorized":"✦ Memorize"}
                             </button>
-                            <button onClick={()=>toggleBookmark({verseRef:week.verseRef,verseText:week.verseText},wk,"passage")} style={{background:isBookmarked(week.verseRef,wk)?T.goldF:"transparent",border:"1px solid "+(isBookmarked(week.verseRef,wk)?T.goldB:T.border),color:isBookmarked(week.verseRef,wk)?T.gold:T.muted,padding:"3px 10px",borderRadius:12,cursor:"pointer",fontSize:13}}>
+                            <button onClick={()=>toggleBookmark({verseRef:week.verseRef,verseText:week.verseText},wk,"passage")} style={{background:isBookmarked(week.verseRef,wk)?T.goldF:"transparent",border:"1px solid "+(isBookmarked(week.verseRef,wk)?T.goldB:T.border),color:isBookmarked(week.verseRef,wk)?T.gold:T.muted,padding:"3px 10px",borderRadius:12,cursor:"pointer",fontSize:16}}>
                               {isBookmarked(week.verseRef,wk)?"★":"☆"}
                             </button>
-                            <button onClick={()=>setShareVerse({verseText:week.verseText,verseRef:week.verseRef})} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"3px 8px",borderRadius:12,cursor:"pointer",fontSize:11}}>&#8599;</button>
+                            <button onClick={()=>setShareVerse({verseText:week.verseText,verseRef:week.verseRef})} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"3px 8px",borderRadius:12,cursor:"pointer",fontSize:14}}>&#8599;</button>
                           </div>
                         </div>
                       </div>
@@ -1319,10 +1319,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 <div>
                   <label style={LBL}>Passage Study Prompt</label>
                   <div style={{background:T.purpleF,border:"1px solid "+T.purpleB,borderRadius:12,padding:"16px 20px",marginBottom:18}}>
-                    <div style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
+                    <div style={{fontSize:11,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Ask:</div>
                     <p style={{fontSize:18,color:T.text,lineHeight:1.85,margin:"0 0 20px",whiteSpace:"pre-line"}}>{week.studyPrompt || 'Study prompt not available.'}</p>
                     <div style={{borderTop:"1px solid "+T.purpleB,paddingTop:16}}>
-                      <a href={enduringWordUrl(week.verseRef||'')} target="_blank" rel="noreferrer" style={{fontSize:10,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read full commentary: {week.verseRef || ''}{week.verseTranslation ? ' (' + week.verseTranslation + ')' : ''} ↗</a>
+                      <a href={enduringWordUrl(week.verseRef||'')} target="_blank" rel="noreferrer" style={{fontSize:11,color:T.purple,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10,display:"block",textDecoration:"none"}}>Read full commentary: {week.verseRef || ''}{week.verseTranslation ? ' (' + week.verseTranslation + ')' : ''} ↗</a>
                       <p style={{fontSize:17,color:T.cream,lineHeight:1.9,fontStyle:"italic",margin:0}}>&#8220;{week.verseText || ''}&#8221;</p>
                     </div>
                   </div>
@@ -1344,22 +1344,22 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               {sec==="lexicon" && (
                 <div>
                   <label style={LBL}>Word Study</label>
-                  <p style={{fontSize:13,color:T.muted,fontStyle:"italic",marginBottom:14,lineHeight:1.7}}>Key Greek &amp; Hebrew words from this week&apos;s Scripture. Tap 🔊 to hear pronunciation.</p>
+                  <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:14,lineHeight:1.7}}>Key Greek &amp; Hebrew words from this week&apos;s Scripture. Tap 🔊 to hear pronunciation.</p>
                   {(week?.lexicon || []).map((entry, i) => (
                     <div key={i} style={{background:T.bgCard,border:"1px solid "+T.borderGold,borderRadius:14,padding:"20px 22px 18px",marginBottom:14}}>
                       <div style={{fontSize:18,fontFamily:"'Cinzel',Georgia,serif",color:T.cream,letterSpacing:"0.04em",marginBottom:6}}>{entry.word}</div>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:2}}>
-                        <div style={{fontSize:15,color:T.gold,fontFamily:"'EB Garamond',Georgia,serif",fontStyle:"italic",flex:1}}>{entry.original}</div>
-                        <button onClick={() => speak(entry)} aria-label="Hear pronunciation" style={{background:speaking?"rgba(176,138,78,0.35)":"rgba(176,138,78,0.12)",border:"1px solid "+T.borderGold,color:T.gold,width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,padding:0,touchAction:"manipulation"}}>{speaking?"▶":"🔊"}</button>
+                        <div style={{fontSize:16,color:T.gold,fontFamily:"'EB Garamond',Georgia,serif",fontStyle:"italic",flex:1}}>{entry.original}</div>
+                        <button onClick={() => speak(entry)} aria-label="Hear pronunciation" style={{background:speaking?"rgba(176,138,78,0.35)":"rgba(176,138,78,0.12)",border:"1px solid "+T.borderGold,color:T.gold,width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,padding:0,touchAction:"manipulation"}}>{speaking?"▶":"🔊"}</button>
                       </div>
-                      <div style={{fontSize:10,color:T.muted,fontFamily:"'Cinzel',Georgia,serif",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>{entry.language}</div>
+                      <div style={{fontSize:11,color:T.muted,fontFamily:"'Cinzel',Georgia,serif",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>{entry.language}</div>
                       <div style={{height:1,background:T.borderGold,marginBottom:12}} />
-                      <p style={{fontSize:15,color:T.text,lineHeight:1.85,marginBottom:12,fontFamily:"'EB Garamond',Georgia,serif"}}>{entry.meaning}</p>
-                      {entry.note && <p style={{fontSize:13,color:T.muted,lineHeight:1.85,fontStyle:"italic",fontFamily:"'EB Garamond',Georgia,serif"}}>{entry.note}</p>}
+                      <p style={{fontSize:16,color:T.text,lineHeight:1.85,marginBottom:12,fontFamily:"'EB Garamond',Georgia,serif"}}>{entry.meaning}</p>
+                      {entry.note && <p style={{fontSize:16,color:T.muted,lineHeight:1.85,fontStyle:"italic",fontFamily:"'EB Garamond',Georgia,serif"}}>{entry.note}</p>}
                     </div>
                   ))}
                   {(!week?.lexicon || week.lexicon.length === 0) && (
-                    <p style={{fontSize:14,color:T.muted,fontStyle:"italic",textAlign:"center",padding:"24px 0"}}>Lexicon entries coming soon for this week.</p>
+                    <p style={{fontSize:16,color:T.muted,fontStyle:"italic",textAlign:"center",padding:"24px 0"}}>Lexicon entries coming soon for this week.</p>
                   )}
                   <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
@@ -1454,7 +1454,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               {sec==="community" && (
                 <div>
                   <label style={LBL}>Community Reflections — Week {wk}</label>
-                  <p style={{fontSize:15,color:T.muted,fontStyle:"italic",marginBottom:20,lineHeight:1.75}}>Share one insight, takeaway, or truth God highlighted for you this week.</p>
+                  <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20,lineHeight:1.75}}>Share one insight, takeaway, or truth God highlighted for you this week.</p>
                   <textarea rows={4} value={communityInput} onChange={e=>setCommunityInput(e.target.value)} placeholder="Share what God revealed to you this week..." style={{...INP,marginBottom:10}}/>
                   <button onClick={async()=>{
                     if(!communityInput.trim()) return;
@@ -1470,11 +1470,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   {/* Display community notes */}
                   {communityNotes.length > 0 && (
                     <div>
-                      <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>What Others Are Sharing</div>
+                      <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>What Others Are Sharing</div>
                       {communityNotes.map((note,i)=>(
                         <div key={note.id || i} style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:10,padding:"12px 16px",marginBottom:8}}>
-                          <p style={{fontSize:15,color:T.text,lineHeight:1.7,margin:"0 0 6px",fontStyle:"italic"}}>"{note.text}"</p>
-                          <p style={{fontSize:11,color:T.muted,margin:0}}>{note.created_at ? new Date(note.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : note.date}</p>
+                          <p style={{fontSize:16,color:T.text,lineHeight:1.7,margin:"0 0 6px",fontStyle:"italic"}}>"{note.text}"</p>
+                          <p style={{fontSize:14,color:T.muted,margin:0}}>{note.created_at ? new Date(note.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : note.date}</p>
                         </div>
                       ))}
                     </div>
@@ -1489,7 +1489,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         {view==='contents' && (
           <div className="fi" style={{padding:18}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Table of Contents</h2>
-            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:20}}>52 weeks of deeper formation. Tap any week to open it.</p>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20}}>52 weeks of deeper formation. Tap any week to open it.</p>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(225px,1fr))",gap:8}}>
               {ALL_WEEKS.map(w=>{
                 const done=daysComplete(w.week);
@@ -1497,11 +1497,11 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 return (
                   <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} style={{background:cur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":done>0?"linear-gradient(145deg,"+T.greenF+","+T.greenF+")":T.bgCard,border:"1px solid "+(cur?T.goldB:done>0?T.greenB:T.border),borderRadius:12,padding:"13px 16px",cursor:"pointer",textAlign:"left",transition:"all .25s"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                      <span style={{fontSize:9,color:cur?T.gold:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em"}}>WEEK {w.week}</span>
-                      {done>0&&<span style={{fontSize:9,color:T.green}}>{done}/7</span>}
+                      <span style={{fontSize:11,color:cur?T.gold:T.muted,fontFamily:"Cinzel,serif",letterSpacing:"0.1em"}}>WEEK {w.week}</span>
+                      {done>0&&<span style={{fontSize:14,color:T.green}}>{done}/7</span>}
                     </div>
-                    <div style={{fontSize:13,color:cur?T.cream:T.text,fontWeight:600,lineHeight:1.3}}>{w.theme}</div>
-                    {w.verseRef&&<div style={{fontSize:10,color:T.muted,marginTop:2,fontStyle:"italic"}}>{w.verseRef}</div>}
+                    <div style={{fontSize:16,color:cur?T.cream:T.text,fontWeight:600,lineHeight:1.3}}>{w.theme}</div>
+                    {w.verseRef&&<div style={{fontSize:14,color:T.muted,marginTop:2,fontStyle:"italic"}}>{w.verseRef}</div>}
                   </button>
                 );
               })}
@@ -1512,7 +1512,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         {view==='progress' && (
           <div className="fi" style={{padding:18}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Your Progress</h2>
-            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:20}}>Year 2 — 52 weeks of deeper formation.</p>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20}}>Year 2 — 52 weeks of deeper formation.</p>
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:20}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center"}}>
                 {[
@@ -1522,22 +1522,22 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 ].map(([label,val])=>(
                   <div key={label}>
                     <div style={{fontSize:28,fontWeight:600,color:T.gold,fontFamily:"Cinzel,serif"}}>{val}</div>
-                    <div style={{fontSize:10,color:T.muted,textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Cinzel,serif"}}>{label}</div>
+                    <div style={{fontSize:11,color:T.muted,textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Cinzel,serif"}}>{label}</div>
                   </div>
                 ))}
               </div>
             </div>
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px",marginBottom:18}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
-                <span style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase"}}>Year Progress</span>
-                <span style={{fontSize:11,color:T.muted}}>Week {wk} of 52 · {Math.round((wk/52)*100)}%</span>
+                <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.12em",textTransform:"uppercase"}}>Year Progress</span>
+                <span style={{fontSize:14,color:T.muted}}>Week {wk} of 52 · {Math.round((wk/52)*100)}%</span>
               </div>
               <div style={{background:T.border,borderRadius:5,height:7,overflow:"hidden"}}>
                 <div style={{height:"100%",background:"linear-gradient(90deg,#A07840,#C9A96E)",width:((wk/52)*100)+"%",transition:"width .6s ease"}} />
               </div>
             </div>
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px"}}>
-              <div style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:14}}>Your Journey Map</div>
+              <div style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:14}}>Your Journey Map</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                 {ALL_WEEKS.map(w=>{
                   const done=daysComplete(w.week);
@@ -1545,7 +1545,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   const pct=done/7;
                   const bg=cur?T.gold:pct===1?T.green:pct>0?"rgba(124,146,132,"+(0.25+pct*0.55)+")":T.bgCard;
                   return (
-                    <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} title={"Week "+w.week+": "+w.theme} style={{width:26,height:26,borderRadius:6,background:bg,border:"1px solid "+(cur?T.goldB:T.border),cursor:"pointer",fontSize:9,color:cur?T.bg:pct===1?(darkMode?T.bg:"#fff"):pct>0?T.cream:T.muted,fontFamily:"Cinzel,serif",padding:0}}>
+                    <button key={w.week} onClick={()=>{goWk(w.week);setView('journal');}} title={"Week "+w.week+": "+w.theme} style={{width:26,height:26,borderRadius:6,background:bg,border:"1px solid "+(cur?T.goldB:T.border),cursor:"pointer",fontSize:11,color:cur?T.bg:pct===1?(darkMode?T.bg:"#fff"):pct>0?T.cream:T.muted,fontFamily:"Cinzel,serif",padding:0}}>
                       {w.week}
                     </button>
                   );
@@ -1558,7 +1558,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         {view==='search' && (
           <div style={{padding:"0 18px 80px"}}>
             <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4,paddingTop:20}}>Search</h2>
-            <p style={{fontSize:14,color:T.muted,fontStyle:"italic",marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
             <input
               value={searchQuery}
               onChange={e=>{
@@ -1594,14 +1594,14 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 onMouseEnter={e=>e.currentTarget.style.borderColor=T.goldB}
                 onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
-                  <span style={{fontSize:10,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:'0.1em',textTransform:'uppercase'}}>
+                  <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:'0.1em',textTransform:'uppercase'}}>
                     Week {r.week} · {r.theme}
                   </span>
-                  <span style={{fontSize:10,color:T.muted,fontFamily:"Cinzel,serif",letterSpacing:'0.06em',textTransform:'uppercase',background:T.goldF,border:'1px solid '+T.goldB,borderRadius:6,padding:'2px 8px'}}>
+                  <span style={{fontSize:11,color:T.muted,fontFamily:"Cinzel,serif",letterSpacing:'0.06em',textTransform:'uppercase',background:T.goldF,border:'1px solid '+T.goldB,borderRadius:6,padding:'2px 8px'}}>
                     {r.field==='dontmiss'?"Don't Miss":r.field.charAt(0).toUpperCase()+r.field.slice(1)}
                   </span>
                 </div>
-                <p style={{fontSize:14,color:T.text,lineHeight:1.7,margin:0}}>{r.snippet}{r.snippet.length>=120?'…':''}</p>
+                <p style={{fontSize:16,color:T.text,lineHeight:1.7,margin:0}}>{r.snippet}{r.snippet.length>=120?'…':''}</p>
               </div>
             ))}
             {searchQuery.trim() && searchResults.length===0 && (
@@ -1612,7 +1612,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             {!searchQuery.trim() && bookmarks.length===0 && (
               <div style={{textAlign:'center',padding:'48px 0',color:T.muted,fontSize:16,fontStyle:'italic'}}>
                 Start typing to search across all 52 weeks.
-                <div style={{fontSize:14,marginTop:6}}>Tap ☆ on any verse to save it. Your saved verses show up here.</div>
+                <div style={{fontSize:16,marginTop:6}}>Tap ☆ on any verse to save it. Your saved verses show up here.</div>
               </div>
             )}
             {!searchQuery.trim() && bookmarks.length>0 && (
@@ -1631,9 +1631,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
             {/* Appearance */}
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Appearance</div>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Appearance</div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontSize:15,color:T.text}}>Dark Mode</span>
+                <span style={{fontSize:16,color:T.text}}>Dark Mode</span>
                 <button onClick={()=>setDarkMode(d=>!d)} style={{background:darkMode?T.goldF:"transparent",border:"1px solid "+(darkMode?T.goldB:T.border),color:darkMode?T.gold:T.muted,padding:"6px 16px",borderRadius:20,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif"}}>
                   {darkMode?"On":"Off"}
                 </button>
@@ -1642,8 +1642,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
             {/* Refer a Friend */}
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Refer a Friend</div>
-              <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Share Anchored Steps Year 2 with someone ready to go deeper.</p>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Refer a Friend</div>
+              <p style={{fontSize:16,color:T.muted,lineHeight:1.65,marginBottom:14}}>Share Anchored Steps Year 2 with someone ready to go deeper.</p>
               <div style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:10,padding:"12px 14px",marginBottom:12,fontFamily:"Cinzel,serif",fontSize:12,color:T.gold,letterSpacing:"0.04em"}}>
                 steps2.eloraradiance.com
               </div>
@@ -1654,25 +1654,25 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
             {/* Account */}
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Account</div>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Account</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <span style={{fontSize:13,color:T.muted}}>Email</span>
-                <span style={{fontSize:13,color:T.text}}>{session.user.email}</span>
+                <span style={{fontSize:16,color:T.muted}}>Email</span>
+                <span style={{fontSize:16,color:T.text}}>{session.user.email}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-                <span style={{fontSize:13,color:T.muted}}>Plan</span>
+                <span style={{fontSize:16,color:T.muted}}>Plan</span>
                 <span style={{fontSize:12,color:T.gold,fontFamily:"Cinzel,serif",background:T.goldF,border:"1px solid "+T.goldB,padding:"3px 10px",borderRadius:12}}>'Lifetime Access'</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:14,borderTop:"1px solid "+T.border}}>
-                <span style={{fontSize:13,color:T.muted}}>Progress</span>
-                <span style={{fontSize:13,color:T.text}}>{ALL_WEEKS.filter(w=>entries.some(e=>e.week===w.week&&(e.field_value||'').trim())).length} / 52 weeks</span>
+                <span style={{fontSize:16,color:T.muted}}>Progress</span>
+                <span style={{fontSize:16,color:T.text}}>{ALL_WEEKS.filter(w=>entries.some(e=>e.week===w.week&&(e.field_value||'').trim())).length} / 52 weeks</span>
               </div>
             </div>
 
             {/* Support */}
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:12}}>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:10,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Support</div>
-              <p style={{fontSize:14,color:T.muted,lineHeight:1.65,marginBottom:14}}>Questions, feedback, or need help with your account?</p>
+              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Support</div>
+              <p style={{fontSize:16,color:T.muted,lineHeight:1.65,marginBottom:14}}>Questions, feedback, or need help with your account?</p>
               <a href="mailto:support@eloraradiance.com" style={{display:"block",textAlign:"center",width:"100%",boxSizing:"border-box",background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,padding:"10px",borderRadius:10,fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em",textDecoration:"none"}}>
                 Email Support
               </a>
@@ -1689,7 +1689,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:"calc(24px + var(--safe-top, env(safe-area-inset-top, 0px))) 24px calc(24px + env(safe-area-inset-bottom, 0px))"}} onClick={()=>setShowSignOutConfirm(false)}>
           <div style={{background:"linear-gradient(145deg,"+T.bg+","+T.bgMid+")",border:"1px solid "+T.goldB,borderRadius:18,padding:24,maxWidth:340,width:"100%"}} onClick={e=>e.stopPropagation()}>
             <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,textAlign:"center"}}>Sign Out?</div>
-            <p style={{fontSize:14,color:T.text,lineHeight:1.7,marginBottom:18,textAlign:"center"}}>Your progress is saved automatically. You can sign back in anytime.</p>
+            <p style={{fontSize:16,color:T.text,lineHeight:1.7,marginBottom:18,textAlign:"center"}}>Your progress is saved automatically. You can sign back in anytime.</p>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
               <button onClick={()=>setShowSignOutConfirm(false)} style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Cancel</button>
               <button onClick={()=>supabase.auth.signOut()} style={{background:T.redF,border:"1px solid "+T.redB,color:T.red,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Sign Out</button>
@@ -1735,7 +1735,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:500,display:'flex',alignItems:'flex-start',justifyContent:'center',overflowY:'auto',padding:'calc(16px + var(--safe-top, env(safe-area-inset-top, 0px))) 16px calc(48px + env(safe-area-inset-bottom, 0px))'}} onClick={()=>setShareVerse(null)}>
             <div style={{background:'linear-gradient(145deg,'+T.bg+',#172330)',border:'1px solid '+T.goldB,borderRadius:20,padding:22,width:'100%',maxWidth:420,marginTop:24}} onClick={e=>e.stopPropagation()}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                <div style={{fontSize:10,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.18em',textTransform:'uppercase'}}>Share Card</div>
+                <div style={{fontSize:11,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.18em',textTransform:'uppercase'}}>Share Card</div>
                 <button onClick={()=>setShareVerse(null)} style={{background:'transparent',border:'none',color:T.muted,cursor:'pointer',fontSize:20,lineHeight:1}}>×</button>
               </div>
               <div style={{display:'flex',gap:5,marginBottom:12,flexWrap:'wrap'}}>
@@ -1755,13 +1755,13 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <img src="/icon2.png" alt="" style={{width:42,height:42,borderRadius:8}}/>
                   <div>
                     <div style={{fontSize:15,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.06em'}}>Anchored Steps · Year 2</div>
-                    <div style={{fontSize:12,color:cMuted}}>Week {wk} · {week?.theme}</div>
+                    <div style={{fontSize:15,color:cMuted}}>Week {wk} · {week?.theme}</div>
                   </div>
                 </div>
                 <div style={{fontSize:11,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.16em',textTransform:'uppercase',marginBottom:8}}>{ct.icon} {ct.label}</div>
                 <p style={{fontSize:ct.body.length>200?20:23,color:cText,fontStyle:'italic',lineHeight:1.85,margin:'0 0 10px',whiteSpace:'pre-line'}}>{ct.body}</p>
                 {ct.ref&&<div style={{fontSize:13,color:cGold,fontFamily:'Cinzel,serif',letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:6}}>{ct.ref}</div>}
-                <div style={{fontSize:11,color:cMuted,marginTop:6}}>Walk steadily. Stay anchored. — eloraradiance.com</div>
+                <div style={{fontSize:14,color:cMuted,marginTop:6}}>Walk steadily. Stay anchored. — eloraradiance.com</div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
                 <button onClick={handleShareImage} disabled={sharingCard} style={{background:'linear-gradient(135deg,'+T.goldF+','+T.goldF+')',border:'1px solid '+T.goldB,color:T.gold,padding:'13px',borderRadius:10,cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',letterSpacing:'0.08em',opacity:sharingCard?0.6:1}}>
@@ -1772,8 +1772,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 </button>
               </div>
               <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid '+T.border,borderRadius:12,padding:'14px 16px'}}>
-                <div style={{fontSize:10,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:10}}>Suggested Caption</div>
-                <p style={{fontSize:13,color:T.muted,lineHeight:1.7,margin:'0 0 12px',fontStyle:'italic',whiteSpace:'pre-line'}}>{captionText}</p>
+                <div style={{fontSize:11,color:T.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:10}}>Suggested Caption</div>
+                <p style={{fontSize:16,color:T.muted,lineHeight:1.7,margin:'0 0 12px',fontStyle:'italic',whiteSpace:'pre-line'}}>{captionText}</p>
                 <button onClick={()=>{navigator.clipboard?.writeText(captionText);setCaptionCopied(true);setTimeout(()=>setCaptionCopied(false),2000)}} style={{width:'100%',background:captionCopied?T.greenF:'transparent',border:'1px solid '+(captionCopied?T.greenB:'rgba(160,120,64,0.3)'),color:captionCopied?T.green:T.gold,padding:'9px',borderRadius:8,cursor:'pointer',fontSize:11,fontFamily:'Cinzel,serif',transition:'all .25s'}}>
                   {captionCopied?'✓ Copied':'Copy Caption'}
                 </button>
