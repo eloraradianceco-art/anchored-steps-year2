@@ -106,7 +106,7 @@ const DARK_THEME = {
   green:"#9DB5A6",greenF:"rgba(124,146,132,0.12)",greenB:"rgba(124,146,132,0.28)",
   purple:"#BCB0E0",purpleF:"rgba(168,154,207,0.08)",purpleB:"rgba(168,154,207,0.22)",
   red:"#E89090",redF:"rgba(217,122,122,0.08)",redB:"rgba(217,122,122,0.24)",
-  cream:"#F0ECE3",text:"#E0D8CA",muted:"#BAC4CC",dim:"#92A1AD",border:"rgba(255,255,255,0.06)",
+  cream:"#F0ECE3",text:"#E0D8CA",muted:"#BAC4CC",dim:"#92A1AD",border:"rgba(255,255,255,0.06)",borderGold:"rgba(201,161,95,0.32)",
 };
 
 const LIGHT_THEME = {
@@ -115,7 +115,7 @@ const LIGHT_THEME = {
   green:"#3F5F4C",greenF:"rgba(92,114,100,0.10)",greenB:"rgba(92,114,100,0.30)",
   purple:"#4E3F8C",purpleF:"rgba(78,63,140,0.08)",purpleB:"rgba(78,63,140,0.25)",
   red:"#8E2B27",redF:"rgba(168,80,80,0.08)",redB:"rgba(168,80,80,0.25)",
-  cream:"#1A1008",text:"#2C1F0E",muted:"#5A4535",dim:"#6A5545",border:"rgba(0,0,0,0.10)",
+  cream:"#1A1008",text:"#2C1F0E",muted:"#5A4535",dim:"#6A5545",border:"rgba(0,0,0,0.10)",borderGold:"rgba(122,90,40,0.32)",
 };
 
 const ALL_WEEKS = (typeof window !== 'undefined' && window.__APPDATA_Y2__?.ALL_WEEKS) || [];
