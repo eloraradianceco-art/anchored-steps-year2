@@ -302,6 +302,10 @@ function ContextModal({ae,onClose,T}){
 }
 
 // ───────── Main App ─────────
+// Bottom tab bar height; the phone's home-indicator inset is added where it's used
+const TAB_BAR_H = 60;
+const BELOW_BAR = `calc(${TAB_BAR_H}px + env(safe-area-inset-bottom, 0px))`;
+
 function AnchoredStepsY2Inner(){
   const [session,setSession]=useState(null);
   const [loading,setLoading]=useState(true);
@@ -896,7 +900,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
   return (
     <div style={{ position:'fixed', inset:0, zIndex:400, background: darkMode ? '#0D1820' : '#F2EDE3', fontFamily:"'EB Garamond',Georgia,serif", overflowY:'auto' }}>
-      <div style={{ maxWidth:560, margin:'0 auto', padding:'0 0 80px' }}>
+      <div style={{ maxWidth:560, margin:'0 auto', padding:'0 0 calc(100px + env(safe-area-inset-bottom, 0px))' /* clears the bottom tab bar */ }}>
       {showReviews && <Reviews app="as2" appName="Anchored Steps · Year 2" eyebrow="Anchored Steps · Year 2" userEmail={session?.user?.email || profile?.email} C={{ ...T, red: T.gold, redL: T.gold }} lightMode={!darkMode} onClose={() => setShowReviews(false)} />}
 
         {/* Sticky header */}
@@ -1058,7 +1062,42 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
   )
 }
 
+  // ── Bottom tab bar ─────────────────────────────────────────────
+  // Steps, Contents, Search, Progress and Settings sit at the bottom where a thumb reaches them
+  // (they were a row of small links under the header). Same pattern as The Living Planner. 2026-11-13
+  const activeTab = showSettings ? 'settings' : view === 'journal' ? 'steps' : view;
+  const goTab = (id) => {
+    if (id === activeTab && !(id === 'steps' && view === 'journal')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (id === 'settings') { setShowSettings(true); return; }
+    setShowSettings(false); setView(id); window.scrollTo(0, 0);
+  };
+  const tabBar = () => (
+    <nav aria-label="Main" style={{
+      position:'fixed',left:0,right:0,bottom:0,zIndex:450,
+      background:darkMode?'rgba(13,24,32,0.97)':'rgba(240,234,224,0.97)',
+      backdropFilter:'blur(18px)',WebkitBackdropFilter:'blur(18px)',
+      borderTop:'1px solid '+T.border,boxShadow:'0 -8px 28px rgba(0,0,0,'+(darkMode?'0.28':'0.08')+')',
+      paddingBottom:'env(safe-area-inset-bottom, 0px)',
+    }}>
+      <div style={{display:'flex',maxWidth:560,margin:'0 auto'}}>
+        {[['steps','\uD83D\uDC63','Steps'],['contents','\uD83D\uDCD6','Contents'],['search','\uD83D\uDD0D','Search'],['progress','\uD83D\uDCCA','Progress'],['settings','\u2699\uFE0F','Settings']].map(([id,icon,label]) => {
+          const on = activeTab === id;
+          return (
+            <button key={id} onClick={() => goTab(id)} aria-current={on ? 'page' : undefined}
+              style={{flex:1,minHeight:TAB_BAR_H,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,
+                background:'transparent',border:'none',cursor:'pointer',touchAction:'manipulation',padding:'8px 2px 6px',position:'relative'}}>
+              {on && <span style={{position:'absolute',top:0,left:'28%',right:'28%',height:2,borderRadius:2,background:T.gold}}/>}
+              <span style={{fontSize:21,lineHeight:1,filter:on?'none':'saturate(0.55)',opacity:on?1:0.78}}>{icon}</span>
+              <span style={{fontSize:9.5,letterSpacing:'0.08em',textTransform:'uppercase',fontFamily:'Cinzel,serif',fontWeight:on?700:500,color:on?T.gold:T.muted}}>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+
   if(showSettings) return (
+    <>
     <Settings
       profile={profile}
       session={session}
@@ -1072,6 +1111,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       onOpenSaved={()=>{ setShowSettings(false); setSearchQuery(''); setSearchResults([]); setView('search'); window.scrollTo(0,0); }}
       onClose={()=>setShowSettings(false)}
     />
+    {tabBar()}
+    </>
   )
 
   if(showOnboarding){
@@ -1147,16 +1188,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <span style={{fontSize:12,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
           </div>
         </div>
-        <div style={{display:"flex",justifyContent:"flex-start",gap:2,padding:"5px 8px",borderTop:"1px solid "+T.border,overflowX:"auto",flexWrap:"nowrap"}}>
-          {['steps','contents','search','progress','settings'].map((v,i,all)=>{ const on=view===v||(v==='steps'&&view==='journal'); return (
-            <button key={v} onClick={()=>{ if(v==='settings') setShowSettings(true); else { setView(v); window.scrollTo(0,0); } }} style={{marginLeft:i===0?"auto":0,marginRight:i===all.length-1?"auto":0,background:on?"linear-gradient(135deg,rgba(176,138,78,0.18),rgba(176,138,78,0.07))":"transparent",border:"1px solid "+(on?"rgba(176,138,78,0.4)":"transparent"),color:on?T.gold:T.muted,padding:"6px 9px",borderRadius:7,cursor:"pointer",fontSize:11.5,fontFamily:"Cinzel,serif",letterSpacing:"0.03em",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-              {v==='steps'?'Steps':v==='contents'?'Contents':v==='search'?'Search':v==='progress'?'Progress':'Settings'}
-            </button>
-          ); })}
-        </div>
       </div>
 
-      <div style={{maxWidth:680,margin:"0 auto",padding:"0 0 80px"}}>
+      <div style={{maxWidth:680,margin:"0 auto",padding:`0 0 calc(40px + ${BELOW_BAR})`}}>
         {/* JOURNAL VIEW */}
         {view==='steps' && week && (
           <div className="fi" style={{padding:"22px 18px 0"}}>
@@ -1748,6 +1782,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           </div>
         )
       })()}
+      {tabBar()}
     </div>
   );
 }
