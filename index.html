@@ -67,6 +67,9 @@
       ::-webkit-scrollbar{width:4px}
       ::-webkit-scrollbar-track{background:transparent}
       ::-webkit-scrollbar-thumb{background:rgba(160,120,64,0.3);border-radius:2px}
+          /* The page always fills the screen. When Settings is open the page behind it is empty, and on iPhone a
+         short page let the bottom tab bar ride up; Armed & Anchored already had this rule. 2026-11-13 */
+      html,body,#root{height:100%;min-height:100vh}
     </style>
       <!-- iPad Home Screen app: iPadOS 26 blurs a band below the status bar (solid with Reduce
          Transparency). Headers keep their text below it; see --safe-top / --top-band. -->
