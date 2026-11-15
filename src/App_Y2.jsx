@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"; // v2.3
 import { createClient } from "@supabase/supabase-js";
+import { speak as readAloud } from "./speech.js";
 import { ShareComposer, FormatPicker, captionExcerpt } from "./shareKit.jsx";
 import Onboarding from "./Onboarding.jsx";
 import Reviews from "./Reviews";
@@ -357,21 +358,15 @@ function AnchoredStepsY2Inner(){
   const [communityNotes,setCommunityNotes]=useState([]);
   const [showSignOutConfirm,setShowSignOutConfirm]=useState(false);
   const [speaking,setSpeaking]=useState(false);
+  // Word Study pronunciation (read-aloud fixes live in speech.js)
   const speak = entry => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
     let text = entry.transliteration || "";
     if (!text && entry.original) {
       const m = entry.original.match(/\(([^)]+)\)/);
       text = m ? m[1].trim() : entry.original;
     }
     if (!text) return;
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 0.72;
-    utt.onstart = () => setSpeaking(true);
-    utt.onend = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(utt);
+    readAloud(text, { rate: 0.72, onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false), onError: () => setSpeaking(false) });
   };
 
   // Debounce timer ref for saves
