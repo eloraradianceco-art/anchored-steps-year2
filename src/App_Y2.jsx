@@ -332,6 +332,13 @@ function AnchoredStepsY2Inner(){
   const [wk,setWk]=useState(()=>{
     try { return Number(localStorage.getItem('y2_last_week')) || 1; } catch { return 1; }
   });
+  // Week sync with the account (fixed 2026-11-17: Next used to jump back a week).
+  // The account's week is read ONCE per sign-in. After that this device is the one moving, so it only saves.
+  const wkRef=useRef(wk); wkRef.current=wk;
+  const weekMovedRef=useRef(false);   // the reader changed weeks here since the app opened
+  const savedWeekRef=useRef(null);    // the week the account holds (null = not read yet, so nothing is saved over it)
+  const darkLoadedRef=useRef(false);  // same idea for dark mode: don't save over the account's setting before reading it
+  const [profileTick,setProfileTick]=useState(0); // bump to read the profile again (after "I've Paid · Check Again")
   const [sec,setSec]=useState('passage');
   const [entries,setEntries]=useState([]);
   const [flash,setFlash]=useState(false);
@@ -389,23 +396,29 @@ function AnchoredStepsY2Inner(){
   const LBL = {fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12,display:"block"};
   const INP = {width:"100%",background:darkMode?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",border:"1px solid "+T.border,borderRadius:10,padding:"12px 14px",color:T.text,fontSize:16,fontFamily:"EB Garamond,Georgia,serif",resize:"vertical",boxSizing:"border-box",outline:"none",lineHeight:1.7};
 
+  const uid = session?.user?.id || null;
+  // Save the week to the account, but only once the account's own week is known and only when it differs
+  const saveWeek = useCallback((n)=>{
+    if (!uid || savedWeekRef.current === null || savedWeekRef.current === n) return;
+    savedWeekRef.current = n;
+    supabase.from('as2_profiles').update({ current_week: n }).eq('user_id', uid)
+      .then(({ error }) => { if (error) { console.warn('week sync:', error.message); if (savedWeekRef.current === n) savedWeekRef.current = -1; } });
+  }, [uid]);
+
   // Persist last visited week
   useEffect(()=>{
     try { localStorage.setItem('y2_last_week', String(wk)); } catch {}
-    if (session?.user?.id) {
-      supabase.from('as2_profiles').update({ current_week: wk }).eq('user_id', session.user.id)
-        .then(({ error }) => { if (error) console.warn('week sync:', error.message) });
-    }
-  }, [wk, session]);
+    saveWeek(wk);
+  }, [wk, saveWeek]);
 
   // Persist dark mode preference
   useEffect(()=>{
     try { localStorage.setItem('y2_dark_mode', darkMode ? '1' : '0'); } catch {}
-    if (session?.user?.id) {
-      supabase.from('as2_profiles').update({ dark_mode: darkMode }).eq('user_id', session.user.id)
+    if (uid && darkLoadedRef.current) {
+      supabase.from('as2_profiles').update({ dark_mode: darkMode }).eq('user_id', uid)
         .then(({ error }) => { if (error) console.warn('dark sync:', error.message) });
     }
-  }, [darkMode, session]);
+  }, [darkMode, uid]);
 
   // Auth session management
   useEffect(()=>{
@@ -414,12 +427,14 @@ function AnchoredStepsY2Inner(){
     return ()=>subscription.unsubscribe();
   },[]);
 
-  // Load profile + entries + community notes when session changes
+  // Load the profile once per sign-in. (It used to re-run on every week change and every session refresh, and each
+  // run put the account's saved week back on screen: tap Next, and a read that beat the save sent you back a week.)
   useEffect(()=>{
-    if(!session) return;
+    savedWeekRef.current = null; darkLoadedRef.current = false; weekMovedRef.current = false;
+    if(!uid) return;
     let cancelled = false;
 
-    const fetchProfile = () => supabase.from('as2_profiles').select('*').eq('user_id',session.user.id).maybeSingle();
+    const fetchProfile = () => supabase.from('as2_profiles').select('*').eq('user_id',uid).maybeSingle();
     (async () => {
       let { data, error } = await fetchProfile();
       // An as2_profiles row means Year 2 is unlocked. Otherwise apply a matching purchase.
@@ -447,36 +462,57 @@ function AnchoredStepsY2Inner(){
         setDarkMode(data.dark_mode);
         try { localStorage.setItem('y2_dark_mode', data.dark_mode ? '1' : '0') } catch {}
       }
-      if (typeof data.current_week === 'number' && data.current_week > 0) {
-        setWk(data.current_week);
-        try { localStorage.setItem('y2_last_week', String(data.current_week)) } catch {}
+      darkLoadedRef.current = true;
+      // The week: pick up where the account left off (another device may be further along), unless the reader
+      // has already moved on this device while this was loading. Then this device's week is the newer one.
+      const accountWeek = typeof data.current_week === 'number' && data.current_week > 0 ? data.current_week : 0;
+      savedWeekRef.current = accountWeek;
+      if (accountWeek && !weekMovedRef.current) {
+        setWk(accountWeek);
+        try { localStorage.setItem('y2_last_week', String(accountWeek)) } catch {}
+      } else {
+        saveWeek(wkRef.current);
       }
       if (data.onboarded) {
         try { localStorage.setItem('y2_onboarding_complete', '1') } catch {}
         setShowOnboarding(false);
       }
     });
+    return () => { cancelled = true; };
+  },[uid, saveWeek, profileTick]);
+
+  // Entries for the week on screen (± 5 weeks), reloaded as the reader moves
+  useEffect(()=>{
+    if(!uid) return;
+    let cancelled = false;
 
     // Load entries for current week ± 5 weeks (smarter than loading all 1500+)
     const minWeek = Math.max(1, wk - 5);
     const maxWeek = Math.min(52, wk + 5);
     supabase.from('as2_journal_entries')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', uid)
       .gte('week', minWeek)
       .lte('week', maxWeek)
       .then(({data})=>{
         // Merge, so step progress and tracker rows loaded in parallel aren't dropped
         if(!cancelled && data) setEntries(prev => {
           const ids = new Set(data.map(d => d.id));
-          return [...data, ...prev.filter(e => !ids.has(e.id) && e.user_id === session.user.id)];
+          return [...data, ...prev.filter(e => !ids.has(e.id) && e.user_id === uid)];
         });
       });
+    return () => { cancelled = true; };
+  },[uid, wk]);
+
+  // Whole-year progress and live updates from other devices: once per sign-in
+  useEffect(()=>{
+    if(!uid) return;
+    let cancelled = false;
 
     // Step progress across all weeks (Steps year strip and streak)
     supabase.from('as2_journal_entries')
       .select('id, week, field_key, field_value, user_id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', uid)
       .like('field_key', 'ds_%')
       .then(({data})=>{
         if(!cancelled && data) {
@@ -490,7 +526,7 @@ function AnchoredStepsY2Inner(){
     // Also load just field_key='tr_*' across all weeks for progress stats
     supabase.from('as2_journal_entries')
       .select('id, week, field_key, field_value, user_id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', uid)
       .like('field_key', 'tr_%')
       .then(({data})=>{
         if(!cancelled && data) {
@@ -504,10 +540,10 @@ function AnchoredStepsY2Inner(){
 
     // Realtime subscription for entries — sync across devices
     const channel = supabase
-      .channel('y2_entries_'+session.user.id)
+      .channel('y2_entries_'+uid)
       .on('postgres_changes', {
         event: '*', schema: 'public', table: 'as2_journal_entries',
-        filter: `user_id=eq.${session.user.id}`,
+        filter: `user_id=eq.${uid}`,
       }, payload => {
         if(cancelled) return;
         const row = payload.new || payload.old;
@@ -526,7 +562,7 @@ function AnchoredStepsY2Inner(){
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
-  },[session, wk]);
+  },[uid]);
 
   // Load community notes for current week
   useEffect(()=>{
@@ -621,6 +657,7 @@ function AnchoredStepsY2Inner(){
   },[entries, session]);
 
   const goWk=useCallback((n)=>{
+    weekMovedRef.current = true;
     setWk(Math.max(1,Math.min(52,n)));
     setSec('passage');
     setAnimK(a=>a+1);
@@ -729,7 +766,7 @@ function AnchoredStepsY2Inner(){
   );
   if(access==='no') return (
     <Y2NoAccess email={session.user?.email} userId={session.user?.id} buyLink={STRIPE_LINK}
-      onUnlocked={()=>{ setAccess('checking'); setSession(s=>({...s})); }}
+      onUnlocked={()=>{ setAccess('checking'); setProfileTick(t=>t+1); }}
       onSignOut={()=>supabase.auth.signOut()} />
   );
 
@@ -1107,7 +1144,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",gap:10,alignItems:"center"}}>
               <span style={{fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>{bm.ref}</span>
-              <button onClick={()=>{setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,textDecoration:"underline"}}>Open</button>
+              <button onClick={()=>{weekMovedRef.current=true;setWk(bm.week);setView('journal');setSec(bm.section||'passage');setAnimK(a=>a+1);window.scrollTo(0,0);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",fontSize:14,textDecoration:"underline"}}>Open</button>
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <span style={{fontSize:14,color:T.muted}}>Week {bm.week}</span>
