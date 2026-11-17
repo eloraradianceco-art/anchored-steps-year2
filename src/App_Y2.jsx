@@ -753,10 +753,10 @@ function AnchoredStepsY2Inner(){
 
 
   if(loading) return (
-    <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
-      <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,opacity:.5,animation:"pulse 2s ease-in-out infinite"}}/>
-      <div style={{color:T.gold,fontFamily:"Cinzel,serif",fontSize:12,letterSpacing:"0.14em",textTransform:"uppercase"}}>Anchored Steps</div>
-      <style>{`@keyframes pulse { 0%, 100% { opacity: .3 } 50% { opacity: .8 } }`}</style>
+    <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",textAlign:"center"}}>
+      <img src="/icon-192.png" alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
+      <div style={{fontFamily:"Cinzel,Georgia,serif",color:T.gold,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>Anchored Steps · Year 2</div>
+      <div style={{color:T.muted,fontSize:14}}>Loading your journal…</div>
     </div>
   );
 
@@ -803,10 +803,10 @@ function AnchoredStepsY2Inner(){
 
   // Signed in, but Year 2 isn't unlocked on this account yet
   if(access==='checking') return (
-    <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
-      <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,opacity:.5,animation:"pulse 2s ease-in-out infinite"}}/>
-      <div style={{color:T.gold,fontFamily:"Cinzel,serif",fontSize:12,letterSpacing:"0.14em",textTransform:"uppercase"}}>Anchored Steps</div>
-      <style>{`@keyframes pulse { 0%, 100% { opacity: .3 } 50% { opacity: .8 } }`}</style>
+    <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",textAlign:"center"}}>
+      <img src="/icon-192.png" alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
+      <div style={{fontFamily:"Cinzel,Georgia,serif",color:T.gold,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>Anchored Steps · Year 2</div>
+      <div style={{color:T.muted,fontSize:14}}>Loading your journal…</div>
     </div>
   );
   if(access==='no') return (
