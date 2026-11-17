@@ -12,6 +12,7 @@ import { Welcome, AuthCard, HomeScreenTip } from "./EntryScreens.jsx";
 import { BRAND } from "./entryBrand.js";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
+import { yourWeek } from "./yourWeek.js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const Y2_CHECKOUT_KEY = "as2_checkout_session";
@@ -329,15 +330,21 @@ function AnchoredStepsY2Inner(){
   const [authBusy,setAuthBusy]=useState(false);
 
   // Restore last visited week
+  // The app opens on YOUR week: the one you're working through on the Steps page (see yourWeek.js), not the last
+  // week you happened to browse. Until any step is done there is no "your week", so it opens where you left off.
   const [wk,setWk]=useState(()=>{
-    try { return Number(localStorage.getItem('y2_last_week')) || 1; } catch { return 1; }
+    try { return Number(localStorage.getItem('y2_my_week')) || Number(localStorage.getItem('y2_last_week')) || 1; } catch { return 1; }
   });
+  const myWeekRef=useRef((()=>{ try { return Number(localStorage.getItem('y2_my_week')) || 0; } catch { return 0; } })());
+  const [stepsLoaded,setStepsLoaded]=useState(false); // step progress for the whole year has arrived
+  const stepsBusyRef=useRef(false);                   // a step is open on the Steps page
   // Week sync with the account (fixed 2026-11-17: Next used to jump back a week).
   // The account's week is read ONCE per sign-in. After that this device is the one moving, so it only saves.
   const wkRef=useRef(wk); wkRef.current=wk;
   const weekMovedRef=useRef(false);   // the reader changed weeks here since the app opened
   const savedWeekRef=useRef(null);    // the week the account holds (null = not read yet, so nothing is saved over it)
   const darkLoadedRef=useRef(false);  // same idea for dark mode: don't save over the account's setting before reading it
+  const myWeekSettledRef=useRef(false); // the opening week has been chosen for this sign-in
   const [profileTick,setProfileTick]=useState(0); // bump to read the profile again (after "I've Paid · Check Again")
   const [sec,setSec]=useState('passage');
   const [entries,setEntries]=useState([]);
@@ -348,6 +355,7 @@ function AnchoredStepsY2Inner(){
     try { return localStorage.getItem('y2_dark_mode') !== '0'; } catch { return true; }
   });
   const [view,setView]=useState('steps');
+  const viewRef=useRef(view); viewRef.current=view;
   const [animK,setAnimK]=useState(0);
   const [quizVerse,setQuizVerse]=useState(null);
   const [shareVerse,setShareVerse]=useState(null);
@@ -467,7 +475,7 @@ function AnchoredStepsY2Inner(){
       // has already moved on this device while this was loading. Then this device's week is the newer one.
       const accountWeek = typeof data.current_week === 'number' && data.current_week > 0 ? data.current_week : 0;
       savedWeekRef.current = accountWeek;
-      if (accountWeek && !weekMovedRef.current) {
+      if (accountWeek && !weekMovedRef.current && !myWeekRef.current) {
         setWk(accountWeek);
         try { localStorage.setItem('y2_last_week', String(accountWeek)) } catch {}
       } else {
@@ -506,6 +514,7 @@ function AnchoredStepsY2Inner(){
 
   // Whole-year progress and live updates from other devices: once per sign-in
   useEffect(()=>{
+    setStepsLoaded(false);
     if(!uid) return;
     let cancelled = false;
 
@@ -520,6 +529,7 @@ function AnchoredStepsY2Inner(){
             const existing = new Set(prev.map(e => e.id));
             return [...prev, ...data.filter(d => !existing.has(d.id))];
           });
+          setStepsLoaded(true);
         }
       });
 
@@ -563,6 +573,41 @@ function AnchoredStepsY2Inner(){
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
   },[uid]);
+
+  // Your week, from step progress across the year (0 until that progress has loaded, or if no step is done yet)
+  const myWeek = useMemo(() => (stepsLoaded ? yourWeek(entries.filter(e => e.user_id === uid), 52) : 0), [entries, stepsLoaded, uid]);
+  useEffect(()=>{
+    if (!stepsLoaded) return;
+    myWeekRef.current = myWeek;
+    try { if (myWeek) localStorage.setItem('y2_my_week', String(myWeek)); else localStorage.removeItem('y2_my_week'); } catch {}
+    // On opening the app: go to your week (or, with no steps done yet, to where the account left off)
+    if (!myWeekSettledRef.current) {
+      myWeekSettledRef.current = true;
+      if (!weekMovedRef.current) {
+        if (myWeek) setWk(myWeek);
+        else if (savedWeekRef.current > 0) setWk(savedWeekRef.current);
+      }
+    }
+  }, [myWeek, stepsLoaded]);
+  useEffect(()=>{ myWeekSettledRef.current = false; }, [uid]);
+
+  // Coming back to the app counts as opening it: from the Home Screen icon the app usually resumes where it was,
+  // so if you were only browsing other weeks on the Steps page, it returns to your week. Never while a step is open
+  // or you are in the journal. In a browser tab this waits 5 minutes away, so flipping between tabs doesn't move you.
+  useEffect(()=>{
+    let hiddenAt = 0;
+    const standalone = () => { try { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; } catch { return false; } };
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+      if (!hiddenAt) return;
+      const away = Date.now() - hiddenAt; hiddenAt = 0;
+      if (away < (standalone() ? 1500 : 5 * 60 * 1000)) return;
+      if (viewRef.current !== 'steps' || stepsBusyRef.current || !myWeekRef.current || wkRef.current === myWeekRef.current) return;
+      setWk(myWeekRef.current); setDay(-1); window.scrollTo(0,0);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
 
   // Load community notes for current week
   useEffect(()=>{
@@ -1193,7 +1238,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           <div className="fi" style={{padding:"22px 18px 0"}}>
             <DailySteps week={week} wk={wk} totalWeeks={52} entries={entries} get={get} set={set} darkMode={darkMode}
               onOpenWeek={()=>{ setView('journal'); setSec('passage'); window.scrollTo(0,0); }}
-              onGoWeek={n=>goWk(n)} />
+              onGoWeek={n=>goWk(n)} yourWeek={myWeek} onBusy={b=>{ stepsBusyRef.current = b; }} />
           </div>
         )}
 

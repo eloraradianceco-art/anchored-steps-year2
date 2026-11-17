@@ -1,5 +1,5 @@
-// Year 2: the week you move to stays put (2026-11-17). Before the fix, every week change re-read the profile, and if that
-// read came back before the save landed, the app jumped back to the old week.
+// Year 2 weeks (2026-11-17): the week you move to stays put, and the app opens on YOUR week (the one you're working
+// through on the Steps page), not the last week you browsed.
 // Run: npm run build && node tests/week-test.cjs dist   (needs Playwright: npm install --no-save playwright && npx playwright install chromium)
 // The database is faked in the browser, so nothing real is touched.
 const { chromium, devices } = require('playwright')
@@ -19,7 +19,7 @@ const check = (k, ok, x) => results.push((ok ? 'PASS ' : 'FAIL ') + k + (x !== u
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // One browser + a stand-in profile row. Saves take `saveMs` to land; reads answer after `readMs`.
-async function open(browser, { localWeek, serverWeek, saveMs = 500, readMs = 30, dark = true, locked = false, entries = [] }) {
+async function open(browser, { localWeek, serverWeek, saveMs = 500, readMs = 30, dark = true, locked = false, entries = [], homeScreen = false }) {
   const row = { id: 1, user_id: UID, email: user.email, current_week: serverWeek, onboarded: true, dark_mode: dark, bookmarks: [] }
   const db = { profile: locked ? null : row, row, paid: false, reads: 0, saves: [], entryReads: [] }
   const ctx = await browser.newContext({ ...devices['iPhone 14'] })
@@ -51,11 +51,20 @@ async function open(browser, { localWeek, serverWeek, saveMs = 500, readMs = 30,
     localStorage.setItem('sb-cvtukqamaqrhjtdvmslb-auth-token', t); localStorage.setItem('y2_onboarding_complete', '1'); localStorage.setItem('onboarding_complete', 'true')
     if (wk) localStorage.setItem('y2_last_week', String(wk))
   }, [JSON.stringify(token), localWeek])
+  if (homeScreen) await ctx.addInitScript(() => { Object.defineProperty(navigator, 'standalone', { get: () => true }) }) // opened from the Home Screen icon
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message))
   const week = async () => Number(((await p.locator('.ds-wk').innerText().catch(() => '')).match(/Week (\d+)/) || [])[1] || 0)
   const next = () => p.getByRole('button', { name: 'Next week' }).click()
   const prev = () => p.getByRole('button', { name: 'Previous week' }).click()
-  return { ctx, p, db, errs, week, next, prev }
+  // Leave the app for `ms`, then come back (what pressing Home and tapping the icon does when iOS keeps the app alive)
+  const away = async (ms) => {
+    await p.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')) })
+    await p.waitForTimeout(ms)
+    await p.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')) })
+    await p.waitForTimeout(500)
+  }
+  const pill = p.locator('.ds-yourweek')
+  return { ctx, p, db, errs, week, next, prev, away, pill }
 }
 
 server.listen(PORT, async () => {
@@ -131,7 +140,7 @@ server.listen(PORT, async () => {
   await t.ctx.close()
 
   // 7. Entries still load as the reader moves through weeks, and whole-year progress loads once
-  const E = [{ id: 1, user_id: UID, week: 9, field_key: 'reflection', field_value: 'Week nine reflection.' }, { id: 2, user_id: UID, week: 1, field_key: 'ds_1', field_value: '2026-11-01' }]
+  const E = [{ id: 1, user_id: UID, week: 9, field_key: 'reflection', field_value: 'Week nine reflection.' }]
   t = await open(browser, { localWeek: 3, serverWeek: 3, entries: E })
   await t.p.goto(URL_); await t.p.waitForTimeout(2500)
   const first = [...t.db.entryReads]
@@ -139,6 +148,58 @@ server.listen(PORT, async () => {
   check('first load reads weeks 1-8, progress (ds_) and trackers (tr_) once', first.filter((x) => x === '1-8').length === 1 && first.filter((x) => x === 'ds_').length === 1 && first.filter((x) => x === 'tr_').length === 1, first)
   check('moving a week reads the new range only (no repeat of the year-wide reads)', JSON.stringify(t.db.entryReads.slice(first.length)) === JSON.stringify(['1-9']), t.db.entryReads.slice(first.length))
   check('no page errors (entries)', t.errs.length === 0, t.errs.slice(0, 2))
+  await t.ctx.close()
+
+  // ── Your week (2026-11-17): the app opens on the week you're working through, not the last one you browsed ──
+  const dayAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+  const ds = (week, key, n, id) => ({ id, user_id: UID, week, field_key: 'ds_' + key, field_value: dayAgo(n) })
+  const W1D2 = [ds(1, 'start', 1, 11), ds(1, '1', 1, 12)] // week 1: step 1 done yesterday, step 2 open today
+
+  // 8. Week 1, day two. Browse ahead, close, open → back on week 1
+  t = await open(browser, { localWeek: 1, serverWeek: 1, entries: W1D2 })
+  await t.p.goto(URL_); await t.p.waitForTimeout(2500)
+  check('your week: opens on week 1', (await t.week()) === 1 && (await t.pill.count()) === 0, await t.week())
+  await t.next(); await t.p.waitForTimeout(1200)
+  check('browsing week 2 shows "Back to your week (Week 1)"', (await t.week()) === 2 && /Back to your week \(Week 1\)/.test(await t.pill.innerText().catch(() => '')), await t.pill.innerText().catch(() => 'none'))
+  if (process.env.SHOT) await t.p.screenshot({ path: process.env.SHOT })
+  await t.p.reload(); await t.p.waitForTimeout(2500)
+  check('close and open after browsing week 2 → week 1', (await t.week()) === 1, await t.week())
+  await t.next(); await t.next(); await t.p.waitForTimeout(600)
+  await t.pill.click(); await t.p.waitForTimeout(600)
+  check('"Back to your week" from week 3 → week 1', (await t.week()) === 1 && (await t.pill.count()) === 0, await t.week())
+  // In a browser tab, flipping away for a moment doesn't move you
+  await t.next(); await t.p.waitForTimeout(400); await t.away(2500)
+  check('browser tab: a short trip away keeps the week you were browsing', (await t.week()) === 2, await t.week())
+  check('your week: no page errors', t.errs.length === 0, t.errs.slice(0, 2))
+  await t.ctx.close()
+
+  // 9. Home Screen app: iOS keeps the app alive, so "open" is a return from the background
+  t = await open(browser, { localWeek: 1, serverWeek: 1, entries: W1D2, homeScreen: true })
+  await t.p.goto(URL_); await t.p.waitForTimeout(2500)
+  await t.next(); await t.p.waitForTimeout(500); await t.away(2500)
+  check('Home Screen app: browse week 2, leave, come back → week 1', (await t.week()) === 1, await t.week())
+  // …but never while a step is open
+  await t.next(); await t.p.waitForTimeout(500)
+  await t.p.locator('.ds-stone').first().click(); await t.p.waitForTimeout(700)
+  const stepOpen = (await t.p.locator('.ds-overlay').count()) > 0
+  await t.away(2500)
+  const stillOpen = (await t.p.locator('.ds-overlay').count()) > 0
+  await t.p.keyboard.press('Escape'); await t.p.waitForTimeout(500)
+  check('Home Screen app: a step open on week 2 is left alone', stepOpen && stillOpen && (await t.week()) === 2, { stepOpen, stillOpen, week: await t.week() })
+  await t.ctx.close()
+
+  // 10. Another device that last browsed week 5 (and the account says 5): steps progress still wins
+  t = await open(browser, { localWeek: 5, serverWeek: 5, entries: W1D2 })
+  await t.p.goto(URL_); await t.p.waitForTimeout(2800)
+  check('second device (last browsed week 5): opens on week 1', (await t.week()) === 1, await t.week())
+  await t.ctx.close()
+
+  // 11. Week 1 finished → opens on week 2, ready to start
+  t = await open(browser, { localWeek: 1, serverWeek: 1, entries: [ds(1, 'start', 8, 20), ...[1, 2, 3, 4, 5, 6, 7].map((n) => ds(1, String(n), 8 - n, 20 + n))] })
+  await t.p.goto(URL_); await t.p.waitForTimeout(2800)
+  check('week 1 finished: opens on week 2', (await t.week()) === 2, await t.week())
+  await t.prev(); await t.p.waitForTimeout(600)
+  check('looking back at finished week 1: no duplicate button (it already says Start week 2)', (await t.pill.count()) === 0 && /Start week 2/.test(await t.p.locator('body').innerText()))
   await t.ctx.close()
 
   await browser.close(); server.close()
