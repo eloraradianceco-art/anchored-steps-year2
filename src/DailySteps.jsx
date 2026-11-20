@@ -122,7 +122,7 @@ function makeHl(week) {
 }
 
 // Read-aloud lives in speech.js (iPhone Silent switch, Safari's dropped reads, long passages).
-const speakText = (text, onError) => readAloud(text, { rate: 0.9, onError });
+const speakText = (text, onError, onEnd) => readAloud(text, { rate: 0.9, onError, onEnd });
 const hush = stopSpeaking;
 // Older iPhones (no audio-session control) still mute read-aloud with the Silent switch: say so once.
 function silentTip() {
@@ -181,7 +181,7 @@ function buildSteps(week) {
       <p className="ds-kicker">{kicker}</p>
       <blockquote className="ds-verse">{c.hl(week.verseText)}</blockquote>
       <p className="ds-ref">{ref}</p>
-      <button className="ds-chip" onClick={() => c.speak(week.verseText)}><Speaker />Listen</button>
+      <button className={"ds-chip" + (c.listening ? " is-on" : "")} aria-pressed={!!c.listening} onClick={() => c.speak(week.verseText)}><Speaker />{c.listening ? "Stop" : "Listen"}</button>
     </>),
   });
 
@@ -474,6 +474,7 @@ export default function DailySteps({ week, wk, totalWeeks = 52, entries = [], ge
   const [draft, setDraft] = useState({});
   const [done, setDone] = useState(null);          // { step, from }
   const [toast, setToast] = useState("");
+  const [listening, setListening] = useState(false); // Listen is reading: the chip says Stop
   const ovRef = useRef(null);
   const ringRef = useRef(null);
   const closeRef = useRef(null);
@@ -564,8 +565,12 @@ export default function DailySteps({ week, wk, totalWeeks = 52, entries = [], ge
 
   const ctx = () => ({
     week, u, setU, val, put, get, set, hl,
+    listening,
+    // Listen reads the passage; while it reads the chip says Stop, and a tap stops it.
     speak: t => {
-      if (!speakText(t, () => setToast("Couldn\u2019t play the audio. Check that your volume is up, then tap Listen again."))) setToast("Listening isn\u2019t supported in this browser.");
+      if (listening) { hush(); setListening(false); return; }
+      setListening(true);
+      if (!speakText(t, () => { setListening(false); setToast("Couldn\u2019t play the audio. Check that your volume is up, then tap Listen again."); }, () => setListening(false))) { setListening(false); setToast("Listening isn\u2019t supported in this browser."); }
       else { const tip = silentTip(); if (tip) setToast(tip); }
     },
   });

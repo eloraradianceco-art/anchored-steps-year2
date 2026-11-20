@@ -1322,7 +1322,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                             <button onClick={()=>toggleBookmark({verseRef:week.verseRef,verseText:week.verseText},wk,"passage")} style={{background:isBookmarked(week.verseRef,wk)?T.goldF:"transparent",border:"1px solid "+(isBookmarked(week.verseRef,wk)?T.goldB:T.border),color:isBookmarked(week.verseRef,wk)?T.gold:T.muted,padding:"3px 10px",borderRadius:12,cursor:"pointer",fontSize:16}}>
                               {isBookmarked(week.verseRef,wk)?"★":"☆"}
                             </button>
-                            <button onClick={()=>setShareVerse({verseText:week.verseText,verseRef:week.verseRef})} aria-label="Share as an image" style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"3px 8px",borderRadius:12,cursor:"pointer",fontSize:14}}>&#8599;</button>
                           </div>
                         </div>
                       </div>
@@ -1469,7 +1468,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                     <p style={{fontSize:17,color:T.cream,lineHeight:1.65,fontStyle:"italic",margin:"0 0 14px",whiteSpace:"pre-line"}}>{week.prayer || 'No prayer text for this week.'}</p>
                     <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                       <CopyBtn text={week.prayer||''} label="Copy Prayer" T={T}/>
-                      <button onClick={()=>setShareVerse({verseText:week.prayer,verseRef:"Week "+wk+" — Prayer"})} aria-label="Share as an image" style={{background:"transparent",border:"1px solid "+T.border,color:T.muted,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontSize:11,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>Share ↗</button>
                     </div>
                   </div>
                   <div style={{marginBottom:18}}/>
@@ -1864,6 +1862,24 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           </div>
         )
       })()}
+      {/* Floating share button (2026-11-19): one share button for the whole week. It opens the share sheet on the
+          section you are reading. */}
+      {view === 'journal' && week && !shareVerse && (
+        <div style={{position:'fixed',bottom:`calc(14px + ${BELOW_BAR})`,right:16,zIndex:200}}>
+          <button
+            onClick={() => { setShareCardType(({context:'context',dontmiss:'dontmiss',study:'study',reflect:'reflect',apply:'apply',prayer:'prayer'})[sec] || 'passage'); setShareVerse({verseText:week.verseText,verseRef:week.verseRef}) }}
+            aria-label="Share"
+            style={{
+              width:48, height:48, borderRadius:'50%',
+              background:'linear-gradient(135deg, #C9A15F, #7A5A28)',
+              border:'none', color:'#fff', fontSize:20, cursor:'pointer',
+              boxShadow:'0 6px 18px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.3)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              touchAction:'manipulation', flexShrink:0,
+            }}
+          >↗</button>
+        </div>
+      )}
       {tabBar()}
     </div>
   );
