@@ -818,6 +818,24 @@ function AnchoredStepsY2Inner(){
 
 
 
+// A row that opens on tap: emoji, title, one line of detail. Defined outside Settings so a row stays open when the
+// page re-renders (a component defined inside would be rebuilt each time and snap shut).
+function FoldRow({ C, id, emoji, title, sub, first = false, children }) {
+  return (
+    <details id={id} className="as-fold" style={{ borderTop: first ? 'none' : `1px solid ${C.border}` }}>
+      <summary style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', listStyle: 'none', touchAction: 'manipulation' }}>
+        <span aria-hidden="true" style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>{emoji}</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 14, color: C.cream, fontFamily: "'Cinzel',Georgia,serif", letterSpacing: '0.04em' }}>{title}</span>
+          {sub && <span style={{ display: 'block', fontSize: 15, color: C.muted, fontStyle: 'italic', marginTop: 1 }}>{sub}</span>}
+        </span>
+        <span aria-hidden="true" className="as-fold-caret" style={{ color: C.muted, fontSize: 13, flexShrink: 0 }}>▾</span>
+      </summary>
+      <div style={{ padding: '2px 14px 16px' }}>{children}</div>
+    </details>
+  )
+}
+
 function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode, onToggleDarkMode, onClose, savedCount, onOpenSaved }) {
   const [copiedShare, setCopiedShare] = useState(false)
   const [showReviews, setShowReviews] = useState(false)
@@ -956,10 +974,31 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
         <div style={{ padding:'8px 20px' }}>
 
-          {/* Progress */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Progress</div>
+          {/* Settings 2026-11-19: your account and the light/dark switch stay open; everything else is a row that opens on tap */}
+          <style>{`.as-fold > summary::-webkit-details-marker{display:none}.as-fold-caret{display:inline-block;transition:transform .2s}.as-fold[open] > summary .as-fold-caret{transform:rotate(180deg)}`}</style>
+          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14, padding: '0 16px', marginTop: 18 }}>
+            <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
+              <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
+                Lifetime ✦
+              </span>
+            </Row>
+            <Row icon={darkMode ? '🌙' : '☀️'} label={darkMode ? 'Dark Mode' : 'Light Mode'} border={false}>
+              <div onClick={onToggleDarkMode} style={{ width:48, height:28, borderRadius:14, cursor:'pointer', background: darkMode ? T.gold : T.bgCard, border:`1px solid ${darkMode ? T.goldB : T.border}`, position:'relative', transition:'all .25s' }}>
+                <div style={{ position:'absolute', top:3, left: darkMode ? 22 : 3, width:20, height:20, borderRadius:'50%', background: darkMode ? '#fff' : T.muted, transition:'left .25s', boxShadow:'0 1px 4px rgba(0,0,0,0.3)' }}/>
+              </div>
+            </Row>
           </div>
+
+          <div style={{ border: `1px solid ${T.border}`, borderRadius: 14, overflow: 'hidden', marginTop: 14, background: T.bgCard }}>
+            <FoldRow C={T} id="set-reminders" emoji="🔔" title="Reminders" sub="A daily nudge to keep going" first>
+              <div style={{ marginTop: -22 }}>
+          <ReminderSettings supabase={supabase} app="as2" theme={{
+            text: T.text, muted: T.muted, accent: T.gold, accentF: T.goldF, accentB: T.goldB,
+            card: T.bgCard, border: T.border, dark: darkMode,
+          }} />
+              </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-progress" emoji="📊" title="Progress" sub="Where you are, and your saved verses">
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:14 }}>
               {[[weeksJournaled,'Weeks','📖'],[versesMemorized,'Memorized','✦'],[bookmarks,'Saved','☆']].map(([v,l,icon]) => (
@@ -975,8 +1014,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             <div style={{ fontSize:15, color:T.muted, textAlign:'center', marginTop:8 }}>Week {wk} of 52 · {Math.round((wk/52)*100)}% complete</div>
             <button onClick={()=>{ if(window.confirm('Reset to Week 1? Journal entries will be kept.')) goWk(1) }} style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.muted, padding:'10px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em', marginTop:10 }}>↺ Reset to Week 1</button>
           </div>
-
-          {/* Saved verses */}
           {onOpenSaved && (
             <button onClick={onOpenSaved} style={{ width:'100%', marginTop:10, display:'flex', alignItems:'center', justifyContent:'space-between', background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'14px 16px', cursor:'pointer', textAlign:'left' }}>
               <span style={{ display:'flex', alignItems:'center', gap:12 }}>
@@ -986,55 +1023,19 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               <span style={{ fontSize:13, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>{bookmarks} →</span>
             </button>
           )}
-
-          <ReminderSettings supabase={supabase} app="as2" theme={{
-            text: T.text, muted: T.muted, accent: T.gold, accentF: T.goldF, accentB: T.goldB,
-            card: T.bgCard, border: T.border, dark: darkMode,
-          }} />
-
-          {/* Account */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Account</div>
+            </FoldRow>
+            <FoldRow C={T} id="set-data" emoji="📥" title="Your Data" sub="Export or print your journal">
+          <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
+            <p style={{ fontSize:16, color:T.text, lineHeight:1.7, marginBottom:14 }}>Download all your journal entries as a text file, or print as a formatted PDF.</p>
+            <button onClick={handleExportTxt} disabled={exporting} style={{ width:'100%', background: exporting ? 'transparent' : T.goldF, border:`1px solid ${exporting ? T.border : T.goldB}`, color: exporting ? T.muted : T.gold, padding:'13px', borderRadius:12, cursor: exporting ? 'default' : 'pointer', fontSize:13, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em', transition:'all .25s', marginBottom:8 }}>
+              {exporting ? 'Preparing Export…' : '📥 Export Journal'}
+            </button>
+            <button onClick={handlePrintPDF} style={{ width:'100%', padding:'13px', borderRadius:12, cursor:'pointer', background:T.bgCard, border:`1px solid ${T.border}`, color:T.muted, fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em' }}>
+              🖨️ Print as PDF
+            </button>
           </div>
-          <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
-            <Row icon="✉️" label={session?.user?.email || profile?.email || 'Your account'}>
-              <span style={{ fontSize:11, color:T.gold, fontFamily:"'Cinzel',Georgia,serif" }}>
-                'Lifetime ✦'
-              </span>
-            </Row>
-            <Row icon="⭐" label="Ratings & Reviews">
-              <button onClick={() => setShowReviews(true)} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em' }}>Open</button>
-            </Row>
-            <Row icon="🚪" label="Sign Out" border={false}>
-              <button onClick={handleSignOut} disabled={signingOut} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.07em' }}>
-                {signingOut ? 'Signing out...' : 'Sign Out'}
-              </button>
-            </Row>
-          </div>
-
-          <AccountPrivacy supabase={supabase} theme={{
-            text: T.text, muted: T.muted, card: T.bgCard, border: T.border, dark: darkMode,
-            danger: darkMode ? '#D9786B' : '#8E2B27', dangerF: darkMode ? 'rgba(217,120,107,0.12)' : 'rgba(168,68,58,0.08)', dangerB: darkMode ? 'rgba(217,120,107,0.35)' : 'rgba(168,68,58,0.3)',
-          }} />
-
-          <ScriptureCredits notices={['NIV_ALL', 'KJV']} theme={{ text: T.text, muted: T.muted, card: T.bgCard, border: T.border }} />
-
-          {/* Appearance */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Appearance</div>
-          </div>
-          <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
-            <Row icon={darkMode ? '🌙' : '☀️'} label={darkMode ? 'Dark Mode' : 'Light Mode'} border={false}>
-              <div onClick={onToggleDarkMode} style={{ width:48, height:28, borderRadius:14, cursor:'pointer', background: darkMode ? T.gold : T.bgCard, border:`1px solid ${darkMode ? T.goldB : T.border}`, position:'relative', transition:'all .25s' }}>
-                <div style={{ position:'absolute', top:3, left: darkMode ? 22 : 3, width:20, height:20, borderRadius:'50%', background: darkMode ? '#fff' : T.muted, transition:'left .25s', boxShadow:'0 1px 4px rgba(0,0,0,0.3)' }}/>
-              </div>
-            </Row>
-          </div>
-
-          {/* Share */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Share & Referral</div>
-          </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-share" emoji="🔗" title="Share" sub="Send the app to someone who needs it">
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
             <p style={{ fontSize:16, color:T.text, lineHeight:1.75, marginBottom:14 }}>Know someone who finished Year 1 and is ready to go deeper? Share Year 2 with them.</p>
             <div style={{ background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', border:`1px solid ${T.border}`, borderRadius:10, padding:'12px 14px', marginBottom:12, fontSize:16, color:T.muted, fontStyle:'italic', lineHeight:1.7 }}>
@@ -1044,11 +1045,26 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               {copiedShare ? '✓ Copied — Send It to Someone' : '🔗 Share Anchored Steps Year 2'}
             </button>
           </div>
-
-          {/* More from Elora Radiance */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>More from Elora Radiance Co.</div>
-          </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-support" emoji="🛟" title="Reviews & Support" sub="Leave a review or email us">
+              <div style={{ padding: '0 4px' }}>
+            <Row icon="⭐" label="Ratings & Reviews">
+              <button onClick={() => setShowReviews(true)} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.06em' }}>Open</button>
+            </Row>
+            <Row icon="🛟" label="Email Support" border={false}>
+              <a href="mailto:support@eloraradiance.com" style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, fontSize:12, fontFamily:"'Cinzel',Georgia,serif", textDecoration:'none', display:'inline-block', letterSpacing:'0.06em' }}>Contact</a>
+            </Row>
+              </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-privacy" emoji="🔒" title="Privacy & Account" sub="Policies and deleting your account">
+              <div style={{ marginTop: -22 }}>
+          <AccountPrivacy supabase={supabase} theme={{
+            text: T.text, muted: T.muted, card: T.bgCard, border: T.border, dark: darkMode,
+            danger: darkMode ? '#D9786B' : '#8E2B27', dangerF: darkMode ? 'rgba(217,120,107,0.12)' : 'rgba(168,68,58,0.08)', dangerB: darkMode ? 'rgba(217,120,107,0.35)' : 'rgba(168,68,58,0.3)',
+          }} />
+              </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-more" emoji="🌿" title="More from Elora Radiance Co." sub="The other apps in the family">
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'12px 16px' }}>
             <p style={{ fontSize:16, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
             {[
@@ -1068,11 +1084,13 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               </a>
             ))}
           </div>
-
-          {/* About */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>About</div>
-          </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-credits" emoji="📖" title="Scripture Credits" sub="Translations used in this app">
+              <div style={{ marginTop: -22 }}>
+          <ScriptureCredits notices={['NIV_ALL', 'KJV']} theme={{ text: T.text, muted: T.muted, card: T.bgCard, border: T.border }} />
+              </div>
+            </FoldRow>
+            <FoldRow C={T} id="set-about" emoji="ℹ️" title="About" sub="Anchored Steps · Year 2 v1.0">
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'0 16px' }}>
             <Row icon="⚓" label="Anchored Steps · Year 2">
               <span style={{ fontSize:14, color:T.dim }}>v1.0</span>
@@ -1083,19 +1101,13 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             </Row>
             </a>
           </div>
-
-          {/* Export */}
-          <div style={{ marginTop:24, marginBottom:8 }}>
-            <div style={{ fontSize:11, color:T.muted, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:"'Cinzel',Georgia,serif", marginBottom:4 }}>Your Data</div>
+            </FoldRow>
           </div>
-          <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px' }}>
-            <p style={{ fontSize:16, color:T.text, lineHeight:1.7, marginBottom:14 }}>Download all your journal entries as a text file, or print as a formatted PDF.</p>
-            <button onClick={handleExportTxt} disabled={exporting} style={{ width:'100%', background: exporting ? 'transparent' : T.goldF, border:`1px solid ${exporting ? T.border : T.goldB}`, color: exporting ? T.muted : T.gold, padding:'13px', borderRadius:12, cursor: exporting ? 'default' : 'pointer', fontSize:13, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em', transition:'all .25s', marginBottom:8 }}>
-              {exporting ? 'Preparing Export…' : '📥 Export Journal'}
-            </button>
-            <button onClick={handlePrintPDF} style={{ width:'100%', padding:'13px', borderRadius:12, cursor:'pointer', background:T.bgCard, border:`1px solid ${T.border}`, color:T.muted, fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.08em' }}>
-              🖨️ Print as PDF
-            </button>
+
+          <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
+              <button onClick={handleSignOut} disabled={signingOut} style={{ background:T.goldF, border:`1px solid ${T.goldB}`, color:T.gold, padding:'6px 16px', borderRadius:10, cursor:'pointer', fontSize:12, fontFamily:"'Cinzel',Georgia,serif", letterSpacing:'0.07em' }}>
+                {signingOut ? 'Signing out...' : 'Sign Out'}
+              </button>
           </div>
 
         </div>
