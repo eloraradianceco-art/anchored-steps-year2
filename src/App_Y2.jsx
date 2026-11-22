@@ -1260,14 +1260,16 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             {/* Week list: opens over the page, like Year 1 */}
             {showWeekJump&&(
               <div onClick={()=>setShowWeekJump(false)} style={{position:"fixed",inset:0,zIndex:800}}>
-                <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:"calc(150px + var(--safe-top, env(safe-area-inset-top, 0px)))",left:10,right:10,maxWidth:840,margin:"0 auto",background:T.bg,border:"1px solid "+T.border,borderRadius:16,padding:14,maxHeight:300,overflowY:"auto",display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:5,zIndex:900,boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
+                {/* Week list (2026-11-22): all 52 weeks fit on the screen with no scrolling. Six across, nine rows; the rows share
+                  the space between the top bar and the tab bar, so it fits a small phone and stops growing on a tall one. */}
+                <div onClick={e=>e.stopPropagation()} role="dialog" aria-label="Choose a week" style={{position:"fixed",top:"calc(58px + var(--safe-top, env(safe-area-inset-top, 0px)))",bottom:`calc(12px + ${BELOW_BAR})`,left:10,right:10,maxWidth:840,maxHeight:560,margin:"0 auto",background:T.bg,border:"1px solid "+T.border,borderRadius:16,padding:10,overflow:"hidden",display:"grid",gridTemplateColumns:"repeat(6,minmax(0,1fr))",gridTemplateRows:"repeat(9,minmax(0,1fr))",gap:4,zIndex:900,boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
                   {ALL_WEEKS.map(w=>{
                     const isCur=w.week===wk
                     return (
-                      <button key={w.week} onClick={()=>{goWk(w.week);setShowWeekJump(false)}} style={{background:isCur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(isCur?T.goldB:T.border),borderRadius:8,color:isCur?T.gold:T.muted,padding:"8px 4px",minWidth:0,cursor:"pointer",fontFamily:"Cinzel,serif",textAlign:"center",lineHeight:1.3,touchAction:"manipulation"}}>
-                        <div style={{fontSize:14,fontWeight:600,marginBottom:1}}>{w.week}</div>
-                        {/* Year 2 themes are phrases ("Who You Are Without Achievement"), so the tile shows up to two lines of the theme, not just its first word */}
-                        <div style={{overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",fontSize:12.5,lineHeight:1.25,minHeight:"2.5em"}}>{w.theme}</div>
+                      <button key={w.week} onClick={()=>{goWk(w.week);setShowWeekJump(false)}} style={{background:isCur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(isCur?T.goldB:T.border),borderRadius:8,color:isCur?T.gold:T.muted,padding:"2px 2px",minWidth:0,cursor:"pointer",fontFamily:"Cinzel,serif",textAlign:"center",lineHeight:1.3,touchAction:"manipulation",minHeight:0,overflow:"hidden",display:"flex",flexDirection:"column",alignItems:"stretch",justifyContent:"center"}}>
+                        <div style={{fontSize:13,fontWeight:600,lineHeight:1.15}}>{w.week}</div>
+                        {/* Year 2 themes are phrases, so the tile shows up to two lines of the theme, not just its first word */}
+                        <div style={{overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",fontSize:10,lineHeight:1.15,overflowWrap:"anywhere"}}>{w.theme}</div>
                       </button>
                     )
                   })}
@@ -1851,7 +1853,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       })()}
       {/* Floating share button (2026-11-19): one share button for the whole week. It opens the share sheet on the
           section you are reading. */}
-      {view === 'journal' && week && !shareVerse && (
+      {view === 'journal' && week && !shareVerse && !showWeekJump && ( /* hidden while the week list is open, so they never sit on top of it */
         <div style={{position:'fixed',bottom:`calc(14px + ${BELOW_BAR})`,right:16,zIndex:200,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
           <button
             onClick={() => { setShareCardType(({context:'context',dontmiss:'dontmiss',study:'study',reflect:'reflect',apply:'apply',prayer:'prayer'})[sec] || 'passage'); setShareVerse({verseText:week.verseText,verseRef:week.verseRef}) }}
