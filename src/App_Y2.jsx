@@ -157,17 +157,6 @@ function SaveBtn({onSave,flash,T}){
   );
 }
 
-function NextSectionBtn({current, sections, onNext, T}){
-  const idx = sections.findIndex(s=>s.id===current);
-  const next = sections[idx+1];
-  if(!next) return null;
-  return (
-    <button onClick={()=>onNext(next.id)} style={{marginTop:10,width:"100%",background:"transparent",border:"1px solid "+T.goldB,color:T.gold,padding:"11px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>
-      Next: {next.label} &#8594;
-    </button>
-  );
-}
-
 function CopyBtn({text, label="Copy", T, style={}}){
   const [copied,setCopied]=React.useState(false);
   const handle=()=>{ navigator.clipboard.writeText(text||'').then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),1800); }); };
@@ -1225,13 +1214,12 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"EB Garamond,Georgia,serif"}}>
       {/* Header */}
       <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"var(--safe-top, env(safe-area-inset-top, 0px))",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"#0D1820":"#F0EAE0",borderBottom:"1px solid "+T.border}}>
-        <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <img src="/icon2.png" alt="⚓" style={{width:36,height:36,borderRadius:9,boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}/>
-            <div>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:16,color:T.cream,lineHeight:1.1,letterSpacing:"0.04em"}}>Anchored Steps</div>
-              <div style={{fontFamily:"Cinzel,serif",fontSize:11,color:T.gold,letterSpacing:"0.12em",textTransform:"uppercase",lineHeight:1.2}}>Year 2</div>
-            </div>
+        {/* Layout matched to Year 1 (2026-11-22): same bar height, icon and title size; the Year 2 tag tells the two apart */}
+        <div style={{padding:"10px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <img src="/icon2.png" alt="⚓" style={{width:26,height:26,borderRadius:6,verticalAlign:"middle"}}/>
+            <span style={{fontFamily:"Cinzel,serif",fontSize:14,fontWeight:600,color:T.cream}}>Anchored Steps</span>
+            <span style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:12,padding:"1px 8px",fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Year 2</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             {saveStatus!=='idle'&&(
@@ -1239,15 +1227,15 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                 {saveStatus==='saving'?"Saving…":"✓ Saved"}
               </div>
             )}
-            <span style={{fontSize:15,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
+            <span style={{fontSize:14,color:T.muted}}>{session?.user?.email?.split('@')[0]}</span>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:680,margin:"0 auto",padding:`0 0 calc(40px + ${BELOW_BAR})`}}>
+      <div style={{maxWidth:860,margin:"0 auto",padding:`26px 18px calc(40px + ${BELOW_BAR})`}}>
         {/* JOURNAL VIEW */}
         {view==='steps' && week && (
-          <div className="fi" style={{padding:"22px 18px 0"}}>
+          <div className="fi">
             <DailySteps week={week} wk={wk} totalWeeks={52} entries={entries} get={get} set={set} darkMode={darkMode}
               onOpenWeek={()=>{ setView('journal'); setSec('passage'); window.scrollTo(0,0); }}
               onGoWeek={n=>goWk(n)} yourWeek={myWeek} onBusy={b=>{ stepsBusyRef.current = b; }} />
@@ -1257,35 +1245,43 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         {view==='journal' && week && (
           <div className="fi">
             {/* Week nav */}
-            <div style={{display:"flex",alignItems:"center",gap:10,padding:"18px 18px 0"}}>
-              <button onClick={()=>goWk(Math.max(1,wk-1))} disabled={wk===1} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===1?.3:1}}>&#8249;</button>
-              <div style={{flex:1,textAlign:"center"}}>
-                <button onClick={()=>setShowWeekJump(v=>!v)} style={{fontSize:11,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:4,background:"transparent",border:"none",cursor:"pointer",padding:0}}>
-                  Week {wk} of 52 {showWeekJump?"▲":"▼"}
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+              <button onClick={()=>goWk(Math.max(1,wk-1))} disabled={wk===1} aria-label="Previous week" style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:34,height:34,borderRadius:8,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===1?.3:1}}>&#8249;</button>
+              <div style={{flex:1,textAlign:"center",minWidth:0}}>
+                <div style={{fontSize:11,color:T.gold,letterSpacing:"0.16em",textTransform:"uppercase",fontFamily:"Cinzel,serif",marginBottom:1}}>Week {wk} of 52</div>
+                <button onClick={()=>setShowWeekJump(v=>!v)} aria-expanded={showWeekJump} style={{background:"transparent",border:"none",cursor:"pointer",padding:0,touchAction:"manipulation",maxWidth:"100%"}}>
+                  <h1 style={{fontSize:23,fontWeight:600,color:T.cream,fontFamily:"Cinzel,serif",margin:"15px 0",lineHeight:"normal"}}>{week.theme} <span style={{fontSize:16,color:T.muted}}>{showWeekJump?"▲":"▼"}</span></h1>
                 </button>
-                <div style={{fontSize:18,color:T.cream,fontFamily:"Cinzel,serif",letterSpacing:"0.02em",lineHeight:1.2}}>{week.theme}</div>
+                {week.verseRef && <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginTop:1,marginBottom:16}}>{week.verseRef}</p>}
               </div>
-              <button onClick={()=>goWk(Math.min(52,wk+1))} disabled={wk===52} style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:36,height:36,borderRadius:9,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===52?.3:1}}>&#8250;</button>
+              <button onClick={()=>goWk(Math.min(52,wk+1))} disabled={wk===52} aria-label="Next week" style={{background:T.goldF,border:"1px solid "+T.goldB,color:T.gold,width:34,height:34,borderRadius:8,cursor:"pointer",fontSize:16,flexShrink:0,opacity:wk===52?.3:1}}>&#8250;</button>
             </div>
 
-            {/* Week Jump */}
+            {/* Week list: opens over the page, like Year 1 */}
             {showWeekJump&&(
-              <div style={{margin:"8px 18px 0",background:darkMode?"rgba(13,24,32,0.98)":"rgba(240,234,224,0.98)",border:"1px solid "+T.goldB,borderRadius:12,padding:10,maxHeight:190,overflowY:"auto",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:3,boxShadow:"0 8px 24px rgba(0,0,0,0.3)"}}>
-                {ALL_WEEKS.map(w=>(
-                  <button key={w.week} onClick={()=>goWk(w.week)} style={{background:w.week===wk?T.goldF:"transparent",border:"1px solid "+(w.week===wk?T.goldB:T.border),borderRadius:6,padding:"6px 2px",cursor:"pointer",textAlign:"center",color:w.week===wk?T.gold:T.muted,fontSize:11,fontFamily:"Cinzel,serif"}}>
-                    {w.week}
-                  </button>
-                ))}
+              <div onClick={()=>setShowWeekJump(false)} style={{position:"fixed",inset:0,zIndex:800}}>
+                <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:"calc(150px + var(--safe-top, env(safe-area-inset-top, 0px)))",left:10,right:10,maxWidth:840,margin:"0 auto",background:T.bg,border:"1px solid "+T.border,borderRadius:16,padding:14,maxHeight:300,overflowY:"auto",display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:5,zIndex:900,boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
+                  {ALL_WEEKS.map(w=>{
+                    const isCur=w.week===wk
+                    return (
+                      <button key={w.week} onClick={()=>{goWk(w.week);setShowWeekJump(false)}} style={{background:isCur?"linear-gradient(145deg,"+T.goldF+","+T.goldF+")":"transparent",border:"1px solid "+(isCur?T.goldB:T.border),borderRadius:8,color:isCur?T.gold:T.muted,padding:"8px 4px",minWidth:0,cursor:"pointer",fontFamily:"Cinzel,serif",textAlign:"center",lineHeight:1.3,touchAction:"manipulation"}}>
+                        <div style={{fontSize:14,fontWeight:600,marginBottom:1}}>{w.week}</div>
+                        {/* Year 2 themes are phrases ("Who You Are Without Achievement"), so the tile shows up to two lines of the theme, not just its first word */}
+                        <div style={{overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",fontSize:12.5,lineHeight:1.25,minHeight:"2.5em"}}>{w.theme}</div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             )}
 
             {/* Progress bar */}
-            <div style={{background:"rgba(255,255,255,0.05)",borderRadius:3,height:3,margin:"12px 18px 0",overflow:"hidden"}}>
+            <div style={{background:"rgba(255,255,255,0.05)",borderRadius:3,height:3,marginBottom:20,overflow:"hidden"}}>
               <div style={{height:"100%",background:"linear-gradient(90deg,"+T.gold+","+T.goldL+")",width:((wk/52)*100)+"%",transition:"width .5s ease"}}/>
             </div>
 
             {/* Section tabs */}
-            <div style={{display:"flex",gap:3,flexWrap:"wrap",padding:"14px 18px 0"}}>
+            <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:20}}>
               {SECTIONS.map(s=>{
                 const hasData = (s.id==='study'&&(get('study')||'').trim()) ||
                   (s.id==='reflect'&&[0,1,2,3,4].some(i=>(get('rq'+i)||'').trim())) ||
@@ -1303,7 +1299,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
             </div>
 
             {/* Section content */}
-            <div key={wk+"-"+sec+"-"+animK} style={{padding:"18px 18px 0"}}>
+            <div key={wk+"-"+sec+"-"+animK} className="fu">
               {/* PASSAGE */}
               {sec==="passage" && (
                 <div>
@@ -1335,7 +1331,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                     </div>
                   </div>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1349,7 +1344,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                       <CopyBtn text={week.whereAreWe||''} label="Copy Story Context" T={T}/>
                     </div>
                   </div>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1363,7 +1357,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                       <CopyBtn text={"\u26a0\ufe0f Don't Miss This — Week "+wk+"\n\n"+(week.dontMissThis||'')} label="Copy Don't Miss This" T={T}/>
                     </div>
                   </div>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1389,7 +1382,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <label style={LBL}>Your Notes</label>
                   <textarea rows={6} defaultValue={get("study")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("study",e.target.value)} placeholder="Write your personal study notes here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1414,7 +1406,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   {(!week?.lexicon || week.lexicon.length === 0) && (
                     <p style={{fontSize:16,color:T.muted,fontStyle:"italic",textAlign:"center",padding:"24px 0"}}>Lexicon entries coming soon for this week.</p>
                   )}
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1439,7 +1430,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                     <p style={{color:T.muted,fontStyle:"italic",marginBottom:18}}>No reflection questions for this week.</p>
                   )}
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1456,7 +1446,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <label style={LBL}>How Will You Live This Out?</label>
                   <textarea rows={5} defaultValue={get("apply")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("apply",e.target.value)} placeholder="Write your specific plan here..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1474,7 +1463,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <label style={LBL}>Your Personal Prayer</label>
                   <textarea rows={6} defaultValue={get("prayer")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("prayer",e.target.value)} placeholder="Write your own prayer for this week..." style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1498,7 +1486,6 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
                   <label style={LBL}>End of Week Reflection</label>
                   <textarea rows={4} defaultValue={get("weekreflect")} onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)} onChange={e=>set("weekreflect",e.target.value)} placeholder="What changed in you this week?" style={INP}/>
                   <SaveBtn onSave={save} flash={flash} T={T}/>
-                  <NextSectionBtn current={sec} sections={SECTIONS} onNext={s=>{setSec(s);setAnimK(a=>a+1);window.scrollTo(0,0);}} T={T}/>
                 </div>
               )}
 
@@ -1539,9 +1526,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
 
         {/* PROGRESS VIEW */}
         {view==='contents' && (
-          <div className="fi" style={{padding:18}}>
-            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Table of Contents</h2>
-            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20}}>52 weeks of deeper formation. Tap any week to open it.</p>
+          <div className="fi">
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginTop:17,marginBottom:3}}>Table of Contents</h2>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginTop:16,marginBottom:20}}>52 weeks of deeper formation. Tap any week to open it.</p>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(225px,1fr))",gap:8}}>
               {ALL_WEEKS.map(w=>{
                 const done=daysComplete(w.week);
@@ -1562,22 +1549,22 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         )}
 
         {view==='progress' && (
-          <div className="fi" style={{padding:18}}>
-            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4}}>Your Progress</h2>
-            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:20}}>Year 2 — 52 weeks of deeper formation.</p>
-            <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 20px",marginBottom:20}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center"}}>
-                {[
-                  ["Weeks Active",ALL_WEEKS.filter(w=>daysComplete(w.week)>0).length],
-                  ["Days Logged",ALL_WEEKS.reduce((a,w)=>a+daysComplete(w.week),0)],
-                  ["Prayers Written",entries.filter(e=>e.field_key==='prayer'&&(e.field_value||'').trim()).length],
-                ].map(([label,val])=>(
-                  <div key={label}>
-                    <div style={{fontSize:28,fontWeight:600,color:T.gold,fontFamily:"Cinzel,serif"}}>{val}</div>
-                    <div style={{fontSize:11,color:T.muted,textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:"Cinzel,serif"}}>{label}</div>
-                  </div>
-                ))}
-              </div>
+          <div className="fi">
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginTop:17,marginBottom:3}}>Your Progress</h2>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginTop:16,marginBottom:22}}>Year 2 — 52 weeks of deeper formation.</p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8,marginBottom:20}}>
+              {[
+                [ALL_WEEKS.filter(w=>daysComplete(w.week)>0).length,"Weeks Active","📖"],
+                [wk,"Current Week","⚓"],
+                [ALL_WEEKS.reduce((a,w)=>a+daysComplete(w.week),0),"Days Logged","✅"],
+                [entries.filter(e=>e.field_key==='prayer'&&(e.field_value||'').trim()).length,"Prayers Written","🙏"],
+              ].map(([val,label,icon])=>(
+                <div key={label} style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:14,padding:"18px 8px",textAlign:"center",boxShadow:"0 4px 16px rgba(0,0,0,0.08)",minWidth:0}}>
+                  <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
+                  <div style={{fontSize:24,fontWeight:600,color:T.cream,fontFamily:"Cinzel,serif",marginBottom:2}}>{val}</div>
+                  <div style={{fontSize:14,color:T.muted,letterSpacing:"0.04em",marginTop:2,overflowWrap:"anywhere"}}>{label}</div>
+                </div>
+              ))}
             </div>
             <div style={{background:T.bgCard,border:"1px solid "+T.border,borderRadius:12,padding:"16px",marginBottom:18}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
@@ -1608,9 +1595,9 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         )}
 
         {view==='search' && (
-          <div style={{padding:"0 18px 80px"}}>
-            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginBottom:4,paddingTop:20}}>Search</h2>
-            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
+          <div className="fi">
+            <h2 style={{fontFamily:"Cinzel,serif",fontSize:20,color:T.cream,marginTop:17,marginBottom:4}}>Search</h2>
+            <p style={{fontSize:16,color:T.muted,fontStyle:"italic",marginTop:16,marginBottom:16}}>Search across all 52 weeks of Year 2.</p>
             <input
               value={searchQuery}
               onChange={e=>{
@@ -1632,7 +1619,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               placeholder="Search weeks, themes, study notes…"
               style={{width:'100%',background:T.bgCard,border:'1px solid '+T.goldB,borderRadius:10,
                 color:T.cream,fontSize:16,padding:'12px 14px',outline:'none',
-                fontFamily:"'EB Garamond',Georgia,serif",boxSizing:'border-box',marginBottom:16}}
+                fontFamily:"'EB Garamond',Georgia,serif",boxSizing:'border-box',marginBottom:20}}
             />
             {searchQuery.trim() && (
               <div style={{fontSize:12,color:T.muted,marginBottom:12,fontFamily:"Cinzel,serif",letterSpacing:"0.06em"}}>
@@ -1865,7 +1852,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       {/* Floating share button (2026-11-19): one share button for the whole week. It opens the share sheet on the
           section you are reading. */}
       {view === 'journal' && week && !shareVerse && (
-        <div style={{position:'fixed',bottom:`calc(14px + ${BELOW_BAR})`,right:16,zIndex:200}}>
+        <div style={{position:'fixed',bottom:`calc(14px + ${BELOW_BAR})`,right:16,zIndex:200,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
           <button
             onClick={() => { setShareCardType(({context:'context',dontmiss:'dontmiss',study:'study',reflect:'reflect',apply:'apply',prayer:'prayer'})[sec] || 'passage'); setShareVerse({verseText:week.verseText,verseRef:week.verseRef}) }}
             aria-label="Share"
@@ -1878,6 +1865,23 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               touchAction:'manipulation', flexShrink:0,
             }}
           >↗</button>
+          {SECTIONS[SECTIONS.findIndex(x=>x.id===sec)+1] && (
+            <button
+              onClick={() => { const next = SECTIONS[SECTIONS.findIndex(x=>x.id===sec)+1]; if (next) { setSec(next.id); setAnimK(a=>a+1); window.scrollTo(0,0); } }}
+              style={{
+                backgroundColor:T.bg,backgroundImage:'linear-gradient(135deg,rgba(176,138,78,0.4),rgba(176,138,78,0.2))',
+                border:'1px solid rgba(176,138,78,0.5)',
+                color:darkMode?T.goldL:T.gold,padding:'10px 20px',borderRadius:50,
+                cursor:'pointer',fontSize:12,fontFamily:'Cinzel,serif',
+                letterSpacing:'0.07em',boxShadow:'0 4px 20px rgba(0,0,0,0.35)',
+                backdropFilter:'blur(10px)',
+                display:'flex',alignItems:'center',gap:8,
+                transition:'all .2s',touchAction:'manipulation'
+              }}
+            >
+              {SECTIONS[SECTIONS.findIndex(x=>x.id===sec)+1].label} &#8250;
+            </button>
+          )}
         </div>
       )}
       {tabBar()}

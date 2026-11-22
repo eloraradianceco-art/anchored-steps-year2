@@ -1,0 +1,43 @@
+// Year 2 uses Year 1's layout (2026-11-22): same page width, header, week header, week list, floating Next button
+// and Progress tiles. Database faked. Run: npx vite build && node tests/layout-check.cjs dist [screenshot folder]
+const path = require('path')
+const { chromium, serve, openApp } = require('./appkit.cjs')
+const OUT = process.argv[3] || ''
+const results = []; const check = (n, ok, x = '') => results.push((ok ? 'PASS ' : 'FAIL ') + n + (x !== '' ? ' — ' + String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 240) : ''))
+;(async () => {
+  const b = await chromium.launch(); const s = await serve(path.resolve(process.argv[2] || 'dist'), 5121)
+  for (const [label, viewport, width] of [['iPad', { width: 1106, height: 830 }, 860], ['iPhone', { width: 390, height: 844 }, 390], ['small iPhone', { width: 375, height: 667 }, 375]]) {
+    const { page: p, errs } = await openApp(b, 5121, { viewport })
+    const wide = () => p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    const head = await p.evaluate(() => { const i = document.querySelector('img[src="/icon2.png"]'); return { icon: i.getBoundingClientRect().width, tag: /Year 2/.test(i.parentElement.innerText) } })
+    check(`${label}: header matches Year 1 (26 px icon) with a Year 2 tag`, head.icon === 26 && head.tag, head)
+    await p.getByText('See the whole week at once').first().click(); await p.waitForTimeout(700)
+    const m = await p.evaluate(() => { const h1 = document.querySelector('h1'); let el = h1; while (el && !/max-width: *860px/.test(el.getAttribute('style') || '')) el = el.parentElement
+      return { width: Math.round(el.getBoundingClientRect().width), h1: getComputedStyle(h1).fontSize, title: h1.innerText, label: h1.closest('div').innerText.split('\n')[0] } })
+    check(`${label}: page is ${width} px wide`, m.width === width, m.width)
+    check(`${label}: week header is label, 23 px title with arrow, passage`, m.h1 === '23px' && /▼/.test(m.title) && /^WEEK \d+ OF 52$/i.test(m.label), m)
+    check(`${label}: no full-width Next button at the end of the section`, (await p.getByRole('button', { name: /^Next: / }).count()) === 0)
+    const fl = await p.evaluate(() => { const share = document.querySelector('button[aria-label="Share"]'); const next = share.parentElement.querySelectorAll('button')[1]; const nav = [...document.querySelectorAll('nav')].pop()
+      const a = share.getBoundingClientRect(), n = next.getBoundingClientRect(); return { next: next.innerText.trim(), under: n.top >= a.bottom, aboveNav: nav.getBoundingClientRect().top - n.bottom > 0, inView: n.right <= window.innerWidth } })
+    check(`${label}: floating Next sits under the share button, above the tab bar`, /Context/.test(fl.next) && fl.under && fl.aboveNav && fl.inView, fl)
+    await p.getByRole('button', { name: /Context ›/ }).click(); await p.waitForTimeout(500)
+    check(`${label}: floating Next moves to the next section`, /Don't Miss/.test(await p.locator('button[aria-label="Share"]').locator('xpath=..').innerText()))
+    await p.locator('h1').click(); await p.waitForTimeout(400)
+    const list = await p.evaluate(() => { const g = [...document.querySelectorAll('div')].find((d) => getComputedStyle(d).position === 'fixed' && getComputedStyle(d).display === 'grid'); const t = [...g.querySelectorAll('button')]; return { n: t.length, cols: getComputedStyle(g).gridTemplateColumns.split(' ').length, first: t[0].innerText.replace(/\s+/g, ' '), inView: g.getBoundingClientRect().right <= window.innerWidth && g.getBoundingClientRect().left >= 0 } })
+    check(`${label}: week list opens over the page, 52 weeks, 5 across, full themes`, list.n === 52 && list.cols === 5 && /Surrender vs Control/.test(list.first) && list.inView, list)
+    if (OUT) await p.screenshot({ path: path.join(OUT, `y2-${viewport.width}-weeklist.png`) })
+    await p.locator('button', { hasText: /^7(?!\d)/ }).first().click(); await p.waitForTimeout(500)
+    check(`${label}: picking a week opens it and closes the list`, /Week 7 of 52/i.test(await p.locator('body').innerText()) && (await p.evaluate(() => ![...document.querySelectorAll('div')].some((d) => getComputedStyle(d).position === 'fixed' && getComputedStyle(d).display === 'grid'))))
+    check(`${label}: week page has no sideways scroll`, (await wide()) <= 0, await wide())
+    if (OUT) await p.screenshot({ path: path.join(OUT, `y2-${viewport.width}-week.png`) })
+    await p.locator('nav button', { hasText: 'Progress' }).first().click(); await p.waitForTimeout(600)
+    const tiles = await p.evaluate(() => { const g = [...document.querySelectorAll('div')].find((d) => getComputedStyle(d).display === 'grid' && d.children.length === 4 && /Weeks Active/.test(d.innerText)); return g ? { cols: getComputedStyle(g).gridTemplateColumns.split(' ').length, text: g.innerText.replace(/\s+/g, ' ') } : null })
+    check(`${label}: Progress has four tiles across`, tiles && tiles.cols === 4 && /Weeks Active.*Current Week.*Days Logged.*Prayers Written/.test(tiles.text), tiles)
+    check(`${label}: Progress has no sideways scroll`, (await wide()) <= 0, await wide())
+    await p.locator('nav button', { hasText: 'Contents' }).first().click(); await p.waitForTimeout(600)
+    const cols = await p.evaluate(() => { const g = [...document.querySelectorAll('div')].find((d) => getComputedStyle(d).display === 'grid' && d.children.length === 52); return getComputedStyle(g).gridTemplateColumns.split(' ').length })
+    check(`${label}: Contents columns (${cols})`, cols === (width === 860 ? 3 : 1), cols)
+    check(`${label}: no page errors`, errs.length === 0, errs.join(' | ')); await p.close()
+  }
+  await b.close(); s.close(); console.log(results.join('\n')); process.exit(results.some((r) => r.startsWith('FAIL')) ? 1 : 0)
+})()
