@@ -96,7 +96,7 @@ export default function ResetPassword() {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <img
-            src="/icon2.png" alt="⚓"
+            src={import.meta.env.BASE_URL + "icon2.png"} alt="⚓"
             style={{ width: 60, height: 60, borderRadius: 14, marginBottom: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}
           />
           <div style={{ fontFamily: "Cinzel,serif", fontSize: 11, color: G.gold, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 4 }}>

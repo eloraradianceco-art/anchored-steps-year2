@@ -13,7 +13,11 @@ import { BRAND } from "./entryBrand.js";
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 import { yourWeek } from "./yourWeek.js";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inside the combined Anchored Steps phone app the app shell sets window.ERApp before this file runs (app/src/bridge.js
+// on the `capacitor` branch of the anchored-steps repo). The website never has it, so every `APP` check is false there.
+const APP = typeof window !== "undefined" ? window.ERApp || null : null;
+const ASSET = import.meta.env.BASE_URL;   // "/" on the website; "/year2/" inside the phone app
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, APP ? { auth: { storage: APP.authStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } } : undefined);
 
 const Y2_CHECKOUT_KEY = "as2_checkout_session";
 const Y2_JUST_PAID_KEY = "as2_just_paid";
@@ -136,7 +140,7 @@ class ErrorBoundary extends React.Component {
       return (
         <div style={{minHeight:"100vh",background:DARK_THEME.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
           <div style={{maxWidth:380,textAlign:"center"}}>
-            <img src="/icon2.png" alt="⚓" style={{width:50,height:50,borderRadius:12,marginBottom:16,opacity:.6}}/>
+            <img src={ASSET+"icon2.png"} alt="⚓" style={{width:50,height:50,borderRadius:12,marginBottom:16,opacity:.6}}/>
             <div style={{fontFamily:"Cinzel,serif",fontSize:14,color:DARK_THEME.gold,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:12}}>Something went wrong</div>
             <p style={{fontSize:16,color:DARK_THEME.muted,marginBottom:20,lineHeight:1.7}}>The page hit an unexpected error. Reload to try again.</p>
             <button onClick={()=>window.location.reload()} style={{background:"rgba(160,120,64,0.18)",border:"1px solid rgba(160,120,64,0.4)",color:DARK_THEME.gold,padding:"12px 28px",borderRadius:10,cursor:"pointer",fontSize:12,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Reload</button>
@@ -387,6 +391,7 @@ function AnchoredStepsY2Inner(){
   // The unlock screen is always dark; everything else follows the theme.
   const chromeColor = (darkMode || access === 'no') ? "#0D1820" : "#F0EAE0";
   useEffect(() => { paintChrome(chromeColor); }, [chromeColor]);
+  useEffect(() => { if (APP?.statusBar) APP.statusBar(!darkMode); }, [darkMode]);
 
   const week = useMemo(() => ALL_WEEKS.find(w=>w.week===wk), [wk]);
 
@@ -423,6 +428,9 @@ function AnchoredStepsY2Inner(){
     const {data:{subscription}}=supabase.auth.onAuthStateChange((_,s)=>{setSession(s);setLoading(false);if(!s)setAccess('checking');});
     return ()=>subscription.unsubscribe();
   },[]);
+
+  // Phone app: signing in and buying happen on the app's front page, so a signed-out or locked year goes back there.
+  useEffect(()=>{ if(APP && !loading && (!session || access==='no')) APP.home("as2"); },[loading,session,access]);
 
   // Load the profile once per sign-in. (It used to re-run on every week change and every session refresh, and each
   // run put the account's saved week back on screen: tap Next, and a read that beat the save sent you back a week.)
@@ -741,9 +749,9 @@ function AnchoredStepsY2Inner(){
   };
 
 
-  if(loading) return (
+  if(loading || (APP && (!session || access==='no'))) return (
     <div style={{position:"fixed",inset:0,zIndex:50,background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",textAlign:"center"}}>
-      <img src="/icon-192.png" alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
+      <img src={ASSET+"icon-192.png"} alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
       <div style={{fontFamily:"Cinzel,Georgia,serif",color:T.gold,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>Anchored Steps · Year 2</div>
       <div style={{color:T.muted,fontSize:14}}>Loading your journal…</div>
     </div>
@@ -793,7 +801,7 @@ function AnchoredStepsY2Inner(){
   // Signed in, but Year 2 isn't unlocked on this account yet
   if(access==='checking') return (
     <div style={{position:"fixed",inset:0,zIndex:50,background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",textAlign:"center"}}>
-      <img src="/icon-192.png" alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
+      <img src={ASSET+"icon-192.png"} alt="" width="72" height="72" style={{width:72,height:72,borderRadius:16,boxShadow:"0 6px 22px rgba(0,0,0,0.45)",objectFit:"cover",display:"block",marginBottom:18}}/>
       <div style={{fontFamily:"Cinzel,Georgia,serif",color:T.gold,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>Anchored Steps · Year 2</div>
       <div style={{color:T.muted,fontSize:14}}>Loading your journal…</div>
     </div>
@@ -885,10 +893,12 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
         }
       }
       lines.push(''); lines.push('='.repeat(50)); lines.push('Walk steadily. Stay anchored.')
+      const fileName = `anchored-steps-year2-${new Date().toISOString().split('T')[0]}.txt`
+      if (APP) { await APP.shareFile(lines.join('\n'), fileName, 'My Anchored Steps Journal'); setExporting(false); return }
       const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url; a.download = `anchored-steps-year2-${new Date().toISOString().split('T')[0]}.txt`; a.click()
+      a.href = url; a.download = fileName; a.click()
       URL.revokeObjectURL(url)
     } catch(e) { console.error(e) }
     setExporting(false)
@@ -920,6 +930,8 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       }
     }
     html += `<hr/><p style="text-align:center;font-size:12px;color:#999">Walk steadily. Stay anchored. — steps2.eloraradiance.com</p></body></html>`
+    // Phone app: printing isn't available inside the app, so hand the journal to the share sheet (Print, Save to Files, Mail…)
+    if (APP) { await APP.shareFile(html, 'anchored-steps-year-2-journal.html', 'My Anchored Steps Journal'); return }
     // Print via a hidden iframe so we never navigate away or trap the user (critical in standalone PWA mode)
     const frame = document.createElement('iframe')
     frame.setAttribute('aria-hidden', 'true')
@@ -1053,7 +1065,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           }} />
               </div>
             </FoldRow>
-            <FoldRow C={T} id="set-more" emoji="🌿" title="More from Elora Radiance Co." sub="The other apps in the family">
+            {!APP && <FoldRow C={T} id="set-more" emoji="🌿" title="More from Elora Radiance Co." sub="The other apps in the family">
           <div style={{ background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:14, padding:'12px 16px' }}>
             <p style={{ fontSize:16, color:T.muted, fontStyle:'italic', lineHeight:1.7, marginBottom:14 }}>The rest of the Elora Radiance ecosystem — Scripture-based tools for the whole Christian life.</p>
             {[
@@ -1073,7 +1085,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
               </a>
             ))}
           </div>
-            </FoldRow>
+            </FoldRow>}
             <FoldRow C={T} id="set-credits" emoji="📖" title="Scripture Credits" sub="Translations used in this app">
               <div style={{ marginTop: -22 }}>
           <ScriptureCredits notices={['NIV_ALL', 'KJV']} theme={{ text: T.text, muted: T.muted, card: T.bgCard, border: T.border }} />
@@ -1216,8 +1228,10 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
       <div style={{position:"sticky",top:0,zIndex:100,paddingTop:"var(--safe-top, env(safe-area-inset-top, 0px))",marginTop:"calc(-1 * env(safe-area-inset-top, 0px))",background:darkMode?"#0D1820":"#F0EAE0",borderBottom:"1px solid "+T.border}}>
         {/* Layout matched to Year 1 (2026-11-22): same bar height, icon and title size; the Year 2 tag tells the two apart */}
         <div style={{padding:"10px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <img src="/icon2.png" alt="⚓" style={{width:26,height:26,borderRadius:6,verticalAlign:"middle"}}/>
+          {/* Phone app: the icon and title go back to the front page (Year 1, Year 2). On the website they do nothing. */}
+          <div {...(APP ? {role:"button",tabIndex:0,"aria-label":"All studies",onClick:()=>APP.home()} : {})} style={{display:"flex",alignItems:"center",gap:8,cursor:APP?"pointer":"default"}}>
+            {APP && <span aria-hidden="true" style={{fontSize:24,lineHeight:1,color:T.gold,marginRight:-2,marginTop:-3}}>‹</span>}
+            <img src={ASSET+"icon2.png"} alt="⚓" style={{width:26,height:26,borderRadius:6,verticalAlign:"middle"}}/>
             <span style={{fontFamily:"Cinzel,serif",fontSize:14,fontWeight:600,color:T.cream}}>Anchored Steps</span>
             <span style={{background:T.goldF,border:"1px solid "+T.goldB,borderRadius:12,padding:"1px 8px",fontSize:11,color:T.gold,fontFamily:"Cinzel,serif",letterSpacing:"0.08em"}}>Year 2</span>
           </div>
@@ -1777,7 +1791,7 @@ function Settings({ profile, session, supabase, entries, wk, ALL_WEEKS, darkMode
           :{bg:'linear-gradient(155deg,#0D1820 0%,#172330 100%)',canvas:'#0D1820',frame:'rgba(201,161,95,0.35)',divider:'rgba(201,161,95,0.28)',text:'#F0ECE3',gold:'#C9A15F',muted:'#AEBBC6',glow:'radial-gradient(ellipse at 85% 0%, rgba(160,120,64,0.16) 0%, transparent 55%)'}
         const cardHeader=(
           <div style={{display:'flex',alignItems:'center',gap:30}}>
-            <img src="/icon2.png" alt="" style={{width:112,height:112,borderRadius:24,flexShrink:0}}/>
+            <img src={ASSET+"icon2.png"} alt="" style={{width:112,height:112,borderRadius:24,flexShrink:0}}/>
             <div style={{minWidth:0}}>
               <div style={{fontSize:46,color:cc.gold,fontFamily:'Cinzel,serif',letterSpacing:'0.05em',lineHeight:1.2}}>Anchored Steps · Year 2</div>
               <div style={{fontSize:36,color:cc.muted,lineHeight:1.3,marginTop:4,fontFamily:'EB Garamond,Georgia,serif'}}>Week {wk} · {week?.theme}</div>
